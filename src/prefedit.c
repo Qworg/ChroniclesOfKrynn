@@ -1079,7 +1079,9 @@ void prefedit_parse(struct descriptor_data *d, char *arg)
 
     case 'u':
     case 'U':
-      TOGGLE_BIT_AR(PREFEDIT_GET_FLAGS, PRF_COMBATROLL);
+      send_to_char(d->character, "Currently combatroll cannot be disabled.\r\n");
+      SET_BIT_AR(PREFEDIT_GET_FLAGS, PRF_COMBATROLL);
+      //TOGGLE_BIT_AR(PREFEDIT_GET_FLAGS, PRF_COMBATROLL);
       break;
 
     case 'v':
@@ -1162,7 +1164,9 @@ void prefedit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case '9':
-      TOGGLE_BIT_AR(PREFEDIT_GET_FLAGS, PRF_CHARMIE_COMBATROLL);
+      send_to_char(d->character, "Currently charmie combatroll cannot be disabled.\r\n");
+      SET_BIT_AR(PREFEDIT_GET_FLAGS, PRF_CHARMIE_COMBATROLL);
+      // TOGGLE_BIT_AR(PREFEDIT_GET_FLAGS, PRF_CHARMIE_COMBATROLL);
       break;
 
     case 'a':
