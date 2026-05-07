@@ -2547,6 +2547,11 @@ int enter_player_game(struct descriptor_data *d)
   /* initialize the characters condensed combat data struct */
   init_condensed_combat_data(d->character);
 
+  // Temporary fix for some combat issues. Turn on combat roll and charmie combat roll.
+  // Right now if these are off, it's preventing melee attacks from taking place.
+  SET_BIT_AR(PRF_FLAGS(d->character), PRF_COMBATROLL);
+  SET_BIT_AR(PRF_FLAGS(d->character), PRF_CHARMIE_COMBATROLL);
+
   if (needs_save)
     save_char(d->character, 0);
 
