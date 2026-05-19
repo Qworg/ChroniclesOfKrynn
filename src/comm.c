@@ -4255,7 +4255,7 @@ static void update_msdp_automap(struct descriptor_data *d, struct char_data *ch)
   }
 }
 
-#define GRAPHIC_MAP_RADIUS 8
+#define GRAPHIC_MAP_RADIUS 10
 #define GRAPHIC_MAP_MAX_ROOMS \
   (((GRAPHIC_MAP_RADIUS * 2) + 1) * ((GRAPHIC_MAP_RADIUS * 2) + 1))
 
