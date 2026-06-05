@@ -11953,14 +11953,13 @@ int perform_feint(struct char_data *ch, struct char_data *vict)
   }
 
   /* calculate our final bluff skill check (feint attempt) */
-  bluff_skill_check =
-      d20(ch) + compute_ability(ch, ABILITY_BLUFF) + (HAS_FEAT(ch, FEAT_IMPROVED_FEINT) ? 4 : 0);
+  bluff_skill_check = d20(ch) + compute_ability(ch, ABILITY_BLUFF) + (HAS_FEAT(ch, FEAT_IMPROVED_FEINT) ? 4 : 0);
   if (IS_NPC(vict) && GET_NPC_RACE(vict) != RACE_TYPE_HUMANOID)
   {
     if (HAS_FEAT(ch, FEAT_IMPROVED_FEINT))
-      bluff_skill_check -= 2;
+      bluff_skill_check += 2;
     else
-      bluff_skill_check -= 4;
+      bluff_skill_check += 4;
   }
 
   if (GET_INT(vict) <= 2)
@@ -11997,6 +11996,7 @@ int perform_feint(struct char_data *ch, struct char_data *vict)
       af.duration = 2; /* 2 rounds */
       af.location = APPLY_HITROLL;
       af.modifier = 2; /* +2 to-hit bonus */
+      af.bonus_type = BONUS_TYPE_CIRCUMSTANCE;
       affect_to_char(ch, &af);
     }
   }
