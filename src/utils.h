@@ -1249,6 +1249,8 @@ void char_from_furniture(struct char_data *ch);
 #define CASTING_SPELLNUM(ch) ((ch)->char_specials.castingSpellnum)
 #define CASTING_METAMAGIC(ch) ((ch)->char_specials.castingMetamagic)
 #define CASTING_CLASS(ch) ((ch)->char_specials.castingClass)
+#define CASTING_CASTTYPE(ch) ((ch)->char_specials.castingCasttype)
+#define MOB_COMBAT_SPELL_TURN(ch) ((ch)->char_specials.mobCombatSpellTurn)
 
 /* this is an array of variables associated with bardic performance */
 #define GET_PERFORMANCE_VAR(ch, var) (ch->char_specials.performance_vars[var])

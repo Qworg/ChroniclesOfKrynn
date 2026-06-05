@@ -50,6 +50,12 @@ bool mob_knows_assigned_spells(struct char_data *ch);
 int cast_known_spell(struct char_data *ch, struct char_data *tch, struct obj_data *tobj,
                      int spellnum);
 
+/* Try to spend the mob's combat turn on spellcasting. */
+bool mob_try_combat_spell_turn(struct char_data *ch);
+
+/* Check whether generic mob auto-buff logic may select a spell. */
+bool mob_can_auto_buff_with_spell(int spellnum);
+
 /* Wizard AI functions */
 bool wizard_is_long_duration_buff(int spellnum);
 int wizard_get_spell_category(int spellnum);

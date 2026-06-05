@@ -6654,8 +6654,10 @@ struct char_special_data
   int castingSpellnum;          // spell casting
   int castingMetamagic;         // spell metamagic
   int castingClass;             // spell casting class
+  int castingCasttype;          // spell cast type (CAST_SPELL, CAST_INNATE, etc.)
   struct char_data *castingTCH; // target char of spell
   struct obj_data *castingTOBJ; // target obj of spell
+  bool mobCombatSpellTurn;      // internal gate: mob combat spell AI may act on this turn
 
   int performance_vars[MAX_PERFORMANCE_VARS]; /* bardic performance variables */
 
@@ -6688,6 +6690,9 @@ struct char_special_data
   bool energy_retort_used; // used with energy retort ability, which only fires once per round.
 
   bool autodoor_message; // used for message handling in autodoor
+
+  bool defer_room_msdp_update;   // temporarily defer room MSDP until movement text is shown
+  bool pending_room_msdp_update; // room MSDP was requested while deferred
 
   bool
       drainKilled; // true if killed by an energy draining creature (like a vampire), while under the effect of AFFECT_LEVEL_DRAIN

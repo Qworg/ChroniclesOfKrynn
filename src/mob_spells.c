@@ -21,6 +21,7 @@
 #include "act.h"
 #include "fight.h"
 #include "mud_event.h"
+#include "actions.h"
 #include "shop.h"       /* for shop_keeper */
 #include "spec_procs.h" /* for questmaster */
 #include "dg_scripts.h" /* for SCRIPT and TRIGGERS */
@@ -299,6 +300,15 @@ void npc_assigned_spells(struct char_data *ch)
   bool found = false;
   struct char_data *victim = NULL;
 
+  if (!ch || !IS_NPC(ch))
+    return;
+
+  if (FIGHTING(ch) && !MOB_COMBAT_SPELL_TURN(ch))
+    return;
+
+  if (!is_action_available(ch, atSTANDARD, FALSE))
+    return;
+
   while (!found)
   {
     for (i = 0; i < NUM_SPELLS; i++)
@@ -383,6 +393,21 @@ static bool has_slashing_weapon(struct char_data *ch)
   return false;
 }
 
+bool mob_can_auto_buff_with_spell(int spellnum)
+{
+  switch (spellnum)
+  {
+  case SPELL_INVISIBLE:
+  case SPELL_GREATER_INVIS:
+  case SPELL_INVISIBILITY_SPHERE:
+  case SPELL_FIRE_SHIELD:
+  case SPELL_COLD_SHIELD:
+    return false;
+  default:
+    return true;
+  }
+}
+
 /**
  * Cast a known spell as an innate ability.
  * This bypasses class restrictions, allowing non-casters to use MOB_KNOWS_SPELL spells.
@@ -391,24 +416,51 @@ static bool has_slashing_weapon(struct char_data *ch)
  * @param tch The target character (can be NULL)
  * @param tobj The target object (can be NULL)
  * @param spellnum The spell to cast
- * @return The result from call_magic()
+ * @return The result from the normal casting pipeline
  */
 int cast_known_spell(struct char_data *ch, struct char_data *tch, struct obj_data *tobj,
                      int spellnum)
 {
-  int level;
-
   if (!ch || !IS_NPC(ch))
     return 0;
 
   if (spellnum < 0 || spellnum > TOP_SPELL_DEFINE)
     return 0;
 
-  /* Use mob's level for casting */
-  level = GET_LEVEL(ch);
+  if (!MOB_KNOWS_SPELL(ch, spellnum) || !has_known_spell_slot(ch, spellnum))
+    return 0;
 
-  /* Call magic directly with CAST_INNATE to bypass class restrictions */
-  return call_magic(ch, tch, tobj, spellnum, 0, level, CAST_INNATE);
+  return cast_innate_spell(ch, tch, tobj, spellnum, 0);
+}
+
+static bool mob_spell_action_started(struct char_data *ch)
+{
+  return ch && (IS_CASTING(ch) || !is_action_available(ch, atSTANDARD, FALSE));
+}
+
+bool mob_try_combat_spell_turn(struct char_data *ch)
+{
+  if (!ch || !IS_NPC(ch) || !FIGHTING(ch) || IS_CASTING(ch) || !MOB_COMBAT_SPELL_TURN(ch))
+    return false;
+
+  if (!(IS_NPC_CASTER(ch) || mob_has_known_spells(ch)))
+    return false;
+
+  if (!is_action_available(ch, atSTANDARD, FALSE))
+    return false;
+
+  if (dice(1, 4) == 1)
+    return false;
+  else if (dice(1, 4) == 2)
+    return false;
+  else if (dice(1, 4) == 3 && mob_knows_assigned_spells(ch))
+    npc_assigned_spells(ch);
+  else if (GET_CLASS(ch) == CLASS_WIZARD || GET_CLASS(ch) == CLASS_SORCERER)
+    wizard_combat_ai(ch);
+  else
+    npc_offensive_spells(ch);
+
+  return mob_spell_action_started(ch);
 }
 
 /* Helper: Find a known buff spell that the target doesn't already have active */
@@ -433,6 +485,7 @@ static int find_known_buff_spell(struct char_data *ch, struct char_data *target)
 
         /* Only return buff or utility spells (not offensive/heal/summon) */
         if ((category == KNOWN_SPELL_CATEGORY_BUFF || category == KNOWN_SPELL_CATEGORY_UTILITY) &&
+            mob_can_auto_buff_with_spell(i) &&
             !affected_by_spell(target, i) && /* Don't recast if target already has it */
             spell_info[i].violent == FALSE)  /* Non-violent only for buffing */
         {
@@ -508,6 +561,10 @@ void npc_spellup(struct char_data *ch)
   if (!ch)
     return;
   if (MOB_FLAGGED(ch, MOB_NOCLASS))
+    return;
+  if (FIGHTING(ch) && !MOB_COMBAT_SPELL_TURN(ch))
+    return;
+  if (!is_action_available(ch, atSTANDARD, FALSE))
     return;
   if (!can_continue(ch, FALSE))
     return;
@@ -664,8 +721,8 @@ void npc_spellup(struct char_data *ch)
     int known_heal = find_known_heal_spell(ch);
     if (known_heal >= 0)
     {
-      cast_known_spell(ch, victim, NULL, known_heal);
-      consume_known_spell_slot(ch, known_heal);
+      if (cast_known_spell(ch, victim, NULL, known_heal) > 0)
+        consume_known_spell_slot(ch, known_heal);
       return;
     }
 
@@ -694,8 +751,8 @@ void npc_spellup(struct char_data *ch)
   int known_buff = find_known_buff_spell(ch, victim);
   if (known_buff >= 0)
   {
-    cast_known_spell(ch, victim, NULL, known_buff);
-    consume_known_spell_slot(ch, known_buff);
+    if (cast_known_spell(ch, victim, NULL, known_buff) > 0)
+      consume_known_spell_slot(ch, known_buff);
     return;
   }
 
@@ -724,7 +781,8 @@ void npc_spellup(struct char_data *ch)
       loop_counter++;
       if (loop_counter >= (MAX_LOOPS))
         break;
-    } while (level < spell_info[spellnum].min_level[GET_CLASS(ch)] ||
+    } while (!mob_can_auto_buff_with_spell(spellnum) ||
+             level < spell_info[spellnum].min_level[GET_CLASS(ch)] ||
              affected_by_spell(victim, spellnum) ||
              !has_sufficient_slots_for_buff(ch, spellnum)); /* Don't buff if low on slots */
   }
@@ -736,6 +794,9 @@ void npc_spellup(struct char_data *ch)
   }
 
   /* we're putting some special restrictions here */
+
+  if (!mob_can_auto_buff_with_spell(spellnum))
+    return;
 
   // we don't want wizards going invisible unless it's on their dedicated spell list.
   if (spellnum == SPELL_INVISIBLE && !ch->mob_specials.spells_known[spellnum])
@@ -801,6 +862,10 @@ void npc_offensive_spells(struct char_data *ch)
     return;
 
   if (MOB_FLAGGED(ch, MOB_NOCLASS))
+    return;
+  if (FIGHTING(ch) && !MOB_COMBAT_SPELL_TURN(ch))
+    return;
+  if (!is_action_available(ch, atSTANDARD, FALSE))
     return;
 
   /* capping */
@@ -910,8 +975,8 @@ void npc_offensive_spells(struct char_data *ch)
     int known_offensive = find_known_offensive_spell(ch);
     if (known_offensive >= 0)
     {
-      cast_known_spell(ch, tch, NULL, known_offensive);
-      consume_known_spell_slot(ch, known_offensive);
+      if (cast_known_spell(ch, tch, NULL, known_offensive) > 0)
+        consume_known_spell_slot(ch, known_offensive);
       return;
     }
 
@@ -946,8 +1011,8 @@ void npc_offensive_spells(struct char_data *ch)
   int known_offensive = find_known_offensive_spell(ch);
   if (known_offensive >= 0)
   {
-    cast_known_spell(ch, tch, NULL, known_offensive);
-    consume_known_spell_slot(ch, known_offensive);
+    if (cast_known_spell(ch, tch, NULL, known_offensive) > 0)
+      consume_known_spell_slot(ch, known_offensive);
     return;
   }
 
@@ -979,6 +1044,9 @@ bool wizard_is_long_duration_buff(int spellnum)
 
   /* Check if spell is violent (harmful) - we only want beneficial buffs */
   if (SINFO.violent)
+    return false;
+
+  if (!mob_can_auto_buff_with_spell(spellnum))
     return false;
 
   /* List of wizard buff spells with duration > 1 round/level */
@@ -1072,6 +1140,8 @@ void wizard_cast_prebuff(struct char_data *ch)
 
   if (!ch || !IS_MOB(ch))
     return;
+  if (!is_action_available(ch, atSTANDARD, FALSE))
+    return;
 
   /* Default to wizard if not a recognized arcane caster */
   if (char_class != CLASS_WIZARD && char_class != CLASS_SORCERER)
@@ -1107,6 +1177,7 @@ void wizard_cast_prebuff(struct char_data *ch)
         break;
 
     } while (!MOB_KNOWS_SPELL(ch, spellnum) || level < SINFO.min_level[char_class] ||
+             !mob_can_auto_buff_with_spell(spellnum) ||
              affected_by_spell(ch, spellnum) || /* Don't recast if already affected */
              !has_sufficient_slots_for_buff(ch, spellnum)); /* Don't buff if low on slots */
 
@@ -1152,6 +1223,10 @@ void wizard_combat_ai(struct char_data *ch)
   int char_class = GET_CLASS(ch);
 
   if (!ch)
+    return;
+  if (FIGHTING(ch) && !MOB_COMBAT_SPELL_TURN(ch))
+    return;
+  if (!is_action_available(ch, atSTANDARD, FALSE))
     return;
 
   /* Default to wizard if not a recognized arcane caster */

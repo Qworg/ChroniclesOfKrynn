@@ -1078,21 +1078,54 @@ void update_msdp_affects(struct char_data *ch)
   strlcat(msdp_buffer, buf2, sizeof(msdp_buffer));
   for (af = ch->affected; af; af = next)
   {
-    char buf[400]; // Buffer for building the affect table for MSDP
+    char buf[500]; // Buffer for building the affect table for MSDP
+    const char *bonus_type_name = "Untyped";
+    bool has_bonus_type = false;
+
     next = af->next;
-    snprintf(buf, sizeof(buf),
-             "%c%c"
-             "%c%s%c%s"
-             "%c%s%c%s"
-             "%c%s%c%d"
-             "%c%s%c%s"
-             "%c%s%c%d"
-             "%c",
-             (char)MSDP_VAL, (char)MSDP_TABLE_OPEN, (char)MSDP_VAR, "NAME", (char)MSDP_VAL,
-             spell_name(af->spell), (char)MSDP_VAR, "LOCATION", (char)MSDP_VAL,
-             apply_types[(int)af->location], (char)MSDP_VAR, "MODIFIER", (char)MSDP_VAL,
-             af->modifier, (char)MSDP_VAR, "TYPE", (char)MSDP_VAL, bonus_types[af->bonus_type],
-             (char)MSDP_VAR, "DURATION", (char)MSDP_VAL, af->duration, (char)MSDP_TABLE_CLOSE);
+
+    if (af->bonus_type >= 0 && af->bonus_type < NUM_BONUS_TYPES && bonus_types[af->bonus_type])
+    {
+      bonus_type_name = bonus_types[af->bonus_type];
+      has_bonus_type = (af->bonus_type != BONUS_TYPE_UNDEFINED);
+    }
+
+    if (has_bonus_type)
+    {
+      snprintf(buf, sizeof(buf),
+               "%c%c"
+               "%c%s%c%s"
+               "%c%s%c%s"
+               "%c%s%c%d"
+               "%c%s%c%s"
+               "%c%s%c%s"
+               "%c%s%c%d"
+               "%c",
+               (char)MSDP_VAL, (char)MSDP_TABLE_OPEN, (char)MSDP_VAR, "NAME", (char)MSDP_VAL,
+               spell_name(af->spell), (char)MSDP_VAR, "LOCATION", (char)MSDP_VAL,
+               apply_types[(int)af->location], (char)MSDP_VAR, "MODIFIER", (char)MSDP_VAL,
+               af->modifier, (char)MSDP_VAR, "TYPE", (char)MSDP_VAL, bonus_type_name,
+               (char)MSDP_VAR, "BONUS_TYPE", (char)MSDP_VAL, bonus_type_name,
+               (char)MSDP_VAR, "DURATION", (char)MSDP_VAL, af->duration,
+               (char)MSDP_TABLE_CLOSE);
+    }
+    else
+    {
+      snprintf(buf, sizeof(buf),
+               "%c%c"
+               "%c%s%c%s"
+               "%c%s%c%s"
+               "%c%s%c%d"
+               "%c%s%c%s"
+               "%c%s%c%d"
+               "%c",
+               (char)MSDP_VAL, (char)MSDP_TABLE_OPEN, (char)MSDP_VAR, "NAME", (char)MSDP_VAL,
+               spell_name(af->spell), (char)MSDP_VAR, "LOCATION", (char)MSDP_VAL,
+               apply_types[(int)af->location], (char)MSDP_VAR, "MODIFIER", (char)MSDP_VAL,
+               af->modifier, (char)MSDP_VAR, "TYPE", (char)MSDP_VAL, bonus_type_name,
+               (char)MSDP_VAR, "DURATION", (char)MSDP_VAL, af->duration,
+               (char)MSDP_TABLE_CLOSE);
+    }
     strlcat(msdp_buffer, buf, sizeof(msdp_buffer));
   }
   snprintf(buf2, sizeof(buf2),
@@ -1696,7 +1729,12 @@ void char_to_room(struct char_data *ch, room_rnum room)
     }
     /* Keep this after IN_ROOM(ch) is updated so MSDP reflects the new room. */
     if (!IS_NPC(ch))
-      update_msdp_all(ch);
+    {
+      if (ch->char_specials.defer_room_msdp_update)
+        ch->char_specials.pending_room_msdp_update = true;
+      else
+        update_msdp_all(ch);
+    }
 
     /* Master Tracker: refresh proximity alert when entering a room */
     update_master_tracker_alert(ch);

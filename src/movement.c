@@ -51,6 +51,30 @@
 
 /***** start file body *****/
 
+static void begin_deferred_room_msdp_update(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return;
+
+  ch->char_specials.defer_room_msdp_update = true;
+  ch->char_specials.pending_room_msdp_update = false;
+}
+
+static void end_deferred_room_msdp_update(struct char_data *ch)
+{
+  bool should_update;
+
+  if (!ch || IS_NPC(ch))
+    return;
+
+  should_update = ch->char_specials.pending_room_msdp_update;
+  ch->char_specials.pending_room_msdp_update = false;
+  ch->char_specials.defer_room_msdp_update = false;
+
+  if (should_update)
+    update_msdp_all(ch);
+}
+
 /* doorbash - unfinished */
 /*
 ACMD(do_doorbash) {
@@ -876,6 +900,8 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
 #endif
 
   /* the actual technical moving of the char */
+  begin_deferred_room_msdp_update(ch);
+
   char_from_room(ch);
 
   X_LOC(ch) = new_x;
@@ -936,6 +962,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     }
 
     char_to_room(ch, was_in);
+    end_deferred_room_msdp_update(ch);
     if (riding && same_room && RIDING(ch)->in_room != ch->in_room)
     {
       char_from_room(RIDING(ch));
@@ -982,6 +1009,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_AUTOSCAN))
       do_scan(ch, 0, 0, 0);
   }
+  end_deferred_room_msdp_update(ch);
   if (ridden_by)
   {
     if (RIDDEN_BY(ch)->desc != NULL)

@@ -49,6 +49,7 @@
 #include "assign_wpn_armor.h"
 #include "evolutions.h"
 #include "backgrounds.h"
+#include "mob_spells.h"
 #include "perks.h"
 #include "routing.h"
 #include "movement_cost.h"
@@ -5489,8 +5490,7 @@ int damage_handling(struct char_data *ch, struct char_data *victim, int dam, int
     }
 
     /* inertial barrier - damage absorption using psp */
-    if (AFF_FLAGGED(victim, AFF_INERTIAL_BARRIER) && dam && !rand_number(0, 1) &&
-        can_dam_be_resisted(dam_type))
+    if (AFF_FLAGGED(victim, AFF_INERTIAL_BARRIER) && dam && !rand_number(0, 1) && can_dam_be_resisted(dam_type))
     {
       send_to_char(ch, "\twYour attack is absorbed by some manner of invisible barrier.\tn\r\n");
       GET_PSP(victim) -= (1 + (dam / 5));
@@ -13571,14 +13571,14 @@ int handle_successful_attack(struct char_data *ch, struct char_data *victim,
       if (!IS_NPC(ch) && has_perk(ch, PERK_ROGUE_BLEEDING_ATTACK) &&
           !AFF_FLAGGED(victim, AFF_BLEED))
       {
-        int dc = 10 + (GET_LEVEL(ch) / 2) + GET_DEX_BONUS(ch);
-        (void)dc; /* DC computed for future use or debugging */
-        int save_result =
-            savingthrow(ch, victim, SAVING_FORT, 0, CAST_INNATE, GET_LEVEL(ch), NOSCHOOL);
+        // int dc = 10 + (GET_LEVEL(ch) / 2) + GET_DEX_BONUS(ch);
+        // (void)dc; /* DC computed for future use or debugging */
+        int save_result = savingthrow(ch, victim, SAVING_FORT, 0, CAST_INNATE, GET_LEVEL(ch), NOSCHOOL);
 
         if (save_result == FALSE)
         {
           struct affected_type af;
+          new_affect(&af);
           af.spell = SKILL_BLEEDING_ATTACK;
           af.duration = 5;
           af.modifier = 1; /* 1d6 per round */
@@ -13599,14 +13599,14 @@ int handle_successful_attack(struct char_data *ch, struct char_data *victim,
       if (!IS_NPC(ch) && has_perk(ch, PERK_ROGUE_CRIPPLING_STRIKE) &&
           !AFF_FLAGGED(victim, AFF_CRIPPLED))
       {
-        int dc = 10 + (GET_LEVEL(ch) / 2) + GET_DEX_BONUS(ch);
-        (void)dc; /* DC computed for future use or debugging */
-        int save_result =
-            savingthrow(ch, victim, SAVING_FORT, 0, CAST_INNATE, GET_LEVEL(ch), NOSCHOOL);
+        // int dc = 10 + (GET_LEVEL(ch) / 2) + GET_DEX_BONUS(ch);
+        // (void)dc; /* DC computed for future use or debugging */
+        int save_result = savingthrow(ch, victim, SAVING_FORT, 0, CAST_INNATE, GET_LEVEL(ch), NOSCHOOL);
 
         if (save_result == FALSE)
         {
           struct affected_type af;
+          new_affect(&af);
           af.spell = SKILL_CRIPPLING_STRIKE;
           af.duration = 3;
           af.modifier = 0;
@@ -13630,14 +13630,14 @@ int handle_successful_attack(struct char_data *ch, struct char_data *victim,
         /* 5% chance to trigger */
         if (rand_number(1, 100) <= 5)
         {
-          int dc = 10 + (MONK_TYPE(ch) / 2) + GET_WIS_BONUS(ch);
-          (void)dc; /* DC computed for future use or debugging */
-          int save_result =
-              savingthrow(ch, victim, SAVING_FORT, 0, CAST_INNATE, MONK_TYPE(ch), NOSCHOOL);
+          // int dc = 10 + (MONK_TYPE(ch) / 2) + GET_WIS_BONUS(ch);
+          // (void)dc; /* DC computed for future use or debugging */
+          int save_result = savingthrow(ch, victim, SAVING_FORT, 0, CAST_INNATE, MONK_TYPE(ch), NOSCHOOL);
 
           if (save_result == FALSE)
           {
             struct affected_type af;
+            new_affect(&af);
 
             if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_CONDENSED))
             {
@@ -16675,6 +16675,7 @@ void perform_violence(struct char_data *ch, int phase)
 {
   struct char_data *tch = NULL, *charmee;
   struct list_data *room_list = NULL;
+  bool performed_spell_turn = FALSE;
 
   /* Reset combat data */
   GET_TOTAL_AOO(ch) = 0;
@@ -17089,7 +17090,16 @@ void perform_violence(struct char_data *ch, int phase)
                -casting
                -total defense
                -grappling without light weapons*/
-  if (IS_CASTING(ch))
+  if (phase == 1 && IS_NPC(ch))
+  {
+    MOB_COMBAT_SPELL_TURN(ch) = TRUE;
+    performed_spell_turn = mob_try_combat_spell_turn(ch);
+    MOB_COMBAT_SPELL_TURN(ch) = FALSE;
+  }
+
+  if (performed_spell_turn)
+    ;
+  else if (IS_CASTING(ch))
     ;
   else if (AFF_FLAGGED(ch, AFF_TOTAL_DEFENSE))
     send_to_char(ch, "You continue the battle in defensive positioning!\r\n");

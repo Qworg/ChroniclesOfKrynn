@@ -51,6 +51,8 @@ const char *unused_wearoff = "!UNUSED WEAROFF!"; /* So we can get &unused_wearof
 /* Local (File Scope) Function Prototypes */
 static void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
                       struct obj_data *tobj, bool start);
+static int cast_spell_with_type(struct char_data *ch, struct char_data *tch, struct obj_data *tobj,
+                                int spellnum, int metamagic, int casttype);
 void spello(int spl, const char *name, int max_psp, int min_psp, int psp_change, int minpos,
             int targets, int violent, int routines, const char *wearoff, int time, int memtime,
             int school, bool quest);
@@ -1583,6 +1585,7 @@ void resetCastingData(struct char_data *ch)
   CASTING_TIME(ch) = 0;
   CASTING_TIME_MAX(ch) = 0;
   CASTING_SPELLNUM(ch) = 0;
+  CASTING_CASTTYPE(ch) = CAST_UNDEFINED;
   CASTING_TCH(ch) = NULL;
   CASTING_TOBJ(ch) = NULL;
   GET_AUGMENT_PSP(ch) = 0;
@@ -1845,6 +1848,10 @@ void finishCasting(struct char_data *ch)
   }
 
   int final_metamagic = CASTING_METAMAGIC(ch);
+  int final_casttype = CASTING_CASTTYPE(ch);
+
+  if (final_casttype == CAST_UNDEFINED)
+    final_casttype = CAST_SPELL;
 
   if (can_mastermind_power(ch, CASTING_SPELLNUM(ch)))
   {
@@ -1934,7 +1941,7 @@ void finishCasting(struct char_data *ch)
     }
 
     call_magic(ch, CASTING_TCH(ch), CASTING_TOBJ(ch), spellnum, final_metamagic,
-               cast_level, CAST_SPELL);
+               cast_level, final_casttype);
 
     /* Set cosmic awareness cooldown after successful manifestation */
     if (!IS_NPC(ch) && spellnum == PSIONIC_COSMIC_AWARENESS)
@@ -2220,7 +2227,7 @@ void finishCasting(struct char_data *ch)
     {
       call_magic(ch, CASTING_TCH(ch), CASTING_TOBJ(ch), CASTING_SPELLNUM(ch), final_metamagic,
                  (CASTING_CLASS(ch) == CLASS_PSIONICIST) ? GET_PSIONIC_LEVEL(ch) : CASTER_LEVEL(ch),
-                 CAST_SPELL);
+                 final_casttype);
     }
     affect_from_char(ch, PSIONIC_ABILITY_DOUBLE_MANIFESTATION);
   }
@@ -2399,10 +2406,22 @@ EVENTFUNC(event_casting)
 int cast_spell(struct char_data *ch, struct char_data *tch, struct obj_data *tobj, int spellnum,
                int metamagic)
 {
+  return cast_spell_with_type(ch, tch, tobj, spellnum, metamagic, CAST_SPELL);
+}
+
+int cast_innate_spell(struct char_data *ch, struct char_data *tch, struct obj_data *tobj,
+                      int spellnum, int metamagic)
+{
+  return cast_spell_with_type(ch, tch, tobj, spellnum, metamagic, CAST_INNATE);
+}
+
+static int cast_spell_with_type(struct char_data *ch, struct char_data *tch, struct obj_data *tobj,
+                                int spellnum, int metamagic, int casttype)
+{
   if (GET_LEVEL(ch) >= LVL_IMMORT && !IS_NPC(ch))
   {
     // imms can cast any spell
-    return (call_magic(ch, tch, tobj, spellnum, metamagic, GET_LEVEL(ch), CAST_SPELL));
+    return (call_magic(ch, tch, tobj, spellnum, metamagic, GET_LEVEL(ch), casttype));
   }
 
   /* Players cannot directly cast spells flagged as no_player (consumables are handled elsewhere) */
@@ -2432,6 +2451,12 @@ int cast_spell(struct char_data *ch, struct char_data *tch, struct obj_data *tob
   {
     log("SYSERR: cast_spell trying to call spellnum %d/%d.", spellnum, TOP_SPELL_DEFINE);
     return (0);
+  }
+
+  if (IS_NPC(ch) && casttype == CAST_SPELL && !MOB_FLAGGED(ch, MOB_UNLIMITED_SPELL_SLOTS) &&
+      !has_spell_slot(ch, spellnum))
+  {
+    return 0;
   }
 
   treat_as_at_will = canCastAtWill(ch, spellnum);
@@ -3114,6 +3139,7 @@ will be using for casting this spell */
       CASTING_TOBJ(ch) = tobj;
       CASTING_SPELLNUM(ch) = spellnum;
       CASTING_METAMAGIC(ch) = metamagic;
+      CASTING_CASTTYPE(ch) = casttype;
     }
     else
     {
@@ -3122,7 +3148,7 @@ will be using for casting this spell */
     }
 
     {
-      int result = call_magic(ch, tch, tobj, spellnum, metamagic, clevel, CAST_SPELL);
+      int result = call_magic(ch, tch, tobj, spellnum, metamagic, clevel, casttype);
 
       /* Inquisitor Righteous Strike: Set flag when inquisitor spell is cast */
       if (result && !IS_NPC(ch) && has_inquisitor_righteous_strike(ch) &&
@@ -3181,6 +3207,7 @@ will be using for casting this spell */
     CASTING_TOBJ(ch) = tobj;
     CASTING_SPELLNUM(ch) = spellnum;
     CASTING_METAMAGIC(ch) = metamagic;
+    CASTING_CASTTYPE(ch) = casttype;
 
     if (IS_NPC(ch))
     {
