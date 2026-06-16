@@ -530,11 +530,6 @@
 /** Total number of available PC Classes */
 #define NUM_CLASSES 38
 
-/** Per-class archetype storage capacity (row/slot-ready; see archetypes.h). */
-#ifndef MAX_ARCHETYPES_PER_CLASS
-#define MAX_ARCHETYPES_PER_CLASS 4
-#endif
-
 // related to pc (classes, etc)
 /* note that max_classes was established to reign in some of the
    pfile arrays associated with classes */
@@ -1813,8 +1808,9 @@
 #define CON_BOARD_POST_ABORT 84 /**< Board post aborted */
 #define CON_BEDIT 85            /**< OLC mode - board editor */
 #define CON_QUIT_REASON 86      /**< Quit feedback prompt */
+#define CON_QARCHETYPE 87       /**< Choose class archetypes before class-feature grants */
 
-#define NUM_CON_STATES 87
+#define NUM_CON_STATES 88
 
 /* Character equipment positions: used as index for char_data.equipment[] */
 /* NOTE: Don't confuse these constants with the ITEM_ bitvectors
@@ -6857,6 +6853,16 @@ struct char_perk_data
   struct char_perk_data *next; /* Linked list of character's perks */
 };
 
+/** Character's selected archetype - row/list storage so future stacking is
+ * limited by feature-replacement conflicts, not by a fixed per-class count. */
+struct char_archetype_data
+{
+  int archetype_id;    /* ARCHETYPE_* identifier */
+  int archetype_class; /* CLASS_* this archetype modifies */
+
+  struct char_archetype_data *next; /* Linked list of character's archetypes */
+};
+
 /***/
 
 /* Potion storage structure for new consumables system */
@@ -7296,12 +7302,10 @@ struct player_special_data_saved
   int moon_bonus_spells_used; /**< Number of moon bonus spells used (current in use) */
   int moon_bonus_regen_timer; /**< Timer for next moon bonus spell regeneration (in ticks, regen at 1 per 5 mins) */
 
-  /* Archetype system (inert MVP core).  Row/slot-based storage sized for
-   * future stacking; only the first ARCHETYPE_EFFECTIVE_PER_CLASS slot per
-   * class is honored today.  ARCHETYPE_NONE (0) means no archetype selected.
-   * archetype_version records the format/version used when the data was last
-   * saved so loaders can migrate or safely fall back. */
-  sh_int archetypes[NUM_CLASSES][MAX_ARCHETYPES_PER_CLASS];
+  /* Archetype system (inert MVP core).  Linked rows are future-stacking-safe:
+   * selected archetype count is limited by replacement conflicts, not storage.
+   * archetype_version records the pfile format version used when saved. */
+  struct char_archetype_data *archetypes;
   int archetype_version;
 };
 

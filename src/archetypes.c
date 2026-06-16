@@ -4,8 +4,8 @@
  *
  * See archetypes.h for the design overview.  This module ships no enabled
  * archetypes beyond the ARCHETYPE_NONE sentinel, performs versioned validation
- * of its static registry at boot, and exposes safe accessors used by the
- * persistence layer.  It deliberately has no gameplay side effects.
+ * of its static registry and feature-replacement rows at boot, and exposes safe
+ * accessors used by persistence and level-up filtering.
  */
 
 #include "conf.h"
@@ -19,8 +19,12 @@
  * they are persisted in player files.  Only ARCHETYPE_NONE is defined/enabled
  * in the MVP core. */
 const struct archetype_info archetype_list[NUM_ARCHETYPES] = {
-    {ARCHETYPE_NONE, "None", "No archetype selected.", CLASS_UNDEFINED, ARCHETYPE_VERSION, TRUE,
-     CLASS_FEATURE_NONE, CLASS_FEATURE_NONE},
+    {ARCHETYPE_NONE, "None", "No archetype selected.", CLASS_UNDEFINED, ARCHETYPE_VERSION, TRUE},
+};
+
+const struct archetype_feature_change archetype_feature_changes[] = {
+    {ARCHETYPE_NONE, CLASS_UNDEFINED, CLASS_FEATURE_NONE, CLASS_FEATURE_NONE, 0, "None",
+     "No class feature is replaced."},
 };
 
 /* Returns the registry slot for archetype_id, or NULL if undefined. */
@@ -37,9 +41,14 @@ static const struct archetype_info *find_archetype(int archetype_id)
   return NULL;
 }
 
+int num_archetype_feature_changes(void)
+{
+  return sizeof(archetype_feature_changes) / sizeof(archetype_feature_changes[0]);
+}
+
 int validate_archetypes(void)
 {
-  int i, j;
+  int i, j, k;
   int problems = 0;
 
   /* ARCHETYPE_NONE must exist, be id 0, and remain enabled. */
@@ -91,7 +100,68 @@ int validate_archetypes(void)
     }
   }
 
+  for (k = 0; k < num_archetype_feature_changes(); k++)
+  {
+    const struct archetype_feature_change *change = &archetype_feature_changes[k];
+    const struct archetype_info *a = find_archetype(change->archetype_id);
+
+    if (change->name == NULL || change->desc == NULL)
+    {
+      log("SYSERR: archetype feature-change index %d has NULL name/desc", k);
+      problems++;
+    }
+
+    if (a == NULL)
+    {
+      log("SYSERR: archetype feature-change index %d references unknown archetype id %d", k,
+          change->archetype_id);
+      problems++;
+      continue;
+    }
+
+    if (change->archetype_id == ARCHETYPE_NONE)
+    {
+      if (change->replaced_feature != CLASS_FEATURE_NONE || change->granted_feature != CLASS_FEATURE_NONE ||
+          change->granted_feat != 0)
+      {
+        log("SYSERR: ARCHETYPE_NONE feature-change index %d must not replace/grant features", k);
+        problems++;
+      }
+      continue;
+    }
+
+    if (change->class_id != a->class_id)
+    {
+      log("SYSERR: archetype id %d feature-change index %d has class %d but archetype class is %d",
+          change->archetype_id, k, change->class_id, a->class_id);
+      problems++;
+    }
+
+    if (change->replaced_feature == CLASS_FEATURE_NONE)
+    {
+      log("SYSERR: archetype id %d feature-change index %d has no replaced feature",
+          change->archetype_id, k);
+      problems++;
+    }
+  }
+
   return problems;
+}
+
+static bool archetype_replaces_feature(int archetype_id, int class_id, int class_feature)
+{
+  int i;
+
+  if (archetype_id == ARCHETYPE_NONE || class_feature == CLASS_FEATURE_NONE)
+    return FALSE;
+
+  for (i = 0; i < num_archetype_feature_changes(); i++)
+    if (archetype_feature_changes[i].archetype_id == archetype_id &&
+        archetype_feature_changes[i].class_id == class_id &&
+        archetype_feature_changes[i].replaced_feature == class_feature)
+      return TRUE;
+
+  return FALSE;
 }
 
 void init_archetypes(void)
@@ -107,16 +177,172 @@ void init_archetypes(void)
 
 void init_char_archetypes(struct char_data *ch, int version)
 {
-  int class_id, slot;
+  if (ch == NULL || ch->player_specials == NULL)
+    return;
+
+  free_char_archetypes(ch);
+  GET_ARCHETYPE_VERSION(ch) = version;
+}
+
+void free_char_archetypes(struct char_data *ch)
+{
+  struct char_archetype_data *entry, *next_entry;
 
   if (ch == NULL || ch->player_specials == NULL)
     return;
 
-  for (class_id = 0; class_id < NUM_CLASSES; class_id++)
-    for (slot = 0; slot < MAX_ARCHETYPES_PER_CLASS; slot++)
-      GET_ARCHETYPE(ch, class_id, slot) = ARCHETYPE_NONE;
+  for (entry = GET_ARCHETYPES(ch); entry; entry = next_entry)
+  {
+    next_entry = entry->next;
+    free(entry);
+  }
 
-  GET_ARCHETYPE_VERSION(ch) = version;
+  GET_ARCHETYPES(ch) = NULL;
+}
+
+bool has_char_archetype(struct char_data *ch, int class_id, int archetype_id)
+{
+  struct char_archetype_data *entry;
+
+  if (ch == NULL || ch->player_specials == NULL)
+    return FALSE;
+
+  for (entry = GET_ARCHETYPES(ch); entry; entry = entry->next)
+    if (entry->archetype_class == class_id && entry->archetype_id == archetype_id)
+      return TRUE;
+
+  return FALSE;
+}
+
+bool add_char_archetype(struct char_data *ch, int class_id, int archetype_id)
+{
+  struct char_archetype_data *entry;
+
+  if (ch == NULL || ch->player_specials == NULL)
+    return FALSE;
+
+  if (archetype_id == ARCHETYPE_NONE)
+    return TRUE;
+
+  if (!is_valid_archetype_for_class(archetype_id, class_id))
+    return FALSE;
+
+  if (has_char_archetype(ch, class_id, archetype_id))
+    return FALSE;
+
+  if (!can_add_char_archetype(ch, class_id, archetype_id))
+    return FALSE;
+
+  CREATE(entry, struct char_archetype_data, 1);
+  entry->archetype_id = archetype_id;
+  entry->archetype_class = class_id;
+  entry->next = GET_ARCHETYPES(ch);
+  GET_ARCHETYPES(ch) = entry;
+
+  return TRUE;
+}
+
+bool can_add_char_archetype(struct char_data *ch, int class_id, int archetype_id)
+{
+  struct char_archetype_data *entry;
+  int i;
+
+  if (ch == NULL || ch->player_specials == NULL)
+    return FALSE;
+
+  if (archetype_id == ARCHETYPE_NONE)
+    return TRUE;
+
+  if (!is_valid_archetype_for_class(archetype_id, class_id))
+    return FALSE;
+
+  for (i = 0; i < num_archetype_feature_changes(); i++)
+  {
+    if (archetype_feature_changes[i].archetype_id != archetype_id ||
+        archetype_feature_changes[i].class_id != class_id ||
+        archetype_feature_changes[i].replaced_feature == CLASS_FEATURE_NONE)
+      continue;
+
+    for (entry = GET_ARCHETYPES(ch); entry; entry = entry->next)
+    {
+      if (entry->archetype_class != class_id)
+        continue;
+      if (archetype_replaces_feature(entry->archetype_id, class_id,
+                                     archetype_feature_changes[i].replaced_feature))
+        return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+int get_primary_archetype(struct char_data *ch, int class_id)
+{
+  struct char_archetype_data *entry;
+
+  if (ch == NULL || ch->player_specials == NULL)
+    return ARCHETYPE_NONE;
+
+  for (entry = GET_ARCHETYPES(ch); entry; entry = entry->next)
+    if (entry->archetype_class == class_id)
+      return entry->archetype_id;
+
+  return ARCHETYPE_NONE;
+}
+
+bool archetype_suppresses_class_feature(struct char_data *ch, int class_id, int class_feature)
+{
+  struct char_archetype_data *entry;
+
+  if (ch == NULL || ch->player_specials == NULL || class_feature == CLASS_FEATURE_NONE)
+    return FALSE;
+
+  for (entry = GET_ARCHETYPES(ch); entry; entry = entry->next)
+    if (entry->archetype_class == class_id &&
+        archetype_replaces_feature(entry->archetype_id, class_id, class_feature))
+      return TRUE;
+
+  return FALSE;
+}
+
+int get_archetype_replacement_feat(struct char_data *ch, int class_id, int class_feature)
+{
+  struct char_archetype_data *entry;
+  int i;
+
+  if (ch == NULL || ch->player_specials == NULL || class_feature == CLASS_FEATURE_NONE)
+    return 0;
+
+  for (entry = GET_ARCHETYPES(ch); entry; entry = entry->next)
+  {
+    if (entry->archetype_class != class_id)
+      continue;
+
+    for (i = 0; i < num_archetype_feature_changes(); i++)
+    {
+      if (archetype_feature_changes[i].archetype_id == entry->archetype_id &&
+          archetype_feature_changes[i].class_id == class_id &&
+          archetype_feature_changes[i].replaced_feature == class_feature)
+        return archetype_feature_changes[i].granted_feat;
+    }
+  }
+
+  return 0;
+}
+
+int get_archetype_effective_feat(struct char_data *ch, int class_id, int feat_num)
+{
+  int class_feature, replacement_feat;
+
+  if (feat_num <= 0)
+    return 0;
+
+  class_feature = CLASS_FEATURE_FROM_FEAT(feat_num);
+  if (!archetype_suppresses_class_feature(ch, class_id, class_feature))
+    return feat_num;
+
+  replacement_feat = get_archetype_replacement_feat(ch, class_id, class_feature);
+  return (replacement_feat > 0) ? replacement_feat : 0;
 }
 
 bool is_known_archetype(int archetype_id)

@@ -36,6 +36,7 @@ struct class_feat_assign
                                   /* -1 - not assigned, used for class feat assignment */
                                   /* #define NOASSIGN_FEAT  -1 */
   bool stacks;                    /* does this feat stack? */
+  int class_feature;              /* CLASS_FEATURE_* key used by archetype replacement filtering */
   struct class_feat_assign *next; /*linked list*/
 };
 

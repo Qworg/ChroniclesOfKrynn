@@ -78,6 +78,7 @@
 #include "backgrounds.h"
 #include "roleplay.h"
 #include "crafting_new.h"
+#include "archetypes.h"
 #include "brew.h"
 #include "talents.h" /* crafting/harvesting talent system */
 #include "mysql.h"
@@ -2600,12 +2601,87 @@ EVENTFUNC(get_protocols)
   return 0;
 }
 
+static bool has_selectable_archetype_for_class(int class_id)
+{
+  int i;
+
+  if (class_id < 0 || class_id >= NUM_CLASSES)
+    return FALSE;
+
+  for (i = 0; i < NUM_ARCHETYPES; i++)
+    if (archetype_list[i].id != ARCHETYPE_NONE && archetype_list[i].enabled &&
+        archetype_list[i].class_id == class_id)
+      return TRUE;
+
+  return FALSE;
+}
+
+static void show_archetype_chargen_menu(struct descriptor_data *d)
+{
+  int i, j;
+  bool found = FALSE;
+  struct char_data *ch = d->character;
+
+  write_to_output(d, "\r\nSelect Archetypes for %s\r\n", class_list[GET_CLASS(ch)].name);
+  write_to_output(d, "You may select any number of archetypes, but no two selected archetypes may\r\n"
+                     "replace or alter the same class feature.  Choose one archetype at a time.\r\n\r\n");
+
+  for (i = 0; i < NUM_ARCHETYPES; i++)
+  {
+    if (archetype_list[i].id == ARCHETYPE_NONE || !archetype_list[i].enabled ||
+        archetype_list[i].class_id != GET_CLASS(ch))
+      continue;
+
+    found = TRUE;
+    write_to_output(d, "%d) %s\r\n", archetype_list[i].id, archetype_list[i].name);
+    write_to_output(d, "   %s\r\n", archetype_list[i].desc);
+
+    for (j = 0; j < num_archetype_feature_changes(); j++)
+      if (archetype_feature_changes[j].archetype_id == archetype_list[i].id)
+        write_to_output(d, "   Replaces: %s\r\n", archetype_feature_changes[j].name);
+  }
+
+  if (!found)
+    write_to_output(d, "No archetypes are currently available for this class.\r\n");
+
+  write_to_output(d, "\r\n0) Done / no more archetypes\r\n");
+  write_to_output(d, "\r\nChoice: ");
+  STATE(d) = CON_QARCHETYPE;
+}
+
+static void show_alignment_chargen_menu(struct descriptor_data *d)
+{
+  int i;
+
+  write_to_output(
+      d, "\r\nSelect Alignment\r\n"
+         "*Note: you may be restricted by your race/class.  If you don't know which to select, "
+         "select 'true neutral'\r\n"
+         "\r\n- Good characters and creatures protect innocent life. Evil characters "
+         "and creatures debase or destroy innocent life, whether for fun or profit.\r\n"
+         "\r\n- Lawful characters tell the truth, keep their word, respect authority, "
+         "honor tradition, and judge those who fall short of their duties. Chaotic "
+         "characters follow their consciences, resent being told what to do, favor "
+         "new ideas over tradition, and do what they promise if they feel like it.\r\n\r\n");
+  for (i = 0; i < NUM_ALIGNMENTS; i++)
+  {
+    if (valid_align_by_class(i, GET_CLASS(d->character)) &&
+        valid_align_by_race(i, GET_REAL_RACE(d->character)))
+      write_to_output(d, "%d) %s\r\n", i, alignment_names[i]);
+  }
+  write_to_output(d, "\r\n");
+
+  STATE(d) = CON_QALIGN;
+}
+
 /* deal with newcomers and other non-playing sockets */
 void nanny(struct descriptor_data *d, char *arg)
 {
   int load_result = 0; /* Overloaded variable */
   int player_i = 0;
   int i = 0, l = 0; /* sortpos = 0; */ /* sortpos currently unused */ /* incrementor */
+  int selected_archetype_version = 0;
+  struct char_archetype_data *selected_archetypes = NULL;
 
   /* OasisOLC states */
   struct
@@ -4067,26 +4143,52 @@ void nanny(struct descriptor_data *d, char *arg)
       }
     }
 #endif
-    /* start initial alignment selection code */
-    write_to_output(
-        d, "\r\nSelect Alignment\r\n"
-           "*Note: you may be restricted by your race/class.  If you don't know which to select, "
-           "select 'true neutral'\r\n"
-           "\r\n- Good characters and creatures protect innocent life. Evil characters "
-           "and creatures debase or destroy innocent life, whether for fun or profit.\r\n"
-           "\r\n- Lawful characters tell the truth, keep their word, respect authority, "
-           "honor tradition, and judge those who fall short of their duties. Chaotic "
-           "characters follow their consciences, resent being told what to do, favor "
-           "new ideas over tradition, and do what they promise if they feel like it.\r\n\r\n");
-    for (i = 0; i < NUM_ALIGNMENTS; i++)
-    {
-      if (valid_align_by_class(i, GET_CLASS(d->character)) &&
-          valid_align_by_race(i, GET_REAL_RACE(d->character)))
-        write_to_output(d, "%d) %s\r\n", i, alignment_names[i]);
-    }
-    write_to_output(d, "\r\n");
+    if (has_selectable_archetype_for_class(GET_CLASS(d->character)))
+      show_archetype_chargen_menu(d);
+    else
+      show_alignment_chargen_menu(d);
+    break;
 
-    STATE(d) = CON_QALIGN;
+  case CON_QARCHETYPE:
+
+    if (!isdigit(*arg))
+    {
+      write_to_output(d, "That is not a number!\r\n");
+      show_archetype_chargen_menu(d);
+      return;
+    }
+
+    i = atoi(arg);
+    if (i == ARCHETYPE_NONE)
+    {
+      show_alignment_chargen_menu(d);
+      return;
+    }
+
+    if (!is_valid_archetype_for_class(i, GET_CLASS(d->character)))
+    {
+      write_to_output(d, "\r\nInvalid archetype choice for this class.\r\n");
+      show_archetype_chargen_menu(d);
+      return;
+    }
+
+    if (!can_add_char_archetype(d->character, GET_CLASS(d->character), i))
+    {
+      write_to_output(d, "\r\nYou cannot select that archetype because it conflicts with an "
+                         "archetype you already selected.\r\n");
+      show_archetype_chargen_menu(d);
+      return;
+    }
+
+    if (!add_char_archetype(d->character, GET_CLASS(d->character), i))
+    {
+      write_to_output(d, "\r\nUnable to select that archetype.\r\n");
+      show_archetype_chargen_menu(d);
+      return;
+    }
+
+    write_to_output(d, "\r\nSelected %s.\r\n", get_archetype_name(i));
+    show_archetype_chargen_menu(d);
     break;
 
   case CON_QALIGN:
@@ -4133,8 +4235,15 @@ void nanny(struct descriptor_data *d, char *arg)
     if (GET_PFILEPOS(d->character) < 0)
       GET_PFILEPOS(d->character) = create_entry(GET_PC_NAME(d->character));
 
+    selected_archetypes = GET_ARCHETYPES(d->character);
+    selected_archetype_version = GET_ARCHETYPE_VERSION(d->character);
+    GET_ARCHETYPES(d->character) = NULL;
+
     /* Now GET_NAME() will work properly. */
     init_char(d->character);
+    GET_ARCHETYPES(d->character) = selected_archetypes;
+    GET_ARCHETYPE_VERSION(d->character) = selected_archetype_version ? selected_archetype_version :
+                                                                  ARCHETYPE_VERSION;
 
     /* Copy account password to the character for account-created characters */
     if (d->account && d->account->password[0])

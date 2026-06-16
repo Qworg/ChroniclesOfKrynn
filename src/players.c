@@ -3327,21 +3327,18 @@ void save_char(struct char_data *ch, int mode)
   BUFFER_WRITE("0 0\n");
 
   /* Save archetypes (versioned).  Only non-NONE rows are written; the block is
-   * "class slot id" terminated by "-1 -1 -1".  The version is written even
-   * when no archetype is selected so loaders can detect the format. */
+   * "class id" terminated by "-1 -1".  The version is written even when no
+   * archetype is selected so loaders can detect the format. */
   BUFFER_WRITE("ArcV: %d\n", ARCHETYPE_VERSION);
   {
-    int arch_cl, arch_slot;
+    struct char_archetype_data *arch;
     BUFFER_WRITE("Arch:\n");
-    for (arch_cl = 0; arch_cl < NUM_CLASSES; arch_cl++)
+    for (arch = GET_ARCHETYPES(ch); arch; arch = arch->next)
     {
-      for (arch_slot = 0; arch_slot < MAX_ARCHETYPES_PER_CLASS; arch_slot++)
-      {
-        if (GET_ARCHETYPE(ch, arch_cl, arch_slot) != ARCHETYPE_NONE)
-          BUFFER_WRITE("%d %d %d\n", arch_cl, arch_slot, GET_ARCHETYPE(ch, arch_cl, arch_slot));
-      }
+      if (arch->archetype_id != ARCHETYPE_NONE)
+        BUFFER_WRITE("%d %d\n", arch->archetype_class, arch->archetype_id);
     }
-    BUFFER_WRITE("-1 -1 -1\n");
+    BUFFER_WRITE("-1 -1\n");
   }
 
   /* Save perks */
@@ -5197,15 +5194,15 @@ void load_feats(FILE *fl, struct char_data *ch)
   } while (num != 0);
 }
 
-/* Loads the versioned archetype "Arch:" block.  Each row is
- * "class slot id"; the block terminates with a class of -1.  Rows are
- * validated against class/slot bounds and the archetype registry; anything
- * invalid (unknown/disabled id, class mismatch, out-of-range, duplicate slot,
- * or an unsupported saved version) is dropped with a SYSERR.  Old pfiles
- * without this block keep the defaults set during load_char(). */
+/* Loads the versioned archetype "Arch:" block.  Each row is "class id"; the
+ * block terminates with "-1 -1".  The loader also accepts the old branch-local
+ * "class slot id" row shape for safety.  Rows are validated against class
+ * bounds and the archetype registry; anything invalid (unknown/disabled id,
+ * class mismatch, duplicate, or unsupported saved version) is dropped with a
+ * SYSERR.  Old pfiles without this block keep the defaults set during load_char(). */
 static void load_archetypes(FILE *fl, struct char_data *ch)
 {
-  int class_id = -1, slot = -1, id = ARCHETYPE_NONE;
+  int class_id = -1, id = ARCHETYPE_NONE, old_slot = -1;
   int matched = 0;
   bool drop_all = FALSE;
   long row_pos = 0;
@@ -5225,8 +5222,8 @@ static void load_archetypes(FILE *fl, struct char_data *ch)
   do
   {
     class_id = -1;
-    slot = -1;
     id = ARCHETYPE_NONE;
+    old_slot = -1;
     row_pos = ftell(fl);
     if (!get_line(fl, line))
     {
@@ -5235,13 +5232,14 @@ static void load_archetypes(FILE *fl, struct char_data *ch)
           GET_NAME(ch) ? GET_NAME(ch) : "<unknown>");
       break;
     }
-    matched = sscanf(line, "%d %d %d", &class_id, &slot, &id);
+    matched = sscanf(line, "%d %d %d", &class_id, &id, &old_slot);
 
     /* Exact terminator row. */
-    if (matched == 3 && class_id == -1 && slot == -1 && id == -1)
+    if ((matched == 2 && class_id == -1 && id == -1) ||
+        (matched == 3 && class_id == -1 && id == -1 && old_slot == -1))
       break;
 
-    if (matched != 3)
+    if (matched < 2)
     {
       log("SYSERR: load_archetypes: malformed row for %s: '%s'",
           GET_NAME(ch) ? GET_NAME(ch) : "<unknown>", line);
@@ -5249,6 +5247,10 @@ static void load_archetypes(FILE *fl, struct char_data *ch)
         fseek(fl, row_pos, SEEK_SET);
       break;
     }
+
+    /* Old branch-local rows were "class slot id"; list storage ignores slot. */
+    if (matched == 3)
+      id = old_slot;
 
     if (class_id == -1)
     {
@@ -5270,20 +5272,6 @@ static void load_archetypes(FILE *fl, struct char_data *ch)
       continue;
     }
 
-    if (slot < 0 || slot >= MAX_ARCHETYPES_PER_CLASS)
-    {
-      log("SYSERR: load_archetypes: %s has out-of-range slot %d (class %d); dropping id %d",
-          GET_NAME(ch) ? GET_NAME(ch) : "<unknown>", slot, class_id, id);
-      continue;
-    }
-
-    if (slot >= ARCHETYPE_EFFECTIVE_PER_CLASS)
-    {
-      log("SYSERR: load_archetypes: %s has inactive archetype slot %d for class %d; dropping id %d",
-          GET_NAME(ch) ? GET_NAME(ch) : "<unknown>", slot, class_id, id);
-      continue;
-    }
-
     if (!is_valid_archetype_for_class(id, class_id))
     {
       log("SYSERR: load_archetypes: %s has invalid/disabled archetype id %d for class %d; dropping",
@@ -5291,14 +5279,18 @@ static void load_archetypes(FILE *fl, struct char_data *ch)
       continue;
     }
 
-    if (GET_ARCHETYPE(ch, class_id, slot) != ARCHETYPE_NONE)
+    if (has_char_archetype(ch, class_id, id))
     {
-      log("SYSERR: load_archetypes: %s has duplicate archetype for class %d slot %d; ignoring",
-          GET_NAME(ch) ? GET_NAME(ch) : "<unknown>", class_id, slot);
+      log("SYSERR: load_archetypes: %s has duplicate archetype id %d for class %d; ignoring",
+          GET_NAME(ch) ? GET_NAME(ch) : "<unknown>", id, class_id);
       continue;
     }
 
-    GET_ARCHETYPE(ch, class_id, slot) = id;
+    if (!add_char_archetype(ch, class_id, id))
+    {
+      log("SYSERR: load_archetypes: %s could not add archetype id %d for class %d",
+          GET_NAME(ch) ? GET_NAME(ch) : "<unknown>", id, class_id);
+    }
   } while (class_id != -1);
 }
 

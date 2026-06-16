@@ -38,6 +38,7 @@
 #include "backgrounds.h"
 #include "campaign.h"
 #include "perks.h"
+#include "archetypes.h"
 
 /** LOCAL DEFINES **/
 // good/bad
@@ -303,6 +304,7 @@ struct class_feat_assign *create_feat_assign(int feat_num, bool is_classfeat, in
   feat_assign->is_classfeat = is_classfeat;
   feat_assign->level_received = level_received;
   feat_assign->stacks = stacks;
+  feat_assign->class_feature = CLASS_FEATURE_FROM_FEAT(feat_num);
 
   return feat_assign;
 }
@@ -3165,6 +3167,7 @@ void process_class_level_feats(struct char_data *ch, int class)
 {
   struct class_feat_assign *feat_assign = NULL;
   int class_level = -1, effective_class_level = -1;
+  int replacement_feat = 0;
 
   /* deal with some instant disqualification */
   if (class < 0 || class >= NUM_CLASSES)
@@ -3195,6 +3198,28 @@ void process_class_level_feats(struct char_data *ch, int class)
     /* appropriate level to receive this feat? */
     if (feat_assign->level_received == effective_class_level)
     {
+      if (archetype_suppresses_class_feature(ch, class, feat_assign->class_feature))
+      {
+        replacement_feat = get_archetype_replacement_feat(ch, class, feat_assign->class_feature);
+        if (replacement_feat > 0)
+        {
+          if (HAS_REAL_FEAT(ch, replacement_feat))
+          {
+            send_to_char(ch, "\tM[archetype] You have improved your %s %s!\tn\r\n",
+                         feat_list[replacement_feat].name,
+                         feat_types[feat_list[replacement_feat].feat_type]);
+          }
+          else
+          {
+            send_to_char(ch, "\tM[archetype] You have gained the %s %s!\tn\r\n",
+                         feat_list[replacement_feat].name,
+                         feat_types[feat_list[replacement_feat].feat_type]);
+          }
+          SET_FEAT(ch, replacement_feat, HAS_REAL_FEAT(ch, replacement_feat) + 1);
+        }
+        continue;
+      }
+
       /* any special handling for this feat? */
       if (!special_handling_level_feats(ch, feat_assign->feat_num))
       {
@@ -3265,17 +3290,39 @@ void process_race_level_feats(struct char_data *ch)
          feat_assign = feat_assign->next)                                                          \
     {                                                                                              \
       feat_num = feat_assign->feat_num;                                                            \
-      if (feat_num >= first && feat_num <= epic && !HAS_FEAT(ch, feat_num) &&                      \
-          feat_assign->level_received == lvl + mystic)                                             \
+      if (feat_num >= first && feat_num <= epic && feat_assign->level_received == lvl + mystic)     \
       {                                                                                            \
-        SET_FEAT(ch, feat_num, 1);                                                                 \
-        send_to_char(ch, "You have gained access to %s!\r\n", feat_list[feat_num].name);           \
+        if (archetype_suppresses_class_feature(ch, class, feat_assign->class_feature))              \
+        {                                                                                          \
+          replacement_feat = get_archetype_replacement_feat(ch, class, feat_assign->class_feature); \
+          if (replacement_feat > 0 && !HAS_REAL_FEAT(ch, replacement_feat))                         \
+          {                                                                                        \
+            SET_FEAT(ch, replacement_feat, 1);                                                     \
+            send_to_char(ch, "You have gained access to %s!\r\n",                                  \
+                         feat_list[replacement_feat].name);                                        \
+          }                                                                                        \
+        }                                                                                          \
+        else if (!HAS_REAL_FEAT(ch, feat_num))                                                     \
+        {                                                                                          \
+          SET_FEAT(ch, feat_num, 1);                                                               \
+          send_to_char(ch, "You have gained access to %s!\r\n", feat_list[feat_num].name);         \
+        }                                                                                          \
       }                                                                                            \
     }                                                                                              \
   }
 
+#define SHOULD_GRANT_CLASS_FEAT(class_id, feat_const)                                              \
+  ((archetype_feat = get_archetype_effective_feat(ch, class_id, feat_const)) > 0 &&                 \
+   !HAS_REAL_FEAT(ch, archetype_feat))
+
+#define CLASS_FEAT_VALUE_IS(class_id, feat_const, value)                                            \
+  ((archetype_feat = get_archetype_effective_feat(ch, class_id, feat_const)) > 0 &&                 \
+   HAS_REAL_FEAT(ch, archetype_feat) == (value))
+
 void process_conditional_class_level_feats(struct char_data *ch, int class)
 {
+  int archetype_feat = 0;
+
   switch (class)
   {
   case CLASS_SORCERER:
@@ -3283,170 +3330,185 @@ void process_conditional_class_level_feats(struct char_data *ch, int class)
     if (HAS_FEAT(ch, FEAT_SORCERER_BLOODLINE_DRACONIC))
     {
       if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 9 &&
-          !HAS_REAL_FEAT(ch, FEAT_DRACONIC_HERITAGE_BREATHWEAPON))
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_DRACONIC_HERITAGE_BREATHWEAPON))
       {
-        SET_FEAT(ch, FEAT_DRACONIC_HERITAGE_BREATHWEAPON, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_DRACONIC_HERITAGE_BREATHWEAPON].name);
+                     feat_list[archetype_feat].name);
       }
-      if (!HAS_REAL_FEAT(ch, FEAT_DRACONIC_HERITAGE_CLAWS))
+      if (SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_DRACONIC_HERITAGE_CLAWS))
       {
-        SET_FEAT(ch, FEAT_DRACONIC_HERITAGE_CLAWS, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_DRACONIC_HERITAGE_CLAWS].name);
+                     feat_list[archetype_feat].name);
       }
-      if (!HAS_REAL_FEAT(ch, FEAT_DRACONIC_HERITAGE_DRAGON_RESISTANCES) &&
-          CLASS_LEVEL(ch, CLASS_SORCERER) >= 3)
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 3 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_DRACONIC_HERITAGE_DRAGON_RESISTANCES))
       {
-        SET_FEAT(ch, FEAT_DRACONIC_HERITAGE_DRAGON_RESISTANCES, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_DRACONIC_HERITAGE_DRAGON_RESISTANCES].name);
+                     feat_list[archetype_feat].name);
       }
-      if (!HAS_REAL_FEAT(ch, FEAT_DRACONIC_BLOODLINE_ARCANA))
+      if (SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_DRACONIC_BLOODLINE_ARCANA))
       {
-        SET_FEAT(ch, FEAT_DRACONIC_BLOODLINE_ARCANA, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_DRACONIC_BLOODLINE_ARCANA].name);
+                     feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 15 && !HAS_REAL_FEAT(ch, FEAT_DRACONIC_HERITAGE_WINGS))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 15 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_DRACONIC_HERITAGE_WINGS))
       {
-        SET_FEAT(ch, FEAT_DRACONIC_HERITAGE_WINGS, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_DRACONIC_HERITAGE_WINGS].name);
+                     feat_list[archetype_feat].name);
       }
       if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 20 &&
-          !HAS_REAL_FEAT(ch, FEAT_DRACONIC_HERITAGE_POWER_OF_WYRMS))
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_DRACONIC_HERITAGE_POWER_OF_WYRMS))
       {
-        SET_FEAT(ch, FEAT_DRACONIC_HERITAGE_POWER_OF_WYRMS, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_DRACONIC_HERITAGE_POWER_OF_WYRMS].name);
-        SET_FEAT(ch, FEAT_BLINDSENSE, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_BLINDSENSE].name);
+                     feat_list[archetype_feat].name);
+        if (archetype_feat == FEAT_DRACONIC_HERITAGE_POWER_OF_WYRMS &&
+            SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_BLINDSENSE))
+        {
+          SET_FEAT(ch, archetype_feat, 1);
+          send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
+        }
       }
     }
     else if (HAS_FEAT(ch, FEAT_SORCERER_BLOODLINE_ARCANE))
     {
-      if (!HAS_REAL_FEAT(ch, FEAT_ARCANE_BLOODLINE_ARCANA))
+      if (SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_ARCANE_BLOODLINE_ARCANA))
       {
-        SET_FEAT(ch, FEAT_ARCANE_BLOODLINE_ARCANA, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_ARCANE_BLOODLINE_ARCANA].name);
+                     feat_list[archetype_feat].name);
       }
-      if (!HAS_REAL_FEAT(ch, FEAT_IMPROVED_FAMILIAR))
+      if (SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_IMPROVED_FAMILIAR))
       {
-        SET_FEAT(ch, FEAT_IMPROVED_FAMILIAR, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch, "You have gained the %s feat as a benefit of your arcane bloodline!\r\n",
-                     feat_list[FEAT_IMPROVED_FAMILIAR].name);
+                     feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 3 && !HAS_REAL_FEAT(ch, FEAT_METAMAGIC_ADEPT))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 3 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_METAMAGIC_ADEPT))
       {
-        SET_FEAT(ch, FEAT_METAMAGIC_ADEPT, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_METAMAGIC_ADEPT].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 9 && !HAS_REAL_FEAT(ch, FEAT_NEW_ARCANA))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 9 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_NEW_ARCANA))
       {
-        SET_FEAT(ch, FEAT_NEW_ARCANA, 1);
+        SET_FEAT(ch, archetype_feat, 1);
         send_to_char(ch,
                      "You have gained the %s feat!  You can now learn a bonus spell from among the "
                      "spell circles you can currently cast.\r\n",
-                     feat_list[FEAT_NEW_ARCANA].name);
+                     feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 13 && HAS_REAL_FEAT(ch, FEAT_NEW_ARCANA) == 1)
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 13 &&
+          CLASS_FEAT_VALUE_IS(CLASS_SORCERER, FEAT_NEW_ARCANA, 1))
       {
-        SET_FEAT(ch, FEAT_NEW_ARCANA, 2);
+        SET_FEAT(ch, archetype_feat, 2);
         send_to_char(ch,
                      "You have improved the %s feat!  You can now learn a bonus spell from among "
                      "the spell circles you can currently cast.\r\n",
-                     feat_list[FEAT_NEW_ARCANA].name);
+                     feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 17 && HAS_REAL_FEAT(ch, FEAT_NEW_ARCANA) == 2)
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 17 &&
+          CLASS_FEAT_VALUE_IS(CLASS_SORCERER, FEAT_NEW_ARCANA, 2))
       {
-        SET_FEAT(ch, FEAT_NEW_ARCANA, 3);
+        SET_FEAT(ch, archetype_feat, 3);
         send_to_char(ch,
                      "You have improved the %s feat!  You can now learn a bonus spell from among "
                      "the spell circles you can currently cast.\r\n",
-                     feat_list[FEAT_NEW_ARCANA].name);
+                     feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 15 && !HAS_REAL_FEAT(ch, FEAT_SCHOOL_POWER))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 15 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_SCHOOL_POWER))
       {
-        SET_FEAT(ch, FEAT_SCHOOL_POWER, 1);
-        send_to_char(ch, "You have gained the %s (%s) feat!\r\n", feat_list[FEAT_SCHOOL_POWER].name,
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s (%s) feat!\r\n", feat_list[archetype_feat].name,
                      school_names[GET_BLOODLINE_SUBTYPE(ch)]);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 20 && !HAS_REAL_FEAT(ch, FEAT_ARCANE_APOTHEOSIS))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 20 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_ARCANE_APOTHEOSIS))
       {
-        SET_FEAT(ch, FEAT_ARCANE_APOTHEOSIS, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_ARCANE_APOTHEOSIS].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
     }
     else if (HAS_FEAT(ch, FEAT_SORCERER_BLOODLINE_FEY))
     {
-      if (!HAS_REAL_FEAT(ch, FEAT_FEY_BLOODLINE_ARCANA))
+      if (SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_FEY_BLOODLINE_ARCANA))
       {
-        SET_FEAT(ch, FEAT_FEY_BLOODLINE_ARCANA, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_FEY_BLOODLINE_ARCANA].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (!HAS_REAL_FEAT(ch, FEAT_LAUGHING_TOUCH))
+      if (SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_LAUGHING_TOUCH))
       {
-        SET_FEAT(ch, FEAT_LAUGHING_TOUCH, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_LAUGHING_TOUCH].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 3 && !HAS_REAL_FEAT(ch, FEAT_WOODLAND_STRIDE))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 3 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_WOODLAND_STRIDE))
       {
-        SET_FEAT(ch, FEAT_WOODLAND_STRIDE, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_WOODLAND_STRIDE].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 9 && !HAS_REAL_FEAT(ch, FEAT_FLEETING_GLANCE))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 9 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_FLEETING_GLANCE))
       {
-        SET_FEAT(ch, FEAT_FLEETING_GLANCE, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_FLEETING_GLANCE].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 15 && !HAS_REAL_FEAT(ch, FEAT_FEY_MAGIC))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 15 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_FEY_MAGIC))
       {
-        SET_FEAT(ch, FEAT_FEY_MAGIC, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_FEY_MAGIC].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 20 && !HAS_REAL_FEAT(ch, FEAT_SOUL_OF_THE_FEY))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 20 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_SOUL_OF_THE_FEY))
       {
-        SET_FEAT(ch, FEAT_SOUL_OF_THE_FEY, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_SOUL_OF_THE_FEY].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
     }
     else if (HAS_FEAT(ch, FEAT_SORCERER_BLOODLINE_UNDEAD))
     {
-      if (!HAS_REAL_FEAT(ch, FEAT_UNDEAD_BLOODLINE_ARCANA))
+      if (SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_UNDEAD_BLOODLINE_ARCANA))
       {
-        SET_FEAT(ch, FEAT_UNDEAD_BLOODLINE_ARCANA, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_UNDEAD_BLOODLINE_ARCANA].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (!HAS_REAL_FEAT(ch, FEAT_GRAVE_TOUCH))
+      if (SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_GRAVE_TOUCH))
       {
-        SET_FEAT(ch, FEAT_GRAVE_TOUCH, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_GRAVE_TOUCH].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 3 && !HAS_REAL_FEAT(ch, FEAT_DEATHS_GIFT))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 3 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_DEATHS_GIFT))
       {
-        SET_FEAT(ch, FEAT_DEATHS_GIFT, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_DEATHS_GIFT].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 9 && !HAS_REAL_FEAT(ch, FEAT_GRASP_OF_THE_DEAD))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 9 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_GRASP_OF_THE_DEAD))
       {
-        SET_FEAT(ch, FEAT_GRASP_OF_THE_DEAD, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n",
-                     feat_list[FEAT_GRASP_OF_THE_DEAD].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 15 && !HAS_REAL_FEAT(ch, FEAT_INCORPOREAL_FORM))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 15 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_INCORPOREAL_FORM))
       {
-        SET_FEAT(ch, FEAT_INCORPOREAL_FORM, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_INCORPOREAL_FORM].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
-      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 20 && !HAS_REAL_FEAT(ch, FEAT_ONE_OF_US))
+      if (CLASS_LEVEL(ch, CLASS_SORCERER) >= 20 &&
+          SHOULD_GRANT_CLASS_FEAT(CLASS_SORCERER, FEAT_ONE_OF_US))
       {
-        SET_FEAT(ch, FEAT_ONE_OF_US, 1);
-        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[FEAT_ONE_OF_US].name);
+        SET_FEAT(ch, archetype_feat, 1);
+        send_to_char(ch, "You have gained the %s feat!\r\n", feat_list[archetype_feat].name);
       }
     }
     break;
@@ -3454,7 +3516,7 @@ void process_conditional_class_level_feats(struct char_data *ch, int class)
   {
     // This is how extra circles are assigned.
     struct class_feat_assign *feat_assign = NULL;
-    int mystic, feat_num, lvl;
+    int mystic, feat_num, lvl, replacement_feat;
     mystic = HAS_FEAT(ch, FEAT_THEURGE_SPELLCASTING);
 
     GRANT_SPELL_CIRCLE(CLASS_WIZARD, FEAT_WIZARD_1ST_CIRCLE, FEAT_WIZARD_EPIC_SPELL);
@@ -3471,6 +3533,8 @@ void process_conditional_class_level_feats(struct char_data *ch, int class)
   }
 }
 #undef GRANT_SPELL_CIRCLE
+#undef SHOULD_GRANT_CLASS_FEAT
+#undef CLASS_FEAT_VALUE_IS
 
 /* deprecated */
 /* at each level we run this function to assign free RACE feats */

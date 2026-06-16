@@ -774,6 +774,7 @@ i added this trying to debug issues with qedit-copy -zusuk
 #define STUDY_DRAGON_RIDER_BOND_TYPE 76
 #define STUDY_DRAGON_RIDER_DRAGON_TYPE_CONFIRM 77
 #define STUDY_DRAGON_RIDER_BOND_TYPE_CONFIRM 78
+#define STUDY_ARCHETYPE_BROWSER 79
 
 
 #define NUM_BAG_SYSTEMS 2

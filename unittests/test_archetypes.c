@@ -82,10 +82,8 @@ static void Test_Parse_Archetype(CuTest *tc)
   CuAssertIntEquals(tc, ARCHETYPE_NONE, parse_archetype("none"));
 }
 
-static void Test_Storage_Constants_Slot_Ready(CuTest *tc)
+static void Test_Storage_Is_List_Based(CuTest *tc)
 {
-  CuAssertTrue(tc, MAX_ARCHETYPES_PER_CLASS >= ARCHETYPE_EFFECTIVE_PER_CLASS);
-  CuAssertIntEquals(tc, 1, ARCHETYPE_EFFECTIVE_PER_CLASS);
   CuAssertIntEquals(tc, 0, ARCHETYPE_NONE);
   CuAssertIntEquals(tc, 1, ARCHETYPE_VERSION);
 }
@@ -94,21 +92,38 @@ static void Test_Init_Char_Archetypes(CuTest *tc)
 {
   struct char_data ch;
   struct player_special_data ps;
-  int class_id, slot;
 
   memset(&ch, 0, sizeof(ch));
-  memset(&ps, 0xff, sizeof(ps));
+  memset(&ps, 0, sizeof(ps));
   ch.player_specials = &ps;
 
   init_char_archetypes(&ch, 0);
   CuAssertIntEquals(tc, 0, GET_ARCHETYPE_VERSION(&ch));
-
-  for (class_id = 0; class_id < NUM_CLASSES; class_id++)
-    for (slot = 0; slot < MAX_ARCHETYPES_PER_CLASS; slot++)
-      CuAssertIntEquals(tc, ARCHETYPE_NONE, GET_ARCHETYPE(&ch, class_id, slot));
+  CuAssertTrue(tc, GET_ARCHETYPES(&ch) == NULL);
 
   init_char_archetypes(&ch, ARCHETYPE_VERSION);
   CuAssertIntEquals(tc, ARCHETYPE_VERSION, GET_ARCHETYPE_VERSION(&ch));
+  CuAssertTrue(tc, GET_ARCHETYPES(&ch) == NULL);
+}
+
+static void Test_Add_And_Free_Char_Archetypes(CuTest *tc)
+{
+  struct char_data ch;
+  struct player_special_data ps;
+
+  memset(&ch, 0, sizeof(ch));
+  memset(&ps, 0, sizeof(ps));
+  ch.player_specials = &ps;
+  init_char_archetypes(&ch, ARCHETYPE_VERSION);
+
+  CuAssertTrue(tc, add_char_archetype(&ch, CLASS_WIZARD, ARCHETYPE_NONE));
+  CuAssertTrue(tc, GET_ARCHETYPES(&ch) == NULL);
+  CuAssertTrue(tc, !add_char_archetype(&ch, CLASS_WIZARD, 9999));
+  CuAssertTrue(tc, !has_char_archetype(&ch, CLASS_WIZARD, 9999));
+  CuAssertIntEquals(tc, ARCHETYPE_NONE, get_primary_archetype(&ch, CLASS_WIZARD));
+
+  free_char_archetypes(&ch);
+  CuAssertTrue(tc, GET_ARCHETYPES(&ch) == NULL);
 }
 
 CuSuite *ArchetypeGetSuite(void)
@@ -122,8 +137,9 @@ CuSuite *ArchetypeGetSuite(void)
   SUITE_ADD_TEST(suite, Test_Get_Name_Never_Null);
   SUITE_ADD_TEST(suite, Test_Get_Class_For_Unknown);
   SUITE_ADD_TEST(suite, Test_Parse_Archetype);
-  SUITE_ADD_TEST(suite, Test_Storage_Constants_Slot_Ready);
+  SUITE_ADD_TEST(suite, Test_Storage_Is_List_Based);
   SUITE_ADD_TEST(suite, Test_Init_Char_Archetypes);
+  SUITE_ADD_TEST(suite, Test_Add_And_Free_Char_Archetypes);
   return suite;
 }
 

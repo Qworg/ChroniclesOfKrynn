@@ -6583,6 +6583,7 @@ void free_char(struct char_data *ch)
       destroy_innate_magic_queue(ch);
       destroy_spell_collection(ch);
       destroy_known_spells(ch);
+      free_char_archetypes(ch);
 
       /* free craft data strings */
       if (GET_CRAFT(ch).keywords)

@@ -1693,6 +1693,7 @@ const char *connected_types[] = {
     "Board Post Abort",
     "Board Editor",
     "Quit Feedback Prompt",
+    "Select Archetypes",
     "\n" /* make sure this matches NUM_CON_STATES */
 };
 CHECK_TABLE_SIZE(connected_types, NUM_CON_STATES + 1);

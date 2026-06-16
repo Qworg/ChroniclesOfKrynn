@@ -31,6 +31,7 @@
 #include "evolutions.h"
 #include "constants.h"
 #include "talents.h"
+#include "archetypes.h"
 
 /*-------------------------------------------------------------------*/
 /*. Function prototypes . */
@@ -48,6 +49,7 @@ static void display_main_menu(struct descriptor_data *d);
 static void generic_main_disp_menu(struct descriptor_data *d);
 static void main_feat_disp_menu(struct descriptor_data *d);
 static void main_boosts_disp_menu(struct descriptor_data *d);
+static void archetype_browser_menu(struct descriptor_data *d);
 
 void init_study(struct descriptor_data *d, int class);
 void finalize_study(struct descriptor_data *d);
@@ -282,6 +284,7 @@ void finalize_study(struct descriptor_data *d)
 {
   struct char_data *ch = d->character;
   int i = 0, j = 0, subfeat = 0;
+  int archetype_feat = 0;
   struct damage_reduction_type *dr;
 
   /* Finalize the chosen data, applying the levelup structure to
@@ -441,12 +444,24 @@ void finalize_study(struct descriptor_data *d)
       }
       break;
       case FEAT_SORCERER_BLOODLINE_DRACONIC:
-        SET_FEAT(ch, FEAT_DRACONIC_HERITAGE_CLAWS, 1);
-        SET_FEAT(ch, FEAT_DRACONIC_BLOODLINE_ARCANA, 1);
+        archetype_feat = get_archetype_effective_feat(ch, CLASS_SORCERER,
+                                                       FEAT_DRACONIC_HERITAGE_CLAWS);
+        if (archetype_feat > 0)
+          SET_FEAT(ch, archetype_feat, 1);
+        archetype_feat = get_archetype_effective_feat(ch, CLASS_SORCERER,
+                                                       FEAT_DRACONIC_BLOODLINE_ARCANA);
+        if (archetype_feat > 0)
+          SET_FEAT(ch, archetype_feat, 1);
         break;
       case FEAT_SORCERER_BLOODLINE_ARCANE:
-        SET_FEAT(ch, FEAT_IMPROVED_FAMILIAR, HAS_REAL_FEAT(ch, FEAT_IMPROVED_FAMILIAR) + 1);
-        SET_FEAT(ch, FEAT_ARCANE_BLOODLINE_ARCANA, 1);
+        archetype_feat = get_archetype_effective_feat(ch, CLASS_SORCERER,
+                                                       FEAT_IMPROVED_FAMILIAR);
+        if (archetype_feat > 0)
+          SET_FEAT(ch, archetype_feat, HAS_REAL_FEAT(ch, archetype_feat) + 1);
+        archetype_feat = get_archetype_effective_feat(ch, CLASS_SORCERER,
+                                                       FEAT_ARCANE_BLOODLINE_ARCANA);
+        if (archetype_feat > 0)
+          SET_FEAT(ch, archetype_feat, 1);
         break;
       }
     }
@@ -2636,6 +2651,7 @@ static void generic_main_disp_menu(struct descriptor_data *d)
       "%s H%s) Necromancer Casting Type%s\r\n"
       "%s I%s) Languages%s\r\n"
       "%s J%s) Dragon Riders%s\r\n"
+      "%s K%s) Archetypes%s\r\n"
       "\r\n"
       "%s R%s) Reset Character%s\r\n"
       "%s Q%s) Quit\r\n"
@@ -2666,6 +2682,7 @@ static void generic_main_disp_menu(struct descriptor_data *d)
       has_necromancer_cast_type_unchosen(ch) ? "" : "*",                                 // H
       MENU_OPT(has_unchosen_languages(ch)), has_unchosen_languages(ch) ? "" : "*",       // I
       MENU_OPT(has_unchosen_dragon_rider(ch)), has_unchosen_dragon_rider(ch) ? "" : "*", // J
+      MENU_OPT(TRUE), "",                                                                 // K
       MENU_OPT(GET_LEVEL(ch) == 1), GET_LEVEL(ch) == 1 ? "" : "*",                       // R
       grn, nrm,
       (GET_PREMADE_BUILD_CLASS(ch) != CLASS_UNDEFINED)
@@ -2673,6 +2690,59 @@ static void generic_main_disp_menu(struct descriptor_data *d)
           : "");
 
   OLC_MODE(d) = STUDY_GEN_MAIN_MENU;
+}
+
+static void archetype_browser_menu(struct descriptor_data *d)
+{
+  struct char_data *ch = d->character;
+  struct char_archetype_data *entry;
+  int i, j;
+  bool found_active = FALSE, found_available = FALSE;
+
+  get_char_colors(ch);
+  clear_screen(d);
+
+  write_to_output(d, "\r\n-- %sArchetypes%s\r\n\r\n", mgn, nrm);
+  write_to_output(d, "Archetypes permanently replace or alter class features.  You may stack any\r\n"
+                     "number of archetypes as long as no two replace the same class feature.\r\n\r\n");
+
+  write_to_output(d, "%sActive archetypes:%s\r\n", cyn, nrm);
+  for (entry = GET_ARCHETYPES(ch); entry; entry = entry->next)
+  {
+    found_active = TRUE;
+    write_to_output(d, "  %s: %s\r\n", class_list[entry->archetype_class].name,
+                    get_archetype_name(entry->archetype_id));
+  }
+  if (!found_active)
+    write_to_output(d, "  None selected.\r\n");
+
+  write_to_output(d, "\r\n%sAvailable archetypes:%s\r\n", cyn, nrm);
+  for (i = 0; i < NUM_ARCHETYPES; i++)
+  {
+    if (archetype_list[i].id == ARCHETYPE_NONE || !archetype_list[i].enabled)
+      continue;
+
+    found_available = TRUE;
+    write_to_output(d, "\r\n  %s - %s\r\n", class_list[archetype_list[i].class_id].name,
+                    archetype_list[i].name);
+    write_to_output(d, "    %s\r\n", archetype_list[i].desc);
+
+    for (j = 0; j < num_archetype_feature_changes(); j++)
+    {
+      if (archetype_feature_changes[j].archetype_id == archetype_list[i].id)
+      {
+        write_to_output(d, "    Replaces: %s\r\n", archetype_feature_changes[j].name);
+        write_to_output(d, "      %s\r\n", archetype_feature_changes[j].desc);
+      }
+    }
+  }
+  if (!found_available)
+    write_to_output(d, "  No selectable archetypes are defined yet.\r\n");
+
+  write_to_output(d, "\r\nThis browser is read-only.  Archetype selection will be offered during\r\n"
+                     "character creation/respec before class features are granted.\r\n");
+  write_to_output(d, "\r\nEnter Q to return to the Study menu: ");
+  OLC_MODE(d) = STUDY_ARCHETYPE_BROWSER;
 }
 
 /*  This does not work for all cfeats -exotic weapon proficiency is a special
@@ -3163,6 +3233,11 @@ void study_parse(struct descriptor_data *d, char *arg)
       }
       break;
 
+    case 'k':
+    case 'K':
+      archetype_browser_menu(d);
+      break;
+
     // reset levelup, level 1 only.
     case 'R':
     case 'r':
@@ -3182,6 +3257,18 @@ void study_parse(struct descriptor_data *d, char *arg)
       break;
     }
     break;
+
+  case STUDY_ARCHETYPE_BROWSER:
+    switch (*arg)
+    {
+    case 'q':
+    case 'Q':
+    default:
+      generic_main_disp_menu(d);
+      break;
+    }
+    break;
+
   case STUDY_CONFIRM_RESET:
     switch (*arg)
     {
