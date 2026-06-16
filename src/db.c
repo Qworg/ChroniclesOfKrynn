@@ -82,6 +82,7 @@
 #include "treasure.h"
 #include "assign_wpn_armor.h"
 #include "backgrounds.h"
+#include "archetypes.h"
 #include "crafting_new.h"
 #include "crafting_recipes.h"
 #include "mob_spellslots.h"
@@ -773,6 +774,9 @@ void boot_world(void)
   assign_backgrounds();
   log("Sorting backgrounds.");
   sort_backgrounds();
+
+  log("Initializing archetypes.");
+  init_archetypes();
 
   log("Calculating weighted object bonuses for treasure generation.");
   assign_weighted_bonuses();
@@ -7004,6 +7008,7 @@ void init_char(struct char_data *ch)
   /* Initialize crafting data */
   ch->player_specials->saved.craft_data.craft_variant = -1; /* -1 means no variant set */
   ch->player_specials->saved.craft_data.supply_active_slot = -1; /* -1 means no active slot */
+  init_char_archetypes(ch, ARCHETYPE_VERSION);
 
   /* Initialize inquisitor perk tracking */
   ch->player_specials->saved.inq_favored_terrain = -1;
@@ -8238,6 +8243,8 @@ struct char_data *new_char()
   {
     ch->player_specials->saved.score_section_order[i] = i;
   }
+
+  init_char_archetypes(ch, ARCHETYPE_VERSION);
 
   return ch;
 }

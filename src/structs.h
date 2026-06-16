@@ -530,6 +530,11 @@
 /** Total number of available PC Classes */
 #define NUM_CLASSES 38
 
+/** Per-class archetype storage capacity (row/slot-ready; see archetypes.h). */
+#ifndef MAX_ARCHETYPES_PER_CLASS
+#define MAX_ARCHETYPES_PER_CLASS 4
+#endif
+
 // related to pc (classes, etc)
 /* note that max_classes was established to reign in some of the
    pfile arrays associated with classes */
@@ -7290,6 +7295,14 @@ struct player_special_data_saved
   int moon_bonus_spells;      /**< Maximum moon bonus spells available (based on moon phase) */
   int moon_bonus_spells_used; /**< Number of moon bonus spells used (current in use) */
   int moon_bonus_regen_timer; /**< Timer for next moon bonus spell regeneration (in ticks, regen at 1 per 5 mins) */
+
+  /* Archetype system (inert MVP core).  Row/slot-based storage sized for
+   * future stacking; only the first ARCHETYPE_EFFECTIVE_PER_CLASS slot per
+   * class is honored today.  ARCHETYPE_NONE (0) means no archetype selected.
+   * archetype_version records the format/version used when the data was last
+   * saved so loaders can migrate or safely fall back. */
+  sh_int archetypes[NUM_CLASSES][MAX_ARCHETYPES_PER_CLASS];
+  int archetype_version;
 };
 
 struct weird_science_level

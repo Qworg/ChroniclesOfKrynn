@@ -2994,6 +2994,12 @@ bool has_reach(struct char_data *ch);
 #define HAS_BACKGROUND(ch, i)                                                                      \
   (GET_LEVEL(ch) >= LVL_IMMORT ? TRUE : ch->player_specials->saved.background_type == i)
 
+/* Archetype accessors (inert MVP core).  Slot-based; slot 0 is the only slot
+ * currently honored by gameplay.  See archetypes.h. */
+#define GET_ARCHETYPE(ch, cl, slot) ((ch)->player_specials->saved.archetypes[cl][slot])
+#define GET_PRIMARY_ARCHETYPE(ch, cl) ((ch)->player_specials->saved.archetypes[cl][0])
+#define GET_ARCHETYPE_VERSION(ch) ((ch)->player_specials->saved.archetype_version)
+
 #define GET_HOMETOWN(ch) (ch->player_specials->saved.hometown)
 
 #define GET_FORAGE_COOLDOWN(ch) (ch->player_specials->saved.forage_cooldown)

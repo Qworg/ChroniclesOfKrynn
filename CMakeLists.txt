@@ -482,6 +482,7 @@ set(SRC_C_FILES
     src/ai_security.c
     src/ai_service.c
     src/alchemy.c
+    src/archetypes.c
     src/asciimap.c
     src/assign_wpn_armor.c
     src/backgrounds.c
