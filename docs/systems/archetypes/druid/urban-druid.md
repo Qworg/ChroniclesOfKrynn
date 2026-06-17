@@ -6,56 +6,93 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Druid%20Urban%20Druid
 - **Index:** docs/systems/archetypes/druid.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Spontaneous Casting; Nature Bond (Ex); Lorekeeper (Ex); Resist Temptation (Ex); A Thousand Faces (Su); Wild Shape (Su); Mental Strength (Ex)
 - **Replaced / altered class features:** the ability to spontaneously cast summon nature’s ally spells; a druid’s woodland stride and trackless step abilities; venom immunity
 
-## Replacement details
+## Implementation details
 
 ### Replaces: the ability to spontaneously cast summon nature’s ally spells
 
 - **Archetype feature:** Spontaneous Casting
 - **Description:** An urban druid can channel stored spell energy into domain spells that she has not prepared ahead of time.
-- **Mechanics:**
-  - Mechanics summary: An urban druid can channel stored spell energy into domain spells that she has not prepared ahead of time. She can “lose” a prepared spell in order to cast any domain spell of the same level or lower.
+- **Detailed mechanics:**
+  - **Rules text to implement:** An urban druid can channel stored spell energy into domain spells that she has not prepared ahead of time. She can “lose” a prepared spell in order to cast any domain spell of the same level or lower.
 - **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook, cleric domain hook.
+  - domain system.
+  - summoning subsystem.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Nature Bond (Ex)
+- **Description:** An urban druid may not select an animal companion.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** An urban druid may not select an animal companion. Instead, she must choose from the following domains, rather than those usually available to druids: Charm, Community, Knowledge, Nobility, Protection, Repose, Rune, or Weather.
+- **Implementation flags:**
+  - animal companion progression.
+  - domain system.
+  - feat grant/prerequisite handling.
 
 ### Replaces: a druid’s woodland stride and trackless step abilities
 
 - **Archetype feature:** Lorekeeper (Ex)
 - **Description:** At 2nd level, an urban druid adds Diplomacy, Knowledge (history), Knowledge (local), and Knowledge (nobility) skills to her list of class skills.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 2.
-  - Mechanics summary: At 2nd level, an urban druid adds Diplomacy, Knowledge (history), Knowledge (local), and Knowledge (nobility) skills to her list of class skills. She also receives a +2 bonus on these skill checks.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 2.
+  - **Rules text to implement:** At 2nd level, an urban druid adds Diplomacy, Knowledge (history), Knowledge (local), and Knowledge (nobility) skills to her list of class skills. She also receives a +2 bonus on these skill checks.
 - **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, typed/untyped numeric bonus, ki/monk hook.
+  - ki subsystem.
+  - skill/class-skill modification.
 
 ### Replaces: the resist nature’s lure ability
 
 - **Archetype feature:** Resist Temptation (Ex)
 - **Description:** At 4th level, an urban druid gains a +2 bonus on saves vs.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 4.
-  - Mechanics summary: At 4th level, an urban druid gains a +2 bonus on saves vs. divinations and enchantments.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 4.
+  - **Rules text to implement:** At 4th level, an urban druid gains a +2 bonus on saves vs. divinations and enchantments.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, saving throw hook.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** A Thousand Faces (Su)
+- **Description:** An urban druid gains this ability at 6th level.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 6.
+  - **Rules text to implement:** An urban druid gains this ability at 6th level.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Wild Shape (Su)
+- **Description:** An urban druid gains this ability at 8th level, except that her effective druid level for the ability is equal to her druid level – 4.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 8.
+  - **Rules text to implement:** An urban druid gains this ability at 8th level, except that her effective druid level for the ability is equal to her druid level – 4.
+- **Implementation flags:**
+  - wild shape subsystem.
+  - feat grant/prerequisite handling.
 
 ### Replaces: venom immunity
 
 - **Archetype feature:** Mental Strength (Ex)
 - **Description:** At 9th level, an urban druid gains immunity to charm and compulsion effects.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 9.
-  - Mechanics summary: At 9th level, an urban druid gains immunity to charm and compulsion effects.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 9.
+  - **Rules text to implement:** At 9th level, an urban druid gains immunity to charm and compulsion effects.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ## Parsed source feature headings
 
@@ -66,4 +103,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - A Thousand Faces (Su)
 - Wild Shape (Su)
 - Mental Strength (Ex)
-

@@ -6,24 +6,29 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Bard%20Pitax%20%20Academy%20of%20Grand%20Arts
 - **Index:** docs/systems/archetypes/bard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Focused Performance (Ex)
 - **Replaced / altered class features:** Versatile Performance
 
-## Replacement details
+## Implementation details
 
-> **Implementation flag:** No explicit replacement clauses were parsed from the source detail page. Use the index summary and source link for manual mapping.
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
 
-## Unmapped index replacements
-
-The index lists these replaced/altered features, but no one-to-one source clause was parsed. Treat these as manual implementation checkpoints.
-
-- Versatile Performance
+- **Archetype feature:** Focused Performance (Ex)
+- **Description:** At 2nd level, a bard must choose one type of Perform skill.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 2, 8.
+  - **Rules text to implement:** At 2nd level, a bard must choose one type of Perform skill. The bard gains Extra Performance as a bonus feat, usable only with the chosen category of the Perform skill. At 8th level, and every 6 levels thereafter, the bard gains Extra Performance as an additional bonus feat. The additional uses of bardic performance gained from these feats cannot be used with any category of the Performance skill other than the one chosen at 2nd level.
+- **Implementation flags:**
+  - bardic performance subsystem.
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
 
 ## Parsed source feature headings
 
 - Focused Performance (Ex)
-

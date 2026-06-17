@@ -6,56 +6,61 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Druid%20Supernaturalist
 - **Index:** docs/systems/archetypes/druid.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Weapon and Armor Proficiency; Eldritch Botanist (Ex); Paranormal Scholar (Ex); Animal Spirit (Su)
 - **Replaced / altered class features:** wild shape
 
-## Replacement details
+## Implementation details
 
-### Alters: the druid’s weapon
-
-- **Archetype feature:** Weapon and Armor Proficiency
-- **Description:** A supernaturalist is not proficient with any type of armor.
-- **Mechanics:**
-  - Mechanics summary: A supernaturalist is not proficient with any type of armor.
-- **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
-
-### Alters: armor proficiencies
+### Alters: the druid’s weapon and armor proficiencies
 
 - **Archetype feature:** Weapon and Armor Proficiency
 - **Description:** A supernaturalist is not proficient with any type of armor.
-- **Mechanics:**
-  - Mechanics summary: A supernaturalist is not proficient with any type of armor.
+- **Detailed mechanics:**
+  - **Rules text to implement:** A supernaturalist is not proficient with any type of armor.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Eldritch Botanist (Ex)
+- **Description:** A supernaturalist can affect plants with mind-affecting effects she creates and with spells that normally affect animals.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** A supernaturalist can affect plants with mind-affecting effects she creates and with spells that normally affect animals. Any such spell that allows a Will save can instead be negated by the target plant with a successful Fortitude save at the same DC. She also can choose plant bond and green empathy, as a treesinger druid ( Advanced Race Guide 25), in place of nature bond and wild empathy.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
 
 ### Replaces: nature sense, trackless step, and resist nature’s lure
 
 - **Archetype feature:** Paranormal Scholar (Ex)
 - **Description:** A supernaturalist gains Psychic Sensitivity OA as a bonus feat and adds Diplomacy, Knowledge (arcana), and Sense Motive as class skills.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 3.
-  - Mechanics summary: A supernaturalist gains Psychic Sensitivity OA as a bonus feat and adds Diplomacy, Knowledge (arcana), and Sense Motive as class skills. At 3rd level and every 3 levels thereafter, she can select a spell from the psychic class’s spell list ( Occult Adventures 69) and add it to her druid spell list, and is able to prepare and cast it as a druid spell.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3.
+  - **Rules text to implement:** A supernaturalist gains Psychic Sensitivity OA as a bonus feat and adds Diplomacy, Knowledge (arcana), and Sense Motive as class skills. At 3rd level and every 3 levels thereafter, she can select a spell from the psychic class’s spell list ( Occult Adventures 69) and add it to her druid spell list, and is able to prepare and cast it as a druid spell.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, spellcasting/spell-list hook, ki/monk hook.
-  - Needs implementation review: occult/psychic casting, occult subsystem.
+  - ki subsystem.
+  - archetype spell-list override.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
 
 ### Replaces: wild shape
 
 - **Archetype feature:** Animal Spirit (Su)
 - **Description:** At 4th level, a supernaturalist can perform a seance to call an animal spirit of any animal with which she is familiar to serve as her companion and guide.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 4.
-  - Mechanics summary: At 4th level, a supernaturalist can perform a seance to call an animal spirit of any animal with which she is familiar to serve as her companion and guide. The supernaturalist gains spirit, spirit bonus, spirit surge, and taboo abilities as a medium ( Occult Adventures 30) 3 levels lower than her druid level. The supernaturalist’s allies cannot participate in this seance. Spirit Bonus : Your spirit bonus applies on attack and damage rolls with natural weapons and on skill checks relating to animals and plants. Seance Boon : Your natural armor bonus to AC increases by 1. Influence Penalty : You become wild and savage, taking a penalty equal to your spirit bonus on caster level checks, Charisma- and Intelligencebased ability checks, and skill checks.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 4.
+  - **Rules text to implement:** At 4th level, a supernaturalist can perform a seance to call an animal spirit of any animal with which she is familiar to serve as her companion and guide. The supernaturalist gains spirit, spirit bonus, spirit surge, and taboo abilities as a medium ( Occult Adventures 30) 3 levels lower than her druid level. The supernaturalist’s allies cannot participate in this seance. The spirit abilities of the animal spirit are as follows. Spirit Bonus : Your spirit bonus applies on attack and damage rolls with natural weapons and on skill checks relating to animals and plants. Seance Boon : Your natural armor bonus to AC increases by 1. Favored Location : Native terrain of the animal type being invoked. Influence Penalty : You become wild and savage, taking a penalty equal to your spirit bonus on caster level checks, Charisma- and Intelligencebased ability checks, and skill checks. Taboos : Choose one: you must not speak (except with animals and plants); you must not wield manufactured weapons; you must not eat anything you did not kill or harvest yourself. Totem Transformation (Lesser, Su) : You gain any of the following abilities possessed by the animal you select as your animal spirit: bite (1d6 for a Medium druid), 2 claws (1d4 for a Medium druid), darkvision, improved land movement speed (up to a +20-foot enhancement bonus to the druid’s base land movement speed), low-light vision, scent, and swim (up to 30 feet). Pack Leader (Intermediate, Su) : When you summon animals that match your animal spirit, they gain a +2 bonus on attack rolls, damage rolls, and saving throws. Wildstrike (Greater, Su) : You can allow your animal spirit to gain 1 point of influence over you as a swift action to allow an animal or plant (including your companion) within 30 feet that can see or hear you to immediately take an additional standard action. Wild Heart (Supreme, Ex) : You gain a +4 bonus on saves against enchantment and mind-affecting effects, and immunity to effects that affect only humanoids. Once per day, you can cast any summon nature’s ally spell you can cast spontaneously as a standard action without expending a spell slot.
 - **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, typed/untyped numeric bonus, numeric penalty, saving throw hook, spellcasting/spell-list hook, wild shape hook, ki/monk hook, AC/natural armor bonus.
-  - Needs implementation review: occult subsystem.
+  - wild shape subsystem.
+  - ki subsystem.
+  - summoning subsystem.
+  - skill/class-skill modification.
 
 ## Parsed source feature headings
 
@@ -63,4 +68,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Eldritch Botanist (Ex)
 - Paranormal Scholar (Ex)
 - Animal Spirit (Su)
-

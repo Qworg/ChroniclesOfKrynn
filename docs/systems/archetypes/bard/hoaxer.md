@@ -6,59 +6,78 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Bard%20Hoaxer
 - **Index:** docs/systems/archetypes/bard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Counterfeiter (Ex); Bardic Performance (Su); Misery (Ex); Versed in Curses (Ex); Curse Crafter (Ex)
 - **Replaced / altered class features:** bardic knowledge; versatile performance; well-versed; lore master
 
-## Replacement details
+## Implementation details
 
 ### Replaces: bardic knowledge
 
 - **Archetype feature:** Counterfeiter (Ex)
 - **Description:** A hoaxer adds half his bard level (minimum 1) on all Appraise, Bluff, and Sleight of Hand checks, as well as on Craft, Knowledge, Linguistics, Perception, and Profession checks to create or detect a counterfeit or forgery.
-- **Mechanics:**
-  - Type: Ex.
-  - Mechanics summary: A hoaxer adds half his bard level (minimum 1) on all Appraise, Bluff, and Sleight of Hand checks, as well as on Craft, Knowledge, Linguistics, Perception, and Profession checks to create or detect a counterfeit or forgery. He can attempt such skill checks untrained.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** A hoaxer adds half his bard level (minimum 1) on all Appraise, Bluff, and Sleight of Hand checks, as well as on Craft, Knowledge, Linguistics, Perception, and Profession checks to create or detect a counterfeit or forgery. He can attempt such skill checks untrained.
 - **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, ki/monk hook.
+  - ki subsystem.
+  - crafting subsystem.
+  - skill/class-skill modification.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Bardic Performance (Su)
+- **Description:** A hoaxer dedicates his arcane energies to deceiving others rather than to entertaining them, granting him the following unique performances.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 1, 3, 12.
+  - **Rules text to implement:** A hoaxer dedicates his arcane energies to deceiving others rather than to entertaining them, granting him the following unique performances. Bad Deal (Su) : A hoaxer can use his performance to coax a bit of luck (good or bad) into a valuable-seeming object. As a standard action that provokes attacks of opportunity, the hoaxer can use 1 round of bardic performance to invest a single object in his possession with a hex he knows. This object must be light enough to hold in one hand, and cannot already have any magical properties. The object remains hexed as long as the hoaxer continues to spend 1 round of bardic performance each round as a swift action to maintain it, until the hoaxer drops the item, or until triggered. The hex triggers immediately upon being willingly accepted by another creature, targeting its new owner. A bad deal cannot be forced on a creature or slipped into its possession without its knowledge, but a hoaxer can lie or cheat to convince his mark to accept the object, or use spells like beguiling gift. At 1st level, the hoaxer knows one witch hex from the following list: blight, charm, evil eye, fortune, healing, misfortune, slumber, or unnerve beasts. At 3rd level and every 3 bard levels thereafter, he can learn one additional hex. The save DC for a hoaxer’s hexes is equal to 10 + 1/2 the hoaxer’s bard level + his Charisma modifier. These hexes function identically to witch hexes, except they can only target single creatures, and the hoaxer can only use his hexes by investing them into objects. If the hoaxer learns hexes from any other source (such as the witch class), he cannot invoke them into an object. Beginning at 12th level, the hoaxer adds the following major hexes to the list of hexes he can learn: agony, hoarfrost, ice tomb, infected wounds, nightmares, retribution, and speak in dreams. This performance replaces inspire courage, inspire competence, and inspire greatness. Buyer Beware (Su) : As a standard action, a hoaxer can convince someone to accept a gift or trade as per beguiling gift (DC = 10 + 1/2 the hoaxer’s bard level + his Charisma modifier) by spending 1 round of bardic performance on a supernatural sales pitch. The hoaxer can use this ability to convince a creature to accept a hexed object created with his bad deal performance. This performance replaces countersong. Personal Guarantee (Su) : A hoaxer can prevent his hexed wares from afflicting a target until he is safely out of sight. He can spend up to 1 round of bardic performance per bard level while hexing an object. For every round expended, the object’s hex is delayed for 1 minute before triggering and hexing its current owner. This performance replaces distraction. Curse Breaker (Su) : A hoaxer of 12th level or higher can use performance to create an effect equal to break enchantment. This otherwise functions as soothing performance. This performance replaces inspire greatness.
+- **Implementation flags:**
+  - bardic performance subsystem.
+  - rage/rage power subsystem.
+  - hex subsystem.
+  - curse subsystem.
+  - feat grant/prerequisite handling.
 
 ### Replaces: versatile performance
 
 - **Archetype feature:** Misery (Ex)
 - **Description:** At 2nd level, a hoaxer learns to take joy in the misfortune of others.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 2, 5.
-  - Mechanics summary: At 2nd level, a hoaxer learns to take joy in the misfortune of others. He gains a +1 morale bonus on attack rolls and damage rolls against creatures suffering from a curse, hex, or harmful mind-affecting effect, as well as a +1 morale bonus on Will saving throws against spells from such creatures. These bonuses increase by 1 at 5th level and every 6 bard levels thereafter.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 2, 5.
+  - **Rules text to implement:** At 2nd level, a hoaxer learns to take joy in the misfortune of others. He gains a +1 morale bonus on attack rolls and damage rolls against creatures suffering from a curse, hex, or harmful mind-affecting effect, as well as a +1 morale bonus on Will saving throws against spells from such creatures. These bonuses increase by 1 at 5th level and every 6 bard levels thereafter.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, spellcasting/spell-list hook.
-  - Needs implementation review: witch/shaman hex mechanics.
+  - hex subsystem.
+  - curse subsystem.
 
 ### Replaces: well-versed
 
 - **Archetype feature:** Versed in Curses (Ex)
 - **Description:** At 2nd level, a hoaxer gains a +4 bonus on saving throws against curses, hexes, and language-dependent effects.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 2.
-  - Mechanics summary: At 2nd level, a hoaxer gains a +4 bonus on saving throws against curses, hexes, and language-dependent effects.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 2.
+  - **Rules text to implement:** At 2nd level, a hoaxer gains a +4 bonus on saving throws against curses, hexes, and language-dependent effects.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus.
-  - Needs implementation review: witch/shaman hex mechanics.
+  - hex subsystem.
+  - curse subsystem.
 
 ### Replaces: lore master
 
 - **Archetype feature:** Curse Crafter (Ex)
 - **Description:** At 5th level, a hoaxer learns how to craft cursed items.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 5.
-  - Mechanics summary: At 5th level, a hoaxer learns how to craft cursed items. He gains one item creation feat as a bonus feat at 5th level, plus an additional item creation feat every 6 levels thereafter. He can use these feats only to craft cursed items. In addition, he can craft items that appear magical but have no true magical properties—as if permanently affected by the magic aura spell—for 50 gp.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 5.
+  - **Rules text to implement:** At 5th level, a hoaxer learns how to craft cursed items. He gains one item creation feat as a bonus feat at 5th level, plus an additional item creation feat every 6 levels thereafter. He can use these feats only to craft cursed items. In addition, he can craft items that appear magical but have no true magical properties—as if permanently affected by the magic aura spell—for 50 gp.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, spellcasting/spell-list hook.
+  - curse subsystem.
+  - crafting subsystem.
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -67,4 +86,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Misery (Ex)
 - Versed in Curses (Ex)
 - Curse Crafter (Ex)
-

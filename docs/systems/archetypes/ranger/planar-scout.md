@@ -6,73 +6,71 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Ranger%20Planar%20Scout
 - **Index:** docs/systems/archetypes/ranger.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Class Skills; Planar Empathy (Ex); Planar Terrains (Ex); Planar Bond (Su); Planar Adaptation (Su)
 - **Replaced / altered class features:** Class Skills; Wild Empathy; Favored Terrain; Hunter's Bond; Evasion; Improved Evasion
 
-## Replacement details
+## Implementation details
 
 ### Alters: the ranger’s skills
 
 - **Archetype feature:** Class Skills
 - **Description:** A planar scout gains Knowledge (planes) as a class skill but does not gain Knowledge (dungeoneering) as a class skill.
-- **Mechanics:**
-  - Mechanics summary: A planar scout gains Knowledge (planes) as a class skill but does not gain Knowledge (dungeoneering) as a class skill.
+- **Detailed mechanics:**
+  - **Rules text to implement:** A planar scout gains Knowledge (planes) as a class skill but does not gain Knowledge (dungeoneering) as a class skill.
 - **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, ki/monk hook.
+  - ki subsystem.
+  - skill/class-skill modification.
 
 ### Alters: wild empathy
 
 - **Archetype feature:** Planar Empathy (Ex)
 - **Description:** A planar scout can use wild empathy only on animals with the extraplanar subtype.
-- **Mechanics:**
-  - Type: Ex.
-  - Mechanics summary: A planar scout can use wild empathy only on animals with the extraplanar subtype. He can use this ability to influence outsiders with an Intelligence score of 1 or 2, but he takes a –4 penalty on the check.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** A planar scout can use wild empathy only on animals with the extraplanar subtype. He can use this ability to influence outsiders with an Intelligence score of 1 or 2, but he takes a –4 penalty on the check.
 - **Implementation flags:**
-  - Likely existing hooks: numeric penalty.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Alters: favored terrain
 
 - **Archetype feature:** Planar Terrains (Ex)
 - **Description:** At 3rd level, a planar scout gains a planar terrain (see the sidebar on page 9).
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 3.
-  - Mechanics summary: At 3rd level, a planar scout gains a planar terrain (see the sidebar on page 9). Planar terrains function in all ways like a ranger’s favored terrain; he must select a new plane each time he gains a favored terrain.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3.
+  - **Rules text to implement:** At 3rd level, a planar scout gains a planar terrain (see the sidebar on page 9). Planar terrains function in all ways like a ranger’s favored terrain; he must select a new plane each time he gains a favored terrain.
 - **Implementation flags:**
-  - Likely existing hooks: favored terrain hook.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: hunter’s bond
 
 - **Archetype feature:** Planar Bond (Su)
 - **Description:** At 4th level, rather than forge a bond with an animal or his allies, a planar scout forms a bond with a specific plane.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 4, 8, 10, 9, 14.
-  - Mechanics summary: At 4th level, rather than forge a bond with an animal or his allies, a planar scout forms a bond with a specific plane. The planar scout becomes infused with the essence of his plane of choice, taking on physical characteristics of denizens native to his chosen plane as well as the abilities listed below. Aligned Plane : If the planar scout selects a plane with an alignment trait, he gains a +1 bonus on attack and damage rolls against outsiders and creatures with the extraplanar subtype whose alignments oppose this alignment trait. This bonus increases by 1 at 8th level and every 4 levels thereafter. Astral Plane : Each day, the planar scout can teleport up to 5 feet per ranger level as a move action. This must be used in 5-foot increments.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 4, 8, 10, 9, 14.
+  - **Rules text to implement:** At 4th level, rather than forge a bond with an animal or his allies, a planar scout forms a bond with a specific plane. The planar scout becomes infused with the essence of his plane of choice, taking on physical characteristics of denizens native to his chosen plane as well as the abilities listed below. Aligned Plane : If the planar scout selects a plane with an alignment trait, he gains a +1 bonus on attack and damage rolls against outsiders and creatures with the extraplanar subtype whose alignments oppose this alignment trait. This bonus increases by 1 at 8th level and every 4 levels thereafter. Astral Plane : Each day, the planar scout can teleport up to 5 feet per ranger level as a move action. This must be used in 5-foot increments. At 10th level, he can do so as a swift action. Ethereal Plane : The planar scout can damage incorporeal creatures with mundane weapons as if they were ghost touch weapons, and at 10th level, he can inflict critical hits and deal precision damage to incorporeal creatures. First World : As a swift action a number of times per day equal to his Wisdom modifier, a planar scout can gain fast healing 2 for a number of rounds equal to his ranger level. Plane of Air : As a swift action, the planar scout can gain a fly speed (average) equal to his base speed for a number of minutes equal to his ranger level (minimum 1 minute). This duration need not be used consecutively. Plane of Earth : The planar scout gains a +1 bonus to his natural armor. This bonus increases by 1 for every 4 levels he gains beyond 4th level. Plane of Fire : As a swift action, the planar scout can wreathe his body in flames. This grants the planar scout fire resistance 5 and causes his melee attacks to each deal 1d4 additional points of fire damage. The scout’s fire resistance increases to 10 at 9th level, and 15 at 14th level. He can use this ability for a number of rounds per day equal to his level. These rounds need not be used consecutively. Plane of Shadow : The planar scout gains darkvision 60 feet and a +4 bonus on Stealth checks. The bonus on Stealth checks increases by 2 at 8th level and every 4 levels thereafter. Plane of Water : The planar scout gains the amphibious subtype and a swim speed equal to base speed.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, rage/rage-power hook, ki/monk hook, AC/natural armor bonus.
+  - rage/rage power subsystem.
+  - ki subsystem.
+  - teleport/positioning subsystem.
+  - flight/movement mode support.
 
 ### Replaces: evasion and improved evasion
 
 - **Archetype feature:** Planar Adaptation (Su)
 - **Description:** At 9th level a planar scout gains planar adaptation when on his bonded plane.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 9, 16.
-  - Mechanics summary: At 9th level a planar scout gains planar adaptation when on his bonded plane. At 16th level he confers this protection to all allies within a 30-foot spread. Some classes, like the ranger, interact directly with terrain, and class abilities like favored terrain can become complicated in a plane-hopping campaign. With this latter solution, you should work with ranger players to help them anticipate the terrains featured in your upcoming campaign, with new categories like crystalline (for realms in the Plane of Earth or under Elysium, where immense crystal formations are common), living (for truly sentient realms like portions of the Abyss), or void (for empty reaches in the Astral Pl...
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 9, 16.
+  - **Rules text to implement:** At 9th level a planar scout gains planar adaptation when on his bonded plane. At 16th level he confers this protection to all allies within a 30-foot spread. Planar Terrains A staggering array of terrains await exploration in the Great Beyond. Some are akin to the forests, mountains, oceans, and plains of Material Plane worlds, but others are unlike anything found there, such as the ghostly reaches of the Ethereal Plane, the living and horrific reaches of the deep Abyss, the constantly burning inferno of the Plane of Fire, and the life-draining nothingness of the Negative Energy Plane. Some classes, like the ranger, interact directly with terrain, and class abilities like favored terrain can become complicated in a plane-hopping campaign. In games that are largely limited to the Material Plane, the planes terrain category works fine, but if you intend to run a game set on another plane, you should consider breaking up that category into specific planes (thus, a ranger would choose Heaven or Ethereal Plane, or even a demiplane like Leng as a favored terrain), or simply doing away with the planes category entirely. With this latter solution, you should work with ranger players to help them anticipate the terrains featured in your upcoming campaign, with new categories like crystalline (for realms in the Plane of Earth or under Elysium, where immense crystal formations are common), living (for truly sentient realms like portions of the Abyss), or void (for empty reaches in the Astral Plane or the energy planes) potentially becoming new options for rangers to select from.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, favored terrain hook, ki/monk hook.
-
-## Unmapped index replacements
-
-The index lists these replaced/altered features, but no one-to-one source clause was parsed. Treat these as manual implementation checkpoints.
-
-- Class Skills
-- Hunter's Bond
+  - ki subsystem.
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -81,4 +79,3 @@ The index lists these replaced/altered features, but no one-to-one source clause
 - Planar Terrains (Ex)
 - Planar Bond (Su)
 - Planar Adaptation (Su)
-

@@ -6,69 +6,70 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Monk%20Ki%20Mystic
 - **Index:** docs/systems/archetypes/monk.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Ki Mystic (Su); Mystic Insight (Su); Mystic Visions (Su); Mystic Prescience (Su); Mystic Persistence (Su)
 - **Replaced / altered class features:** still mind; purity of body; diamond body; diamond soul; empty body
 
-## Replacement details
+## Implementation details
 
 ### Replaces: still mind
 
 - **Archetype feature:** Ki Mystic (Su)
 - **Description:** At 3rd level, a ki mystic gains a pool of ki points equal to his Wisdom modifier.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 3.
-  - Mechanics summary: At 3rd level, a ki mystic gains a pool of ki points equal to his Wisdom modifier. The pool increases to 1/2 his monk level + his Wisdom modifier + 2 at level 4. If the monk has at least 1 point of ki in his ki pool, he gains a +2 bonus on all Knowledge skill checks. As a swift action, the monk can spend 1 ki point immediately before making an ability, or skill check to gain a +4 insight bonus on the check.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 3.
+  - **Rules text to implement:** At 3rd level, a ki mystic gains a pool of ki points equal to his Wisdom modifier. The pool increases to 1/2 his monk level + his Wisdom modifier + 2 at level 4. If the monk has at least 1 point of ki in his ki pool, he gains a +2 bonus on all Knowledge skill checks. As a swift action, the monk can spend 1 ki point immediately before making an ability, or skill check to gain a +4 insight bonus on the check.
 - **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, typed/untyped numeric bonus, ki/monk hook.
+  - ki subsystem.
+  - skill/class-skill modification.
 
 ### Replaces: purity of body
 
 - **Archetype feature:** Mystic Insight (Su)
 - **Description:** At 5th level, a ki mystic becomes apt at giving just the right word of advice in just the nick of time.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 5.
-  - Mechanics summary: At 5th level, a ki mystic becomes apt at giving just the right word of advice in just the nick of time. As an immediate action, the monk can spend 2 ki points to grant an ally within 30 feet the ability to reroll a single attack roll or saving throw. The ally must be able to hear the monk to gain the reroll benefit.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 5.
+  - **Rules text to implement:** At 5th level, a ki mystic becomes apt at giving just the right word of advice in just the nick of time. As an immediate action, the monk can spend 2 ki points to grant an ally within 30 feet the ability to reroll a single attack roll or saving throw. The ally must be able to hear the monk to gain the reroll benefit.
 - **Implementation flags:**
-  - Likely existing hooks: ki/monk hook.
+  - ki subsystem.
 
 ### Replaces: diamond body
 
 - **Archetype feature:** Mystic Visions (Su)
 - **Description:** At 11th level, a ki mystic may receive mystic visions when he rests.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 11.
-  - Mechanics summary: At 11th level, a ki mystic may receive mystic visions when he rests. These visions can come as a dream, an epiphany, or even as the voice of an old friend whispering in the monk’s mind. The effect is similar to a divination spell with a caster level equal to the monk’s level. Using this ability costs 2 ki points that are removed from the next day’s total.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 11.
+  - **Rules text to implement:** At 11th level, a ki mystic may receive mystic visions when he rests. These visions can come as a dream, an epiphany, or even as the voice of an old friend whispering in the monk’s mind. The effect is similar to a divination spell with a caster level equal to the monk’s level. The divination has no casting time; it is just part of the normal dreams or visions that occur every night. Using this ability costs 2 ki points that are removed from the next day’s total.
 - **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook, ki/monk hook.
+  - ki subsystem.
 
 ### Replaces: diamond soul
 
 - **Archetype feature:** Mystic Prescience (Su)
 - **Description:** At 13th level, a ki mystic gains a +2 insight bonus to AC and CMD.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 13, 20.
-  - Mechanics summary: At 13th level, a ki mystic gains a +2 insight bonus to AC and CMD. At 20th level, the bonus increases to +4.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 13, 20.
+  - **Rules text to implement:** At 13th level, a ki mystic gains a +2 insight bonus to AC and CMD. At 20th level, the bonus increases to +4.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, ki/monk hook.
+  - ki subsystem.
 
 ### Replaces: empty body
 
 - **Archetype feature:** Mystic Persistence (Su)
 - **Description:** At 19th level, a ki mystic can create an aura once per day as a swift action at the cost of at least 2 points of ki.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 19.
-  - Mechanics summary: At 19th level, a ki mystic can create an aura once per day as a swift action at the cost of at least 2 points of ki. The aura emanates out to a 20-foot radius. The monk and all allies within the aura can roll two dice when making an attack roll or a saving throw and take the better result. The aura lasts for 1 round, plus an additional round for every 2 ki points spent when the monk created the aura. The monk can dismiss the aura at any time as a free action, but the ki points for the full duration of the aura are lost.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 19.
+  - **Rules text to implement:** At 19th level, a ki mystic can create an aura once per day as a swift action at the cost of at least 2 points of ki. The aura emanates out to a 20-foot radius. The monk and all allies within the aura can roll two dice when making an attack roll or a saving throw and take the better result. The aura lasts for 1 round, plus an additional round for every 2 ki points spent when the monk created the aura. The monk can dismiss the aura at any time as a free action, but the ki points for the full duration of the aura are lost.
 - **Implementation flags:**
-  - Likely existing hooks: ki/monk hook.
+  - ki subsystem.
 
 ## Parsed source feature headings
 
@@ -77,4 +78,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Mystic Visions (Su)
 - Mystic Prescience (Su)
 - Mystic Persistence (Su)
-

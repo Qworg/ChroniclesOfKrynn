@@ -6,7 +6,7 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Wizard%20First%20World%20Caller
 - **Index:** docs/systems/archetypes/wizard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
@@ -18,53 +18,71 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 ### Alters: arcane bond
 
 - **Archetype feature:** Fey Familiar
-- **Description:** A First World caller must select a familiar as his arcane bond.
+- **Description:** The archetype's familiar is recast as a fey-touched companion with reduced baseline defenses and later flight.
 - **Mechanics:**
-  - Level hooks: 10.
-  - Mechanics summary: A First World caller must select a familiar as his arcane bond. This familiar is often the fey creature that was created when the First World caller’s soul passed through the First World on the way to being born. The familiar counts as both an animal and a fey for the purposes of effects that depend on its type, rather than counting as a magical beast. It gains only half the normal natural armor bonus for a familiar based on the First World caller’s level (rounded down, minimum 0), and it doesn’t grant its special familiar ability to its master. Instead, the familiar gains the fey-touched creature template (see sidebar). At 10th level, the familiar grows a pair of delicate, gossamer wings, gaining a fly speed equal to its land speed and average maneuverability.
-- **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, rage/rage-power hook, AC/natural armor bonus.
+  - Type: None stated
+  - Level hooks: 1, 10
+  - Action/timing: Passive bond formed at character creation; wing upgrade applies automatically at 10th level
+  - Duration: Permanent
+  - Uses: No daily cap
+  - Core function:
+    - The wizard must choose a familiar for arcane bond.
+    - The familiar counts as both animal and fey for type-dependent effects.
+    - It gains only half the normal familiar natural-armor bonus from wizard level, rounded down and never below 0.
+    - It no longer grants its special familiar ability to the wizard.
+    - Instead, it gains the fey-touched creature template.
+    - At 10th level, it gains gossamer wings and a fly speed equal to its land speed with average maneuverability.
+  - Scaling: Flight is added at 10th level.
+  - Interactions: The template alters the familiar's stat block, while normal familiar systems still apply unless the template says otherwise.
+  - Edge cases: Halve the natural-armor table before applying the result; at 1st level that often means +0 armor.
+  - Implementation flags:
+    - Likely existing hooks: familiar-type override, halved natural-armor table, special-ability-to-master suppression, template attachment, flight addition at 10th level.
 
 ### Replaces: arcane school and Scribe Scroll
 
 - **Archetype feature:** Fey Summoner
-- **Description:** A First World caller is able to conjure fey creatures.
+- **Description:** The wizard gains Augment Summoning and expands summon monster with fey creatures for personal casts.
 - **Mechanics:**
-  - Mechanics summary: A First World caller is able to conjure fey creatures. He gains Augment Summoning as a bonus feat. He adds the following creatures to the summon monster list of the same level, allowing him to summon them with the appropriate summon monster spell: 1st—grimple (gremlin), mite, sprite; 2nd—atomie, fuath (gremlin), nixie; 3rd— leprechaun, nuglub (gremlin), pooka; 4th—kelpie, korred, twigjack; 5th—lampad, lurker in light, swan maiden; 6th—cold rider, oceanid, sangoi; 7th—alp,... This ability is a function of the First World caller himself, and it applies even if he uses a scroll, wand, or other magic item to cast a summon monster spell. If he creates such an item and it is used by another character, the spell functions as an ordinary summon monster spell.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, spellcasting/spell-list hook.
+  - Type: None stated
+  - Level hooks: 1
+  - Action/timing: Passive list expansion whenever the wizard personally casts summon monster
+  - Duration: Per each summon monster spell's duration
+  - Uses: Normal summon monster spell slots or other personal summon monster effects
+  - Core function:
+    - Gain Augment Summoning as a bonus feat at 1st level.
+    - Add fey creatures to the summon monster list at matching spell tiers, including grimple, mite, and sprite at 1st level; atomie, fuath, and nixie at 2nd; leprechaun, nuglub, and pooka at 3rd; kelpie, korred, and twigjack at 4th; lampad, lurker in light, and swan maiden at 5th; cold rider, oceanid, and sangoi at 6th; alp at 7th; and any other creatures specified by the archetype source.
+    - The expanded list applies when the wizard personally casts summon monster or triggers that spell through the wizard's own effects.
+    - Magic items created by the wizard do not pass this expanded list to other users.
+  - Scaling: New summon options come online with each summon monster tier as the wizard gains access to those spell levels.
+  - Interactions: Augment Summoning and other summon-boosting effects apply normally to the added fey creatures.
+  - Edge cases: If another creature uses a summon monster scroll or wand created by the wizard, it uses the ordinary list rather than the expanded fey list.
+  - Implementation flags:
+    - Likely existing hooks: bonus feat grant, extended summon monster creature list, personal-casting limitation on list expansion.
 
-### Replaces: the bonus feats gained at 10th
+### Replaces: bonus feats at 10th and 15th level
 
 - **Archetype feature:** Warp Reality (Su)
-- **Description:** At 10th level, a First World caller can reshape the nearby area at his whim, as he pulls in aspects of the mutable and primal First World.
+- **Description:** High-level spell slots can briefly impose First World-style planar traits on a nearby area.
 - **Mechanics:**
-  - Type: Su.
-  - Level hooks: 10, 5, 15, 7.
-  - Mechanics summary: At 10th level, a First World caller can reshape the nearby area at his whim, as he pulls in aspects of the mutable and primal First World. To use this ability, he must expend a spell slot of 5th level or higher as a standard action and succeed at a DC 15 Charisma check. If he succeeds, he can apply one of the following planar traits to the area in a 60-foot radius for 2d4 minutes: normal gravity, heavy gravity, light gravity, mildly aligned (chaos, evil, good, or law), enhanced magic, or impeded magic. At 15th level, he can instead expend a slot of 7th level or higher and attempt a DC 20 Charisma check. If successfully, he can apply two planar traits from the previous list, or any one of the following traits: no gravity, subjective directional gravity, erratic time, fire-dominant, water-dominant, negative-dominant, positive-dominant, or wild magic.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, save DC calculation, spellcasting/spell-list hook.
-
-### Replaces: 15th level
-
-- **Archetype feature:** Warp Reality (Su)
-- **Description:** At 10th level, a First World caller can reshape the nearby area at his whim, as he pulls in aspects of the mutable and primal First World.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 10, 5, 15, 7.
-  - Mechanics summary: At 10th level, a First World caller can reshape the nearby area at his whim, as he pulls in aspects of the mutable and primal First World. To use this ability, he must expend a spell slot of 5th level or higher as a standard action and succeed at a DC 15 Charisma check. If he succeeds, he can apply one of the following planar traits to the area in a 60-foot radius for 2d4 minutes: normal gravity, heavy gravity, light gravity, mildly aligned (chaos, evil, good, or law), enhanced magic, or impeded magic. At 15th level, he can instead expend a slot of 7th level or higher and attempt a DC 20 Charisma check. If successfully, he can apply two planar traits from the previous list, or any one of the following traits: no gravity, subjective directional gravity, erratic time, fire-dominant, water-dominant, negative-dominant, positive-dominant, or wild magic.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, save DC calculation, spellcasting/spell-list hook.
-
-## Unmapped index replacements
-
-The index lists these replaced/altered features, but no one-to-one source clause was parsed. Treat these as manual implementation checkpoints.
-
-- 10th, 15th-level Bonus Feats
+  - Type: Su
+  - Level hooks: 10, 15
+  - Action/timing: Standard action
+  - Duration: 2d4 minutes
+  - Uses: No daily cap; each use consumes a qualifying spell slot and requires a Charisma check
+  - Core function:
+    - At 10th level, expend a 5th-level or higher spell slot and succeed at a DC 15 Charisma check to impose one planar trait in a 60-foot radius.
+    - The 10th-level trait menu includes normal gravity, heavy gravity, light gravity, mildly aligned chaos, mildly aligned evil, mildly aligned good, mildly aligned law, enhanced magic, and impeded magic.
+    - At 15th level, expend a 7th-level or higher spell slot and succeed at a DC 20 Charisma check to impose either two traits from the basic list or one stronger trait.
+    - The stronger 15th-level options are no gravity, subjective directional gravity, erratic time, fire-dominant, water-dominant, negative-dominant, positive-dominant, and wild magic.
+  - Scaling: Access expands at 15th level from one basic trait to either two basic traits or one advanced trait.
+  - Interactions: The spell slot is spent even if the Charisma check fails unless a broader engine rule says otherwise.
+  - Edge cases: Campaign-specific bans on certain planar traits, such as erratic time, should be treated as table rules rather than core archetype logic.
+  - Implementation flags:
+    - Likely existing hooks: spell-slot sacrifice, area planar-trait override, duration timer, Charisma ability check.
+    - Unsupported / review needed: planar-trait subsystem, especially gravity, time, and magic-trait area effects.
 
 ## Parsed source feature headings
 
 - Fey Familiar
 - Fey Summoner
 - Warp Reality (Su)
-

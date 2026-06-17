@@ -6,89 +6,113 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Bard%20Dervish%20Dancer
 - **Index:** docs/systems/archetypes/bard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Weapon and Armor Proficiency; Battle Dance; Fleet (Su); Versatile Dance (Ex); Dance of Fury (Su); Battle Fury (Su)
 - **Replaced / altered class features:** their proficiency with the rapier and whip; suggestion and mass suggestion; dirge of doom; frightening performance; bardic knowledge and lore master; versatile performance; soothing performance
 
-## Replacement details
+## Implementation details
 
 ### Replaces: their proficiency with the rapier and whip
 
 - **Archetype feature:** Weapon and Armor Proficiency
 - **Description:** Dervish dancers gain weapon proficiency with the scimitar and kukri.
-- **Mechanics:**
-  - Mechanics summary: Dervish dancers gain weapon proficiency with the scimitar and kukri.
+- **Detailed mechanics:**
+  - **Rules text to implement:** Dervish dancers gain weapon proficiency with the scimitar and kukri.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: suggestion and mass suggestion
 
 - **Archetype feature:** Battle Dance
 - **Description:** A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 10, 6, 9, 18, 8, 14.
-  - Mechanics summary: A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself. This works like bardic performance, except the dervish dancer only affects himself, and does not need to be able to see or hear his own performance. Battle dancing is treated as bardic performance for the purposes of feats, abilities, effects, and the like that affect bardic performance, except that battle dancing does not benefit from the Lingering Performance feat or any other ability that allows a bardic performance to grant bonuses after it has ended. Like bardic performance, it cannot be maintained at the same time as other performance abilities. Starting a battle dance is a move action, but it can be maintained each round as a free action. Changing a battle dance from one effect to another requires the dervish dancer to stop the previous performance and start the new one as a move action.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 10, 6, 9, 18, 8, 14.
+  - **Rules text to implement:** A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself. This works like bardic performance, except the dervish dancer only affects himself, and does not need to be able to see or hear his own performance. Battle dancing is treated as bardic performance for the purposes of feats, abilities, effects, and the like that affect bardic performance, except that battle dancing does not benefit from the Lingering Performance feat or any other ability that allows a bardic performance to grant bonuses after it has ended. Battle dancing benefits apply only when the bard is wearing light or no armor. Like bardic performance, it cannot be maintained at the same time as other performance abilities. Starting a battle dance is a move action, but it can be maintained each round as a free action. Changing a battle dance from one effect to another requires the dervish dancer to stop the previous performance and start the new one as a move action. Like a bard, a dervish dancer’s performance ends immediately if he is killed, paralyzed, stunned, knocked unconscious, or otherwise prevented from taking a free action each round. A dervish dancer cannot perform more than one battle dance at a time. At 10th level, a dervish dancer can start a battle dance as a swift action instead of a move action. Dervish dancers gain the inspire courage, inspire greatness, and inspire heroics bardic performance types as battle dances, but these only provide benefit to the dervish dancer himself. Rain of Blows (Su) : At 6th level, a dervish dancer can use his battle dance to speed up his attacks. When making a full attack action, he may make one extra attack with any weapon he is holding, as though under the effects of a haste spell. He also gains a +1 bonus on attack rolls and a +1 dodge bonus to AC and on Reflex saves. At 9th level, and every three bard levels thereafter, these bonuses increase by +1, to a maximum of +5 at 18th level. These bonuses do not stack with the haste spell. Razor’s Kiss (Su) : At 8th level, a dervish dancer can use his battle dance to improve his weapons’ critical range. All attacks he makes with manufactured weapons are treated as though he had the Improved Critical feat. Natural weapons and spells are not affected. Leaf on the Wind (Su) : At 14th level, a dervish dancer can use his battle dance to evade attacks with unearthly grace and to shake off the effects of his wounds. Unlike other battle dances, leaf on the wind requires a standard action each round to start or maintain the performance. Each round it is maintained, including the first, the dervish dancer gains a +6 dodge bonus to Armor Class and on Reflex saves. If wounded, he heals 1 hit point of damage per bard level.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, saving throw hook, spellcasting/spell-list hook, rage/rage-power hook, bardic performance hook, ki/monk hook.
+  - bardic performance subsystem.
+  - rage/rage power subsystem.
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
 
 ### Replaces: dirge of doom
 
 - **Archetype feature:** Battle Dance
 - **Description:** A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 10, 6, 9, 18, 8, 14.
-  - Mechanics summary: A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself. This works like bardic performance, except the dervish dancer only affects himself, and does not need to be able to see or hear his own performance. Battle dancing is treated as bardic performance for the purposes of feats, abilities, effects, and the like that affect bardic performance, except that battle dancing does not benefit from the Lingering Performance feat or any other ability that allows a bardic performance to grant bonuses after it has ended. Like bardic performance, it cannot be maintained at the same time as other performance abilities. Starting a battle dance is a move action, but it can be maintained each round as a free action. Changing a battle dance from one effect to another requires the dervish dancer to stop the previous performance and start the new one as a move action.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 10, 6, 9, 18, 8, 14.
+  - **Rules text to implement:** A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself. This works like bardic performance, except the dervish dancer only affects himself, and does not need to be able to see or hear his own performance. Battle dancing is treated as bardic performance for the purposes of feats, abilities, effects, and the like that affect bardic performance, except that battle dancing does not benefit from the Lingering Performance feat or any other ability that allows a bardic performance to grant bonuses after it has ended. Battle dancing benefits apply only when the bard is wearing light or no armor. Like bardic performance, it cannot be maintained at the same time as other performance abilities. Starting a battle dance is a move action, but it can be maintained each round as a free action. Changing a battle dance from one effect to another requires the dervish dancer to stop the previous performance and start the new one as a move action. Like a bard, a dervish dancer’s performance ends immediately if he is killed, paralyzed, stunned, knocked unconscious, or otherwise prevented from taking a free action each round. A dervish dancer cannot perform more than one battle dance at a time. At 10th level, a dervish dancer can start a battle dance as a swift action instead of a move action. Dervish dancers gain the inspire courage, inspire greatness, and inspire heroics bardic performance types as battle dances, but these only provide benefit to the dervish dancer himself. Rain of Blows (Su) : At 6th level, a dervish dancer can use his battle dance to speed up his attacks. When making a full attack action, he may make one extra attack with any weapon he is holding, as though under the effects of a haste spell. He also gains a +1 bonus on attack rolls and a +1 dodge bonus to AC and on Reflex saves. At 9th level, and every three bard levels thereafter, these bonuses increase by +1, to a maximum of +5 at 18th level. These bonuses do not stack with the haste spell. Razor’s Kiss (Su) : At 8th level, a dervish dancer can use his battle dance to improve his weapons’ critical range. All attacks he makes with manufactured weapons are treated as though he had the Improved Critical feat. Natural weapons and spells are not affected. Leaf on the Wind (Su) : At 14th level, a dervish dancer can use his battle dance to evade attacks with unearthly grace and to shake off the effects of his wounds. Unlike other battle dances, leaf on the wind requires a standard action each round to start or maintain the performance. Each round it is maintained, including the first, the dervish dancer gains a +6 dodge bonus to Armor Class and on Reflex saves. If wounded, he heals 1 hit point of damage per bard level.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, saving throw hook, spellcasting/spell-list hook, rage/rage-power hook, bardic performance hook, ki/monk hook.
+  - bardic performance subsystem.
+  - rage/rage power subsystem.
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
 
 ### Replaces: frightening performance
 
 - **Archetype feature:** Battle Dance
 - **Description:** A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 10, 6, 9, 18, 8, 14.
-  - Mechanics summary: A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself. This works like bardic performance, except the dervish dancer only affects himself, and does not need to be able to see or hear his own performance. Battle dancing is treated as bardic performance for the purposes of feats, abilities, effects, and the like that affect bardic performance, except that battle dancing does not benefit from the Lingering Performance feat or any other ability that allows a bardic performance to grant bonuses after it has ended. Like bardic performance, it cannot be maintained at the same time as other performance abilities. Starting a battle dance is a move action, but it can be maintained each round as a free action. Changing a battle dance from one effect to another requires the dervish dancer to stop the previous performance and start the new one as a move action.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 10, 6, 9, 18, 8, 14.
+  - **Rules text to implement:** A dervish dancer is trained in the use of the Perform skill, especially dance, to create magical effects on himself. This works like bardic performance, except the dervish dancer only affects himself, and does not need to be able to see or hear his own performance. Battle dancing is treated as bardic performance for the purposes of feats, abilities, effects, and the like that affect bardic performance, except that battle dancing does not benefit from the Lingering Performance feat or any other ability that allows a bardic performance to grant bonuses after it has ended. Battle dancing benefits apply only when the bard is wearing light or no armor. Like bardic performance, it cannot be maintained at the same time as other performance abilities. Starting a battle dance is a move action, but it can be maintained each round as a free action. Changing a battle dance from one effect to another requires the dervish dancer to stop the previous performance and start the new one as a move action. Like a bard, a dervish dancer’s performance ends immediately if he is killed, paralyzed, stunned, knocked unconscious, or otherwise prevented from taking a free action each round. A dervish dancer cannot perform more than one battle dance at a time. At 10th level, a dervish dancer can start a battle dance as a swift action instead of a move action. Dervish dancers gain the inspire courage, inspire greatness, and inspire heroics bardic performance types as battle dances, but these only provide benefit to the dervish dancer himself. Rain of Blows (Su) : At 6th level, a dervish dancer can use his battle dance to speed up his attacks. When making a full attack action, he may make one extra attack with any weapon he is holding, as though under the effects of a haste spell. He also gains a +1 bonus on attack rolls and a +1 dodge bonus to AC and on Reflex saves. At 9th level, and every three bard levels thereafter, these bonuses increase by +1, to a maximum of +5 at 18th level. These bonuses do not stack with the haste spell. Razor’s Kiss (Su) : At 8th level, a dervish dancer can use his battle dance to improve his weapons’ critical range. All attacks he makes with manufactured weapons are treated as though he had the Improved Critical feat. Natural weapons and spells are not affected. Leaf on the Wind (Su) : At 14th level, a dervish dancer can use his battle dance to evade attacks with unearthly grace and to shake off the effects of his wounds. Unlike other battle dances, leaf on the wind requires a standard action each round to start or maintain the performance. Each round it is maintained, including the first, the dervish dancer gains a +6 dodge bonus to Armor Class and on Reflex saves. If wounded, he heals 1 hit point of damage per bard level.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, saving throw hook, spellcasting/spell-list hook, rage/rage-power hook, bardic performance hook, ki/monk hook.
+  - bardic performance subsystem.
+  - rage/rage power subsystem.
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
 
 ### Replaces: bardic knowledge and lore master
 
 - **Archetype feature:** Fleet (Su)
 - **Description:** While performing a battle dance, a dervish dancer gains a +10 enhancement bonus to his land speed.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 1, 19.
-  - Mechanics summary: While performing a battle dance, a dervish dancer gains a +10 enhancement bonus to his land speed. This bonus increases by 5 feet for every four bard levels gained after 1st level, to a maximum of +30 feet at 19th level.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 1, 19.
+  - **Rules text to implement:** While performing a battle dance, a dervish dancer gains a +10 enhancement bonus to his land speed. This bonus increases by 5 feet for every four bard levels gained after 1st level, to a maximum of +30 feet at 19th level.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: versatile performance
 
 - **Archetype feature:** Versatile Dance (Ex)
 - **Description:** At 2nd level, a dervish dancer gains a bonus equal to half his level on Perform (dance) checks.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 2.
-  - Mechanics summary: At 2nd level, a dervish dancer gains a bonus equal to half his level on Perform (dance) checks. He can use his bonus for his Perform (dance) skill in place of his bonus for Acrobatics.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 2.
+  - **Rules text to implement:** At 2nd level, a dervish dancer gains a bonus equal to half his level on Perform (dance) checks. He can use his bonus for his Perform (dance) skill in place of his bonus for Acrobatics.
 - **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, typed/untyped numeric bonus, ki/monk hook.
+  - ki subsystem.
+  - skill/class-skill modification.
 
 ### Replaces: soothing performance
 
 - **Archetype feature:** Dance of Fury (Su)
 - **Description:** At 12th level, a dervish dancer can attack more than once as he moves while performing a battle dance.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 12.
-  - Mechanics summary: At 12th level, a dervish dancer can attack more than once as he moves while performing a battle dance. He can combine a full-attack action with a single move, taking the attacks at any point during his movement, but must move at least 5 feet between each attack. This movement provokes attacks of opportunity as normal.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 12.
+  - **Rules text to implement:** At 12th level, a dervish dancer can attack more than once as he moves while performing a battle dance. He can combine a full-attack action with a single move, taking the attacks at any point during his movement, but must move at least 5 feet between each attack. This movement provokes attacks of opportunity as normal.
 - **Implementation flags:**
-  - Likely existing hooks: ki/monk hook.
+  - ki subsystem.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Battle Fury (Su)
+- **Description:** At 20th level, the dervish dancer can unleash a whirlwind of blows while performing a battle dance.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 20.
+  - **Rules text to implement:** At 20th level, the dervish dancer can unleash a whirlwind of blows while performing a battle dance. As a full-round action, he can take a single move action and unleash a single attack at his highest bonus against each target within his reach during any point of his move, up to a maximum number of attacks equal to the dervish dancer’s character level. This movement provokes attacks of opportunity as normal, and replaces deadly performance.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -98,4 +122,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Versatile Dance (Ex)
 - Dance of Fury (Su)
 - Battle Fury (Su)
-

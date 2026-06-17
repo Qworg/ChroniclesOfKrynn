@@ -6,46 +6,58 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Barbarian%20Giant%20Stalker
 - **Index:** docs/systems/archetypes/berserker.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Harangue Giant (Ex); Smell Giants (Ex); Giant Baiter (Su); Giant Stalker Rage Powers
 - **Replaced / altered class features:** uncanny dodge; trap sense
 
-## Replacement details
+## Implementation details
 
 ### Alters: rage
 
 - **Archetype feature:** Harangue Giant (Ex)
 - **Description:** While raging, a giant stalker can speak Giant.
-- **Mechanics:**
-  - Type: Ex.
-  - Mechanics summary: While raging, a giant stalker can speak Giant. If the giant stalker already knows Giant, she gains a +2 bonus on Intimidate checks when speaking Giant while raging.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** While raging, a giant stalker can speak Giant. If the giant stalker already knows Giant, she gains a +2 bonus on Intimidate checks when speaking Giant while raging.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, rage/rage-power hook, ki/monk hook.
+  - rage/rage power subsystem.
+  - ki subsystem.
 
 ### Replaces: uncanny dodge
 
 - **Archetype feature:** Smell Giants (Ex)
 - **Description:** A 2nd level, a giant stalker gains the scent special ability, but with regard only to humanoids with the giant subtype.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 2.
-  - Mechanics summary: A 2nd level, a giant stalker gains the scent special ability, but with regard only to humanoids with the giant subtype.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 2.
+  - **Rules text to implement:** A 2nd level, a giant stalker gains the scent special ability, but with regard only to humanoids with the giant subtype.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: trap sense
 
 - **Archetype feature:** Giant Baiter (Su)
 - **Description:** At 3rd level, a raging giant stalker can take a move action to erupt into a violent or vulgar display directed at a single giant within 60 feet.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 3, 6, 9, 12, 15, 18.
-  - Mechanics summary: At 3rd level, a raging giant stalker can take a move action to erupt into a violent or vulgar display directed at a single giant within 60 feet. This display is infused with secret magical traditions that draw upon the Mammoth Lords’ ancestral enmities toward giants. A targeted giant must succeed at a Will save (DC = 10 + half the giant stalker’s barbarian level + the giant stalker’s Constitution modifier) or be compelled to focus its attacks on the giant stalker; this ability can also affect non-giant creatures that are Large or larger, though such creatures gain a +4 bonus on the Will save to resist the effect. This compulsion ends if the giant stalker is out of sight or inaccessible to the giant’s attacks. While baited, a giant is distracted and enraged by the insults—a giant stalker gains a +1 dodge bonus to her AC against any giant she has successfully baited. Once baited, a giant remains baited for a number of rounds equal to the giant stalker’s Constitution modifier, or until the giant stalker’s rage ends (whichever comes first).
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 3, 6, 9, 12, 15, 18.
+  - **Rules text to implement:** At 3rd level, a raging giant stalker can take a move action to erupt into a violent or vulgar display directed at a single giant within 60 feet. This display is infused with secret magical traditions that draw upon the Mammoth Lords’ ancestral enmities toward giants. A targeted giant must succeed at a Will save (DC = 10 + half the giant stalker’s barbarian level + the giant stalker’s Constitution modifier) or be compelled to focus its attacks on the giant stalker; this ability can also affect non-giant creatures that are Large or larger, though such creatures gain a +4 bonus on the Will save to resist the effect. This compulsion ends if the giant stalker is out of sight or inaccessible to the giant’s attacks. While baited, a giant is distracted and enraged by the insults—a giant stalker gains a +1 dodge bonus to her AC against any giant she has successfully baited. Once baited, a giant remains baited for a number of rounds equal to the giant stalker’s Constitution modifier, or until the giant stalker’s rage ends (whichever comes first). If the giant stalker baits a different giant, any previously baited giant is no longer baited. A giant that successfully saves against baiting is immune to that giant stalker’s giant baiter ability for 24 hours. This is a language-dependent mind affecting effect. At 6th level, a giant stalker can bait two giants at once, and her AC bonus against baited giants increases to +2. At 9th level, baiting giants becomes a swift action, and her AC bonus against baited giants increases to +3. At 12th level, she can bait up to three giants at once, and her AC bonus against baited giants increases to +4. At 15th level, baiting giants becomes a free action, and her AC bonus against baited giants increases to +5. At 18th level, a giant stalker can bait a number of giants equal to 3 + her Constitution modifier, and her AC bonus against baited giants increases to +6.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, saving throw hook, save DC calculation, rage/rage-power hook.
+  - rage/rage power subsystem.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Giant Stalker Rage Powers
+- **Description:** A giant stalker gains access to the following rage powers.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** A giant stalker gains access to the following rage powers. Giant Stalker Defense (Ex) : When raging, a giant stalker does not take a penalty to Armor Class against attacks from giants. Topple Giant (Ex) : When raging, the giant stalker does not provoke attacks of opportunity when she attempts to trip a giant, and can attempt to trip a giant that is up to two size categories larger than she is. Underfoot (Ex) : When raging, the giant stalker can attempt to enter a giant’s space, provided she is at least one size category smaller than the giant. This does not provoke an attack of opportunity. Doing so takes a move action and requires a successful combat maneuver check against the giant’s CMD. If she succeeds, she enters a square in the giant’s space. If she makes an attack against the giant while sharing its space, the giant is treated as being flat-footed against her. At the end of her turn, she exits the giant’s space into any square adjacent to the giant’s space.
+- **Implementation flags:**
+  - rage/rage power subsystem.
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -53,4 +65,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Smell Giants (Ex)
 - Giant Baiter (Su)
 - Giant Stalker Rage Powers
-

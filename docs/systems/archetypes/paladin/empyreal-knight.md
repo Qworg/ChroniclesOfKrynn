@@ -6,56 +6,69 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Paladin%20Empyreal%20Knight
 - **Index:** docs/systems/archetypes/paladin.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Voices of the Spheres; Celestial Heart (Su); Celestial Ally (Sp); Divine Bond (Su); Empyreal Champion
 - **Replaced / altered class features:** divine grace; mercy; lay on hands and channel positive energy; holy champion
 
-## Replacement details
+## Implementation details
 
 ### Replaces: divine grace
 
 - **Archetype feature:** Voices of the Spheres
 - **Description:** At 2nd level, an empyreal knight learns to speak and read Celestial, if she could not already.
-- **Mechanics:**
-  - Level hooks: 2.
-  - Mechanics summary: At 2nd level, an empyreal knight learns to speak and read Celestial, if she could not already.
+- **Detailed mechanics:**
+  - **Level hooks:** 2.
+  - **Rules text to implement:** At 2nd level, an empyreal knight learns to speak and read Celestial, if she could not already.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: mercy
 
 - **Archetype feature:** Celestial Heart (Su)
 - **Description:** As an empyreal knight advances, her ties with the celestial realms grant her a portion of the abilities and defenses of true angels.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 3, 6, 9, 12, 15, 18.
-  - Mechanics summary: As an empyreal knight advances, her ties with the celestial realms grant her a portion of the abilities and defenses of true angels. At 3rd level, she gains resistance 5 against acid, cold, and electricity. At 6th level, she gains a +4 racial bonus on saves against poison. At 9th level, her defenses improve to resistance 10 against acid, cold, and electricity. At 12th level, she gains immunity to petrification. At 15th level, she gains truespeech, the ability to speak with any creature that has a language as though using a tongues spell.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 3, 6, 9, 12, 15, 18.
+  - **Rules text to implement:** As an empyreal knight advances, her ties with the celestial realms grant her a portion of the abilities and defenses of true angels. At 3rd level, she gains resistance 5 against acid, cold, and electricity. At 6th level, she gains a +4 racial bonus on saves against poison. At 9th level, her defenses improve to resistance 10 against acid, cold, and electricity. At 12th level, she gains immunity to petrification. At 15th level, she gains truespeech, the ability to speak with any creature that has a language as though using a tongues spell. This ability functions with a caster level equal to her character level, and is always active. At 18th level, as a swift action, the empyreal knight can manifest a protective aura against evil. Against abilities or effects created by evil creatures, this ability provides a +4 deflection bonus to AC and a +4 resistance bonus on saving throws to anyone within 20 feet of her. It otherwise functions as a magic circle against evil. She can use this ability for a maximum of 1 round per day per paladin level. These rounds do not need to be consecutive.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, saving throw hook, spellcasting/spell-list hook, paladin mercy hook.
+  - poison subsystem.
 
 ### Replaces: lay on hands and channel positive energy
 
 - **Archetype feature:** Celestial Ally (Sp)
 - **Description:** At 4th level, an empyreal knight can summon a celestial ally as a full-round action.
-- **Mechanics:**
-  - Type: Sp.
-  - Level hooks: 4, 6, 20.
-  - Mechanics summary: At 4th level, an empyreal knight can summon a celestial ally as a full-round action. This functions as summon monster I , except it can only be used to summon celestial creatures, archons, and angels. At 6th level, this improves to summon monster II , increasing by one spell level for every two levels thereafter, to a maximum of summon monster IX at 20th level. This ability can be used a number of times per day equal to the empyreal knight’s Charisma modifier (minimum 1), but only one ally can be summoned at a time.
+- **Detailed mechanics:**
+  - **Type:** Sp.
+  - **Level hooks:** 4, 6, 20.
+  - **Rules text to implement:** At 4th level, an empyreal knight can summon a celestial ally as a full-round action. This functions as summon monster I, except it can only be used to summon celestial creatures, archons, and angels. At 6th level, this improves to summon monster II, increasing by one spell level for every two levels thereafter, to a maximum of summon monster IX at 20th level. This ability can be used a number of times per day equal to the empyreal knight’s Charisma modifier (minimum 1), but only one ally can be summoned at a time.
 - **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook.
+  - summoning subsystem.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Divine Bond (Su)
+- **Description:** At 5th level, an empyreal knight forms a bond with a mount, as the standard paladin ability.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 5, 8, 12.
+  - **Rules text to implement:** At 5th level, an empyreal knight forms a bond with a mount, as the standard paladin ability. Her mount gains the celestial template at 8th level. At 12th level, her mount sprouts wings if it cannot already fly, and gains a fly speed of twice its land speed and good maneuverability. If the mount could already fly, its fly speed and maneuverability improve to at least this level. This ability otherwise functions as the paladin ability of the same name.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
+  - flight/movement mode support.
 
 ### Replaces: holy champion
 
 - **Archetype feature:** Empyreal Champion
 - **Description:** At 20th level, an empyreal knight transcends her mortal self.
-- **Mechanics:**
-  - Level hooks: 20.
-  - Mechanics summary: At 20th level, an empyreal knight transcends her mortal self. Her DR increases to 10/evil. Her type is treated as outsider for the purposes of spells and magical effects. She gains darkvision 60 feet and low-light vision. As a standard action and a supernatural ability, she can sprout wings that allow her to fly at twice her land speed with average maneuverability. Any armor or clothing reshapes to allow her to fly when she uses this ability.
+- **Detailed mechanics:**
+  - **Level hooks:** 20.
+  - **Rules text to implement:** At 20th level, an empyreal knight transcends her mortal self. Her DR increases to 10/evil. Her type is treated as outsider for the purposes of spells and magical effects. She gains darkvision 60 feet and low-light vision. As a standard action and a supernatural ability, she can sprout wings that allow her to fly at twice her land speed with average maneuverability. Any armor or clothing reshapes to allow her to fly when she uses this ability. She can retract the wings as a free action. Unlike other outsiders, an empyreal knight can still be brought back from the dead as if she were a member of her previous creature type.
 - **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook, rage/rage-power hook.
+  - rage/rage power subsystem.
+  - flight/movement mode support.
 
 ## Parsed source feature headings
 
@@ -64,4 +77,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Celestial Ally (Sp)
 - Divine Bond (Su)
 - Empyreal Champion
-

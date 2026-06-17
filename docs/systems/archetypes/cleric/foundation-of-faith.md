@@ -6,22 +6,58 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Cleric%20Foundation%20of%20Faith
 - **Index:** docs/systems/archetypes/cleric.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Channel Energy; Bastion (Ex); Granite Focus (Ex); Rooted Vitality (Su)
 - **Replaced / altered class features:** Channel Energy
 
-## Replacement details
+## Implementation details
 
-> **Implementation flag:** No explicit replacement clauses were parsed from the source detail page. Use the index summary and source link for manual mapping.
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
 
-## Unmapped index replacements
+- **Archetype feature:** Channel Energy
+- **Description:** A foundation of faith does not gain the channel energy ability.
+- **Detailed mechanics:**
+  - **Rules text to implement:** A foundation of faith does not gain the channel energy ability.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
 
-The index lists these replaced/altered features, but no one-to-one source clause was parsed. Treat these as manual implementation checkpoints.
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
 
-- Channel Energy
+- **Archetype feature:** Bastion (Ex)
+- **Description:** A foundation of faith is an unbreakable obstacle, unmoved by threats and violence alike.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 1.
+  - **Rules text to implement:** A foundation of faith is an unbreakable obstacle, unmoved by threats and violence alike. At 1st level, the foundation of faith adds her Constitution bonus to her CMD and to the DC of attempts to use the Intimidate skill against her.
+- **Implementation flags:**
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Granite Focus (Ex)
+- **Description:** A foundation of faith’s focus is truly impressive.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3.
+  - **Rules text to implement:** A foundation of faith’s focus is truly impressive. At 3rd level, the foundation of faith can take a move action to center herself. If she does, she adds her Constitution modifier to any concentration checks attempted as part of casting cleric spells until the end of her turn.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Rooted Vitality (Su)
+- **Description:** At 5th level, a foundation of faith draws healing from the earth.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 5, 7, 19.
+  - **Rules text to implement:** At 5th level, a foundation of faith draws healing from the earth. As a swift action while standing on natural or worked stone, the foundation of faith can gain fast healing 1. This effect lasts for a number of rounds equal to the foundation of faith’s Constitution modifier or until the foundation of faith loses contact with the natural or worked stone. At 7th level, this ability increases to fast healing 2, and it increases by an additional point every 2 levels thereafter (to a maximum of fast healing 8 at 19th level). Instead of gaining this fast healing herself, a foundation of faith can expend a use of this ability to instead touch up to six other creatures as a standard action to grant each creature half of the fast healing that the foundation of faith would receive (minimum fast healing 1). A recipient must be standing on natural or worked stone to receive this fast healing, and the fast healing lasts for a number of rounds equal to the foundation of faith’s Constitution modifier or until the recipient leaves contact with natural or worked stone. If one recipient loses this fast healing early, it does not affect the duration for the other targets. This ability is usable once per day at 5th level, plus an additional time per day for every 5 levels beyond 5th.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -29,4 +65,3 @@ The index lists these replaced/altered features, but no one-to-one source clause
 - Bastion (Ex)
 - Granite Focus (Ex)
 - Rooted Vitality (Su)
-

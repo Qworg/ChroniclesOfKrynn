@@ -6,25 +6,55 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Rogue%20Swordmaster
 - **Index:** docs/systems/archetypes/rogue.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Class Skills; Trance (Ex); Rogue Talents; Advanced Talents
 - **Replaced / altered class features:** all increments of trap sense
 
-## Replacement details
+## Implementation details
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Class Skills
+- **Description:** The swordmaster adds Knowledge (nature) and Survival to her list of class skills and removes Disguise and Knowledge (dungeoneering) from her list of class skills.
+- **Detailed mechanics:**
+  - **Rules text to implement:** The swordmaster adds Knowledge (nature) and Survival to her list of class skills and removes Disguise and Knowledge (dungeoneering) from her list of class skills.
+- **Implementation flags:**
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
 
 ### Replaces: all increments of trap sense
 
 - **Archetype feature:** Trance (Ex)
 - **Description:** At 3rd level, a swordmaster learns to focus her martial prowess using an intense meditative trance.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 3, 18.
-  - Mechanics summary: At 3rd level, a swordmaster learns to focus her martial prowess using an intense meditative trance. Under the influence of a trance, the swordmaster can perform fantastic martial feats. Entering a trance is a full-round action that provokes attacks of opportunity. The swordmaster can maintain the trance for a number of rounds per day equal to 4 + her Wisdom modifier. At each level beyond 3rd, she can remain in the trance for 1 additional round. She can end her trance as a free action.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3, 18.
+  - **Rules text to implement:** At 3rd level, a swordmaster learns to focus her martial prowess using an intense meditative trance. Under the influence of a trance, the swordmaster can perform fantastic martial feats. Entering a trance is a full-round action that provokes attacks of opportunity. The swordmaster can maintain the trance for a number of rounds per day equal to 4 + her Wisdom modifier. At each level beyond 3rd, she can remain in the trance for 1 additional round. She can end her trance as a free action. Following a trance, the swordmaster is fatigued for a number of rounds equal to 2 × the number of rounds she spent in the trance. A swordmaster cannot enter a new trance while fatigued but can otherwise enter a trance multiple times during a single encounter or combat. If a swordmaster falls unconscious, her trance immediately ends. At 3rd level, the swordmaster chooses one trance from the list below. She chooses another trance at 6th, 9th, 12th, 15th, and 18th level. She can only use one type of trance at a time. Crane Trance (Ex) : The swordmaster’s blade rises and falls with the graceful sweeping arcs of the mountain crane. When in this trance, a swordmaster gains the benefits of the Crane Style feat. Dragon Trance (Ex) : Like the dragon, the swordmaster has honed the steadiness of her mind and body. When in this trance, a swordmaster gains the benefits of the Dragon Style feat. Leopard Trance (Ex) : Using the swiftness of the leopard, a swordmaster’s evasive footwork confuses her opponents. When in this trance, a swordmaster gains the benefits of the Mobility feat. Monkey Trance (Ex) : As the monkey springs, the swordmaster leaps from the reach of her enemies. While in this trance, a swordmaster can make an Acrobatics check opposed by an opponent’s CMD. If she succeeds, she may move 5 feet as a swift action within the opponent’s threatened area; this movement does not provoke attacks of opportunity and does not count as a 5-foot step. Serpent Trance (Ex) : Like the serpent, the swordmaster’s quick movements allow her to catch her opponent unawares. While in this trance, a swordmaster receives a +4 bonus on Bluff checks made to feint during combat. Tiger Trance (Ex) : The swordmaster pounces upon her opponents, striking with the ferocity and brute force of a wild tiger. While in this trance, a swordmaster can make a combat maneuver check against an opponent within charge range. If she succeeds, she may charge that opponent and make a full attack against that opponent.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, ki/monk hook.
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Rogue Talents
+- **Description:** The following rogue talents complement the swordmaster archetype: combat trick, stand up, surprise attack, weapon training ; befuddling strike, positioning strike.
+- **Detailed mechanics:**
+  - **Rules text to implement:** The following rogue talents complement the swordmaster archetype: combat trick, stand up, surprise attack, weapon training ; befuddling strike, positioning strike.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Advanced Talents
+- **Description:** The following advanced rogue talents complement the swordmaster archetype: crippling strike, defensive roll ; hunter’s surprise, redirect attack confounding blade.
+- **Detailed mechanics:**
+  - **Rules text to implement:** The following advanced rogue talents complement the swordmaster archetype: crippling strike, defensive roll ; hunter’s surprise, redirect attack confounding blade.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -32,4 +62,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Trance (Ex)
 - Rogue Talents
 - Advanced Talents
-

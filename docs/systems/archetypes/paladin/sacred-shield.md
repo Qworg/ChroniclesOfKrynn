@@ -6,56 +6,68 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Paladin%20Sacred%20Shield
 - **Index:** docs/systems/archetypes/paladin.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Bastion of Good (Su); Holy Shield (Su); Divine Bond (Su); Improved Bastion; Perfect Bastion
 - **Replaced / altered class features:** smite evil; channel positive energy; the paladin’s aura of justice; the sacred shield’s holy champion ability
 
-## Replacement details
+## Implementation details
 
 ### Replaces: smite evil
 
 - **Archetype feature:** Bastion of Good (Su)
 - **Description:** At 1st level, a sacred shield can call upon the powers of good to defend her and her allies against evil.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 1, 20.
-  - Mechanics summary: At 1st level, a sacred shield can call upon the powers of good to defend her and her allies against evil. This ability functions as smite evil, except that the paladin gains no benefit on attack or damage rolls against her target. Instead, any attacks the target makes against allies within 10 feet of the paladin deal half damage. Attacks against the paladin deal full damage, but the paladin gains a deflection bonus to her AC equal to her Charisma bonus (if any) against attacks made by the target of the smite. This bonus increases by +1 for every four paladin levels (to a maximum of +6 at 20th level). Feats, abilities, and the like that increase a paladin’s number of uses of smite evil per day increase a sacred shield’s uses of bastion of good per day.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 1, 20.
+  - **Rules text to implement:** At 1st level, a sacred shield can call upon the powers of good to defend her and her allies against evil. This ability functions as smite evil, except that the paladin gains no benefit on attack or damage rolls against her target. Instead, any attacks the target makes against allies within 10 feet of the paladin deal half damage. Attacks against the paladin deal full damage, but the paladin gains a deflection bonus to her AC equal to her Charisma bonus (if any) against attacks made by the target of the smite. This bonus increases by +1 for every four paladin levels (to a maximum of +6 at 20th level). As with smite evil, if the paladin targets a creature that is not evil, her bastion of good ability is wasted with no effect. Feats, abilities, and the like that increase a paladin’s number of uses of smite evil per day increase a sacred shield’s uses of bastion of good per day.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, smite hook.
+  - feat grant/prerequisite handling.
 
 ### Replaces: channel positive energy
 
 - **Archetype feature:** Holy Shield (Su)
 - **Description:** At 4th level, a sacred shield can channel her faith into her shield, protecting any nearby allies.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 4, 11, 20.
-  - Mechanics summary: At 4th level, a sacred shield can channel her faith into her shield, protecting any nearby allies. All allies adjacent to the paladin gain a shield bonus equal to the sacred shield’s own shield bonus, including any increase from the shield’s enhancement bonus. This bonus does not stack with any existing shield bonuses. The paladin herself radiates light as a light spell while the shielding is active. At 11th level, this protection expands to cover any allies within 10 feet and the radiance increases to the effects of a daylight spell. At 20th level, any allies within 20 feet are protected.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 4, 11, 20.
+  - **Rules text to implement:** At 4th level, a sacred shield can channel her faith into her shield, protecting any nearby allies. All allies adjacent to the paladin gain a shield bonus equal to the sacred shield’s own shield bonus, including any increase from the shield’s enhancement bonus. This bonus does not stack with any existing shield bonuses. The paladin herself radiates light as a light spell while the shielding is active. At 11th level, this protection expands to cover any allies within 10 feet and the radiance increases to the effects of a daylight spell. At 20th level, any allies within 20 feet are protected. Using this ability consumes two uses of the sacred shield’s lay on hands ability, and the effects last for 3 rounds plus a number of rounds equal to her Charisma bonus (if any).
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, spellcasting/spell-list hook.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Divine Bond (Su)
+- **Description:** At 5th level, instead of forming a divine bond with her weapon or a mount, a sacred shield forms a bond with her shield.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 5, 20, 17.
+  - **Rules text to implement:** At 5th level, instead of forming a divine bond with her weapon or a mount, a sacred shield forms a bond with her shield. As a standard action, a sacred shield can enhance her shield by calling on the aid of a celestial spirit. This bond lasts for 1 minute per paladin level. When called, the spirit causes the shield to shed light like a torch. At 5th level, the spirit grants the shield a +1 enhancement bonus. For every three levels beyond 5th, the shield gains another +1 enhancement bonus, to a maximum of +6 at 20th level. These bonuses can be added to the shield, stacking with existing enhancement bonuses to a maximum of +5, or they can be used to add any of the following armor special abilities: arrow deflection, bashing, blinding, fortification (any), reflecting, and spell resistance (any). The reflecting enhancement may be used once each time the sacred shield makes use of her divine bond. Adding these armor special abilities consumes an amount of bonus equal to the property’s cost. These bonuses are added to any properties the shield already has, but duplicate special abilities do not grant any extra benefit. If the shield is not magical, at least a +1 enhancement bonus must be added before any other special abilities can be added. The bonus and special abilities granted by the spirit are determined when the spirit is called and cannot be changed until the spirit is called again. The celestial spirit imparts no bonuses if the shield is used by anyone other than the sacred shield, but it resumes giving bonuses if the sacred shield resumes using the shield. A sacred shield can use this ability once per day at 5th level, and one additional time per day for every four levels beyond 5th, to a maximum of four times per day at 17th level. If a shield with a celestial spirit is destroyed, the sacred shield loses the use of this ability for 30 days, or until she gains a level, whichever comes first. During this period, the sacred shield takes a –1 penalty to her armor class and on saving throws.
+- **Implementation flags:**
+  - ki subsystem.
+  - feat grant/prerequisite handling.
 
 ### Replaces: the paladin’s aura of justice
 
 - **Archetype feature:** Improved Bastion
 - **Description:** At 11th level, the radius of a sacred shield’s bastion of good ability increases to 20 feet.
-- **Mechanics:**
-  - Level hooks: 11.
-  - Mechanics summary: At 11th level, the radius of a sacred shield’s bastion of good ability increases to 20 feet.
+- **Detailed mechanics:**
+  - **Level hooks:** 11.
+  - **Rules text to implement:** At 11th level, the radius of a sacred shield’s bastion of good ability increases to 20 feet.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: the sacred shield’s holy champion ability
 
 - **Archetype feature:** Perfect Bastion
 - **Description:** At 20th level, a sacred shield and her allies within 20 feet gain regeneration 10 against the target of her bastion of good ability (essentially regeneration that is overcome by any damage not caused by the target).
-- **Mechanics:**
-  - Level hooks: 20.
-  - Mechanics summary: At 20th level, a sacred shield and her allies within 20 feet gain regeneration 10 against the target of her bastion of good ability (essentially regeneration that is overcome by any damage not caused by the target).
+- **Detailed mechanics:**
+  - **Level hooks:** 20.
+  - **Rules text to implement:** At 20th level, a sacred shield and her allies within 20 feet gain regeneration 10 against the target of her bastion of good ability (essentially regeneration that is overcome by any damage not caused by the target).
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ## Parsed source feature headings
 
@@ -64,4 +76,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Divine Bond (Su)
 - Improved Bastion
 - Perfect Bastion
-

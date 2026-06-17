@@ -6,26 +6,37 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Bard%20Sound%20Striker
 - **Index:** docs/systems/archetypes/bard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Errata; Bardic Performance
 - **Replaced / altered class features:** Inspire Competence; Suggestion
 
-## Replacement details
+## Implementation details
 
-> **Implementation flag:** No explicit replacement clauses were parsed from the source detail page. Use the index summary and source link for manual mapping.
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
 
-## Unmapped index replacements
+- **Archetype feature:** Errata
+- **Description:** Link They say that words can cut deeper than any blade, and the sound striker proves this true.
+- **Detailed mechanics:**
+  - **Rules text to implement:** Link They say that words can cut deeper than any blade, and the sound striker proves this true. Using music and words as a weapon, he can focus his performances into a deadly delivery.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
 
-The index lists these replaced/altered features, but no one-to-one source clause was parsed. Treat these as manual implementation checkpoints.
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
 
-- Inspire Competence
-- Suggestion
+- **Archetype feature:** Bardic Performance
+- **Description:** A sound striker gains the following type of bardic performance.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 3, 6.
+  - **Rules text to implement:** A sound striker gains the following type of bardic performance. Neither performance can be performed more quickly than a standard action. Wordstrike (Su) : At 3rd level, the sound striker bard can spend 1 round of bardic performance as a standard action to direct a burst of sonically charged words at a creature or object. This performance deals 1d4 points of damage plus the bard’s level to an object, or half this damage to a living creature. This performance replaces inspire competence. Weird Words (Su) : At 6th level the bard can start a performance that is always a standard action to speak up to one word per 4 bard levels laden with sonic energy. Each word deals 4d6 points of sonic damage as a ranged touch attack with a range of 30 feet. The bard adds his charisma modifier on damage rolls with weird words. Multiple words that strike the same target stack into a single powerful attack, applying energy resistance and bonuses on damage rolls only once. The bard can target all words at the same or different targets, but he unleashes all words simultaneously. Each word costs 1 round of bardic performance. This performance replaces suggestion.
+- **Implementation flags:**
+  - bardic performance subsystem.
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
 - Errata
 - Bardic Performance
-

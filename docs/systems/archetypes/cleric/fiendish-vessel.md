@@ -6,30 +6,70 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Cleric%20Fiendish%20Vessel
 - **Index:** docs/systems/archetypes/cleric.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Domains; Channel Evil (Su); Fiendish Familiar; Fiendish Summoning
 - **Replaced / altered class features:** channel energy
 
-## Replacement details
+## Implementation details
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Alignment
+- **Description:** Unlike normal clerics, a fiendish vessel’s alignment must match her patron’s.
+- **Detailed mechanics:**
+  - **Rules text to implement:** Unlike normal clerics, a fiendish vessel’s alignment must match her patron’s.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Domains
+- **Description:** A fiendish vessel must select the Daemon, Demon, or Devil subdomain ( 88–90) as one of her domain choices, based on the fiendish patron she chooses to serve.
+- **Detailed mechanics:**
+  - **Rules text to implement:** A fiendish vessel must select the Daemon, Demon, or Devil subdomain ( 88–90) as one of her domain choices, based on the fiendish patron she chooses to serve.
+- **Implementation flags:**
+  - domain system.
+  - feat grant/prerequisite handling.
 
 ### Replaces: channel energy
 
 - **Archetype feature:** Channel Evil (Su)
 - **Description:** At 1st level, a fiendish vessel, rather than channeling positive or negative energy, instead channels the pure evil power of her fiendish patron.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 1, 19, 5.
-  - Mechanics summary: At 1st level, a fiendish vessel, rather than channeling positive or negative energy, instead channels the pure evil power of her fiendish patron. This ability is similar to channeling negative energy, but instead of healing undead and dealing damage to living creatures, this blast of evil energy automatically heals evil creatures and debilitates good creatures within its burst. Channeling this evil causes a burst that affects all creatures in a 30-foot radius centered on the fiendish vessel. In the case of evil creatures, the amount of damage healed is equal to 1d4 points of damage and increases by 1d4 at every two levels beyond 1st (to a maximum of 10d4 at 19th level). Good creatures in the burst receive a Will saving throw to negate this damage. Good creatures that fail their saving throws are sickened for 1d4 rounds.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 1, 19, 5.
+  - **Rules text to implement:** At 1st level, a fiendish vessel, rather than channeling positive or negative energy, instead channels the pure evil power of her fiendish patron. This ability is similar to channeling negative energy, but instead of healing undead and dealing damage to living creatures, this blast of evil energy automatically heals evil creatures and debilitates good creatures within its burst. Channeling this evil causes a burst that affects all creatures in a 30-foot radius centered on the fiendish vessel. In the case of evil creatures, the amount of damage healed is equal to 1d4 points of damage and increases by 1d4 at every two levels beyond 1st (to a maximum of 10d4 at 19th level). Good creatures in the burst receive a Will saving throw to negate this damage. Good creatures that fail their saving throws are sickened for 1d4 rounds. Good creatures with a number of Hit Dice less than or equal to the fiendish vessel’s class level – 5 that fail their saving throws are nauseated for 1 round and then sickened for 1d4 rounds instead. The DC of this save is equal to 10 + 1/2 the fiendish vessel’s level + the fiendish vessel’s Charisma bonus. Neutral creatures are unaffected by this burst of evil energy. A fiendish vessel may channel this energy a number of times per day equal to 3 + her Charisma modifier. Doing so is a standard action that does not provoke attacks of opportunity. A fiendish vessel can choose whether or not to include herself in this effect. A fiendish vessel must present her unholy symbol or use her familiar as the divine focus for this ability. For the purposes of feats that affect channel energy, this ability counts as channeling negative energy. If the feat changes the way the fiendish vessel channels or deals damage with her channeling, use the amount of damage this ability heals evil creatures to determine the damage-dealing potential of the affected ability. For instance, if a 5th-level fiendish vessel takes the Channel Smite feat, her channeling deals an additional 3d4 points of damage to living creatures on a successful hit (though they may save to negate the damage).
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, saving throw hook, save DC calculation, smite hook.
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Fiendish Familiar
+- **Description:** At 3rd level, a fiendish vessel’s patron rewards her with a fiendish servant.
+- **Detailed mechanics:**
+  - **Type:** Sp.
+  - **Level hooks:** 3, 9, 13.
+  - **Rules text to implement:** At 3rd level, a fiendish vessel’s patron rewards her with a fiendish servant. The fiendish vessel gains an imp, quasit, or cacodaemon familiar based on the patron she worships. This ability is identical to the wizard’s arcane bond with a familiar and the Improved Familiar feat, using the fiendish vessel’s character level in place of the wizard level. This tiny fiend acts like a perverse, manifest moral compass. Furthermore, this familiar can act as a living divine focus and unholy symbol for her spellcasting if the fiendish vessel so desires, which means that when she uses her channel evil ability, its burst can be centered on the familiar instead, as long as that familiar is within 30 feet and line of sight. A fiendish vessel’s familiar tends to be fawning and subservient to the fiendish vessel. Should her familiar die, the fiendish vessel’s patron replaces the familiar with an identical one within 1 week, without the need for a special ritual. Furthermore, the fiendish familiar gains the following special abilities beyond the standard familiar special abilities. Fiendish Augury (Sp) : At 3rd level, the fiendish vessel can ask the familiar whether a particular course of action will bring good or bad results for her in the immediate future. This ability acts like the augury spell, with a caster level equal to the fiendish vessel’s level, with the familiar acting as the mouthpiece for the spell. This ability can be used once per day. Fiendish Divination (Sp) : At 9th level, the fiendish vessel can use a more powerful form of divination to gain intelligence from her patron through her fiendish familiar. This ability acts like the divination spell, with a caster level equal to the fiendish vessel’s level; the familiar acts as the mouthpiece for the spell. This ability can be used once per day. Extra Divination (Sp) : At 13th level, the fiendish vessel can gain intelligence from her patron more often each day. She can use fiendish divination up to 3 times per day.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Fiendish Summoning
+- **Description:** When casting summon monster spells, a fiendish vessel is limited to summoning fiendish creatures and evil outsiders of the same alignment as her patron.
+- **Detailed mechanics:**
+  - **Rules text to implement:** When casting summon monster spells, a fiendish vessel is limited to summoning fiendish creatures and evil outsiders of the same alignment as her patron.
+- **Implementation flags:**
+  - summoning subsystem.
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
+- Alignment
 - Domains
 - Channel Evil (Su)
 - Fiendish Familiar
 - Fiendish Summoning
-

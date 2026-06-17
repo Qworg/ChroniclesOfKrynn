@@ -6,7 +6,7 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Wizard%20Arcane%20Warden
 - **Index:** docs/systems/archetypes/wizard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
@@ -18,72 +18,103 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 ### Alters: arcane school
 
 - **Archetype feature:** Universal Magic
-- **Description:** An arcane warden values all schools of magic and recognizes that, faced with an unpredictable world, versatility is one of the greatest tools for survival.
+- **Description:** Every arcane warden is locked into the universalist chassis.
 - **Mechanics:**
-  - Mechanics summary: An arcane warden values all schools of magic and recognizes that, faced with an unpredictable world, versatility is one of the greatest tools for survival. All arcane warden wizards must be universalists.
-- **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Type: None stated
+  - Level hooks: 1
+  - Action/timing: Passive build restriction
+  - Duration: Permanent
+  - Uses: No daily cap
+  - Core function:
+    - The wizard must be a universalist and cannot specialize in any other school.
+    - The archetype never grants a specialist-school choice during creation or retraining.
+    - All altered school powers plug into the universalist progression instead.
+  - Scaling: None
+  - Interactions: The archetype's replacement powers take the place of the normal universalist school abilities.
+  - Edge cases: Retraining into a specialist school is incompatible with this archetype.
+  - Implementation flags:
+    - Likely existing hooks: universalist lock.
 
-### Alters: the wizard’s class skills
+### Alters: wizard class skills
 
 - **Archetype feature:** Class Skills
-- **Description:** An arcane warden focuses his training on survival, be it navigating difficult regions, enduring in the wilderness, or aiding others in such conditions.
+- **Description:** The archetype trades scholarly skills for rugged field utility skills.
 - **Mechanics:**
-  - Mechanics summary: An arcane warden focuses his training on survival, be it navigating difficult regions, enduring in the wilderness, or aiding others in such conditions. He gains Climb, Heal, Survival, and Swim as class skills. Appraise, Fly, Knowledge (nobility), and Linguistics are not class skills for the arcane warden.
-- **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, ki/monk hook.
+  - Type: None stated
+  - Level hooks: 1
+  - Action/timing: Passive
+  - Duration: Permanent
+  - Uses: No daily cap
+  - Core function:
+    - Add Climb, Heal, Survival, and Swim as class skills.
+    - Remove Appraise, Fly, Knowledge (nobility), and Linguistics from the wizard class-skill list.
+  - Scaling: None
+  - Interactions: Skill ranks still work normally after the list swap.
+  - Edge cases: Removed skills remain usable, but they no longer receive the class-skill bonus from wizard levels.
+  - Implementation flags:
+    - Likely existing hooks: class-skill set modification.
 
-### Replaces: Scribe Scroll
+### Replaces: Scribe Scroll and bonus feats at 5th, 10th, 15th, and 20th level
 
 - **Archetype feature:** Ready for Anything (Ex)
-- **Description:** Instead of crafting magical items or learning ways to manipulate metamagic, arcane wardens prefer to spend their time providing safety and refuge for others.
+- **Description:** The arcane warden gets a narrow set of survival-oriented feats instead of the wizard's usual flexible feat track.
 - **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 1.
-  - Mechanics summary: Instead of crafting magical items or learning ways to manipulate metamagic, arcane wardens prefer to spend their time providing safety and refuge for others. At 1st level, an arcane warden gains a bonus feat associated with aiding allies or providing shelter. At 5th, 10th, 15th, and 20th levels, the arcane warden gains an additional bonus feat. The arcane warden must qualify for any feat he takes, and must choose from the following list: Alertness, Endurance, Great Fortitude, Improved Great Fortitude, Leadership, Self-Sufficient, Skill Focus (Survival), Toughness, or any teamwork feat.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, ki/monk hook.
+  - Type: Ex
+  - Level hooks: 1, 5, 10, 15, 20
+  - Action/timing: Passive feat grant
+  - Duration: Permanent
+  - Uses: No daily cap
+  - Core function:
+    - Gain one bonus feat at 1st level and another at 5th, 10th, 15th, and 20th level.
+    - Each feat must come from this restricted list: Alertness, Endurance, Great Fortitude, Improved Great Fortitude, Leadership, Self-Sufficient, Skill Focus (Survival), Toughness, or any teamwork feat.
+    - All normal prerequisites for the chosen feat still apply.
+  - Scaling: One additional feat is granted at each listed milestone.
+  - Interactions: This fully replaces the wizard's normal bonus-feat flexibility at those levels.
+  - Edge cases: Teamwork feats are granted normally; this feature does not waive prerequisites or grant partner exceptions.
+  - Implementation flags:
+    - Likely existing hooks: restricted bonus-feat grant at five milestone levels.
 
-### Replaces: the bonus feats gained at 5th, 10th, 15th
-- **Archetype feature:** Ready for Anything (Ex)
-- **Description:** Instead of crafting magical items or learning ways to manipulate metamagic, arcane wardens prefer to spend their time providing safety and refuge for others.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 1.
-  - Mechanics summary: Instead of crafting magical items or learning ways to manipulate metamagic, arcane wardens prefer to spend their time providing safety and refuge for others. At 1st level, an arcane warden gains a bonus feat associated with aiding allies or providing shelter. At 5th, 10th, 15th, and 20th levels, the arcane warden gains an additional bonus feat. The arcane warden must qualify for any feat he takes, and must choose from the following list: Alertness, Endurance, Great Fortitude, Improved Great Fortitude, Leadership, Self-Sufficient, Skill Focus (Survival), Toughness, or any teamwork feat.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, ki/monk hook.
-
-### Replaces: 20th levels
-
-- **Archetype feature:** Ready for Anything (Ex)
-- **Description:** Instead of crafting magical items or learning ways to manipulate metamagic, arcane wardens prefer to spend their time providing safety and refuge for others.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 1.
-  - Mechanics summary: Instead of crafting magical items or learning ways to manipulate metamagic, arcane wardens prefer to spend their time providing safety and refuge for others. At 1st level, an arcane warden gains a bonus feat associated with aiding allies or providing shelter. At 5th, 10th, 15th, and 20th levels, the arcane warden gains an additional bonus feat. The arcane warden must qualify for any feat he takes, and must choose from the following list: Alertness, Endurance, Great Fortitude, Improved Great Fortitude, Leadership, Self-Sufficient, Skill Focus (Survival), Toughness, or any teamwork feat.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, ki/monk hook.
-
-### Replaces: the hand of the apprentice universalist school ability
+### Replaces: hand of the apprentice (universalist school ability)
 
 - **Archetype feature:** Generous Touch (Su)
-- **Description:** Arcane wardens are talented at enhancing the magical effects they create to bolster allies.
+- **Description:** Helpful touch spells cast on allies last longer, but the extension is tightly limited.
 - **Mechanics:**
-  - Type: Su.
-  - Mechanics summary: Arcane wardens are talented at enhancing the magical effects they create to bolster allies. When an arcane warden casts a spell with a target of “creature touched” on a willing target other than himself, he can cause the effects of the spell to last longer than normal. A spell with a duration of 1 round per level lasts an additional number of rounds equal to the arcane warden’s Intelligence modifier (minimum of 1 additional round). A spell with a duration of 1 minute per level lasts for an additional number of minutes equal to the arcane warden’s Intelligence modifier (minimum of 1 additional minute). Spells with different durations than this are not enhanced by this ability. Only one spell can be enhanced in this way on any individual creature at a time.
-- **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook.
+  - Type: Su
+  - Level hooks: 1
+  - Action/timing: Passive trigger when casting a qualifying touch spell on a willing ally other than the wizard
+  - Duration: Base spell duration plus Intelligence modifier units, minimum 1
+  - Uses: No daily cap
+  - Core function:
+    - When casting a spell with range "creature touched" on a willing target other than the wizard, extend the duration if it matches one of two exact patterns.
+    - Spells lasting 1 round per level gain extra rounds equal to the wizard's Intelligence modifier, minimum 1.
+    - Spells lasting 1 minute per level gain extra minutes equal to the wizard's Intelligence modifier, minimum 1.
+    - Only one spell per creature can benefit from this extension at a time.
+  - Scaling: The extension grows as the wizard's Intelligence modifier increases.
+  - Interactions: Does not function on self-targeted casts or on unwilling targets.
+  - Edge cases: Applying a new extended spell to the same creature ends the previous extended effect from this ability.
+  - Implementation flags:
+    - Likely existing hooks: touch-spell duration extension conditioned on willing ally target and duration template.
 
-### Replaces: the metamagic mastery universalist school ability
+### Replaces: metamagic mastery (universalist school ability)
 
 - **Archetype feature:** Restorative Shelter (Su)
-- **Description:** While an arcane warden can find refuge in many naturally occurring hideaways, his preferred places of rest are magically created cottages, homes, and even manors.
+- **Description:** Shelter spells are always on hand, harder to dispel, and reward a full night's rest.
 - **Mechanics:**
-  - Type: Su.
-  - Mechanics summary: While an arcane warden can find refuge in many naturally occurring hideaways, his preferred places of rest are magically created cottages, homes, and even manors. An arcane warden learns the following spells: mage’s magnificent mansion , rope trick , secure shelter , and tiny hut . These spells do not take up room in the arcane warden’s spellbook, and he does not need his spellbook to prepare these spells. He must still be the appropriate level to prepare the spell in question. The arcane warden’s caster level is treated as 2 higher than his actual caster level for the purposes of determining the duration of these spells and resolving attempts to dispel these spells. Any creature that spends at least 8 hours relaxing in one of these shelters gains a bonus equal to the level of the spell that created it on any saving throws against disease or poison effects made in the next 24 hours.
-- **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, spellcasting/spell-list hook.
+  - Type: Su
+  - Level hooks: 1
+  - Action/timing: Passive spellbook addition; each spell is still cast using its normal action
+  - Duration: Per each shelter spell's own duration; the rest bonus lasts 24 hours
+  - Uses: No daily cap beyond normal spell-slot expenditure
+  - Core function:
+    - Automatically learn mage's magnificent mansion, rope trick, secure shelter, and tiny hut.
+    - These four spells do not consume spellbook pages and can be prepared even without the spellbook present.
+    - Treat caster level as 2 higher for duration and dispel-check purposes when casting those spells.
+    - Any creature that completes at least 8 hours of rest in one of those shelters gains a bonus on saves against disease and poison for 24 hours equal to the spell's level.
+  - Scaling: The save bonus depends on which shelter spell was used.
+  - Interactions: The +2 caster-level adjustment applies only to the four named shelter spells.
+  - Edge cases: The save bonus starts after the rest finishes, not when the creature first enters the shelter.
+  - Implementation flags:
+    - Likely existing hooks: auto-add spells to known list without spellbook cost, localized caster-level override for named spells, rest-triggered save bonus.
 
 ## Parsed source feature headings
 
@@ -92,4 +123,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Ready for Anything (Ex)
 - Generous Touch (Su)
 - Restorative Shelter (Su)
-

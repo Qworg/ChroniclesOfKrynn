@@ -6,24 +6,28 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Ranger%20Infiltrator
 - **Index:** docs/systems/archetypes/ranger.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Adaptation (Ex)
 - **Replaced / altered class features:** Favored Terrain
 
-## Replacement details
+## Implementation details
 
-> **Implementation flag:** No explicit replacement clauses were parsed from the source detail page. Use the index summary and source link for manual mapping.
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
 
-## Unmapped index replacements
-
-The index lists these replaced/altered features, but no one-to-one source clause was parsed. Treat these as manual implementation checkpoints.
-
-- Favored Terrain
+- **Archetype feature:** Adaptation (Ex)
+- **Description:** At 3rd level, an infiltrator learns how to copy the unusual abilities of his prey.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3, 15.
+  - **Rules text to implement:** At 3rd level, an infiltrator learns how to copy the unusual abilities of his prey. He chooses one type of creature he has selected as a favored enemy, such as “aberrations.” The ranger selects one ability or feat from the adaptation list for that type (see below). A ranger can use adaptations for 10 minutes per day per ranger level he possesses. This duration does not need to be consecutive, but it must be used in 10-minute increments. If the adaptation requires the ranger to make a more specific choice (such as what skill to use with Skill Focus), this choice is permanent and cannot be changed. At 8th, 13th, and 15th-level, the ranger chooses another one of his favored enemy types and selects one adaptation from that type's list, as well as an additional adaptation from any one list of a creature type he's selected (including the one just chosen, if so desired). The infiltrator can only use one adaptation at a time. This class ability replaces favored terrain. The ranger can use the camouflage and hide in plain sight class features whenever he is using adaptations. Aberration : amphibious, darkvision 60 ft., Iron Will, natural armor +2. Animal : climb 15 ft., darkvision 60 ft., Great Fortitude, Lightning Reflexes, low-light vision, natural armor (+2), swim 15 ft. Construct : darkvision 60 ft., Great Fortitude, Lightning Reflexes, low-light vision. Dragon : darkvision 60 ft., Great Fortitude, Iron Will, Lightning Reflexes, low-light vision, Lunge. Fey : Iron Will, Lightning Reflexes, low-light vision. Humanoid (aquatic) : low-light vision, natural armor +2, darkvision, swim 15 ft. Humanoid (dwarf) : darkvision 60 ft., defensive training, greed, hatred, hardy, slow and steady, stability, stonecunning, weapon familiarity. Humanoid (elf) : elf blood, low-light vision, elven immunities, elven magic, keen senses, Skill Focus (choose one skill), weapon familiarity. Humanoid (giant) : low-light vision, Lunge, natural armor +2, resist energy 10 (choose cold, electricity, or fire), Throw Anything. Humanoid (gnoll) : darkvision 60 ft., Exotic Weapon Proficiency (dire flail), natural armor +2. Humanoid (gnome) : defensive training, gnome magic, hatred, illusion resistance, keen senses, low-light vision, obsessive, weapon familiarity. Humanoid (goblinoid) : darkvision 60 ft., goblin fast, Skill Focus (Stealth), natural armor (+2). Humanoid (halfling) : fearless, halfling luck, keen senses, sure-footed, weapon familiarity. Humanoid (human) : Great Fortitude, Iron Will, Lightning Reflexes, Skill Focus (choose one skill). Humanoid (orc) : darkvision 60 ft., ferocity, intimidating, orc blood, weapon familiarity. Humanoid (reptilian) : darkvision 60 ft., kobold fast (as goblin fast), lizardfolk hold breath, natural armor +2, Skill Focus (choose Acrobatics, Perception, or Stealth). Magical Beast : darkvision 60 ft., Great Fortitude, low-light vision, natural armor +2. Monstrous Humanoid : darkvision 60 ft., Lightning Reflexes, low-light vision, natural armor +2. Ooze : acid resistance 10, Great Fortitude, Iron Will, Skill Focus (choose Climb, Escape Artist, or Perception). Outsider : darkvision 60 ft., energy resistance 5 (choose one type of energy from acid, cold, electricity, or fire), Great Fortitude, Iron Will, Lightning Reflexes. Plant : low-light vision, Great Fortitude, Iron Will. Undead : darkvision 60 ft., Great Fortitude, Iron Will, natural armor (+2). Skill Focus (Stealth). Vermin : climb 15 ft., darkvision 60 ft., Great Fortitude, Iron Will, swim 15 ft.
+- **Implementation flags:**
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
 
 ## Parsed source feature headings
 
 - Adaptation (Ex)
-

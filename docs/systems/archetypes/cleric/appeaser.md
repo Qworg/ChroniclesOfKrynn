@@ -6,56 +6,58 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Cleric%20Appeaser
 - **Index:** docs/systems/archetypes/cleric.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Aura (Ex); Channel Utility (Su); Divine Apologist (Ex); Mollified Domain (Su)
 - **Replaced / altered class features:** Aura; Channel Energy; Alignment; Spells; Domains
 
-## Replacement details
+## Implementation details
 
 ### Alters: aura
 
 - **Archetype feature:** Aura (Ex)
 - **Description:** An appeaser always has an evil aura regardless of his actual alignment.
-- **Mechanics:**
-  - Type: Ex.
-  - Mechanics summary: An appeaser always has an evil aura regardless of his actual alignment.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** An appeaser always has an evil aura regardless of his actual alignment.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Alters: channel energy
 
 - **Archetype feature:** Channel Utility (Su)
 - **Description:** An appeaser channels negative energy, but also gains limited access to positive energy.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 5.
-  - Mechanics summary: An appeaser channels negative energy, but also gains limited access to positive energy. At 5th level, an appeaser can channel positive energy as a full-round action, but he treats his cleric level as if it were 4 lower when determining the amount of damage he can deal to undead and the amount of hit points he can restore to living creatures.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 5.
+  - **Rules text to implement:** An appeaser channels negative energy, but also gains limited access to positive energy. At 5th level, an appeaser can channel positive energy as a full-round action, but he treats his cleric level as if it were 4 lower when determining the amount of damage he can deal to undead and the amount of hit points he can restore to living creatures.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Alters: the cleric’s alignment and spells
 
 - **Archetype feature:** Divine Apologist (Ex)
 - **Description:** An appeaser must worship an evil god.
-- **Mechanics:**
-  - Type: Ex.
-  - Mechanics summary: An appeaser must worship an evil god. His alignment must be within one step of his deity’s, but he himself cannot have an evil alignment. An appeaser cannot cast any spells with the good or evil descriptor.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** An appeaser must worship an evil god. His alignment must be within one step of his deity’s, but he himself cannot have an evil alignment. An appeaser cannot cast any spells with the good or evil descriptor.
 - **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Alters: the cleric’s domains class feature
 
 - **Archetype feature:** Mollified Domain (Su)
 - **Description:** At 1st level, an appeaser gains no domain or domain bonus spells.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 1, 4, 19.
-  - Mechanics summary: At 1st level, an appeaser gains no domain or domain bonus spells. Once per day as a standard action, he can sacrifice his own force of will to gain divine providence. Doing so deals 1d3 points of Charisma damage to the appeaser, and allows him to select a single domain offered by his deity (except the Evil domain or its subdomains). The appeaser gains access to any granted powers offered by the domain he would otherwise qualify for, and can sacrifice a prepared spell to cast a domain spell from that domain just as if he were spontaneously casting a cure or inflict spell. He retains access to this domain for a number of minutes equal to 1/2 the appeaser’s cleric level + plus his Wisdom modifier. Any domain abilities that can be used a limited number of times per day can be used only once each time that particular domain is invoked.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 1, 4, 19.
+  - **Rules text to implement:** At 1st level, an appeaser gains no domain or domain bonus spells. Once per day as a standard action, he can sacrifice his own force of will to gain divine providence. Doing so deals 1d3 points of Charisma damage to the appeaser, and allows him to select a single domain offered by his deity (except the Evil domain or its subdomains). The appeaser gains access to any granted powers offered by the domain he would otherwise qualify for, and can sacrifice a prepared spell to cast a domain spell from that domain just as if he were spontaneously casting a cure or inflict spell. He retains access to this domain for a number of minutes equal to 1/2 the appeaser’s cleric level + plus his Wisdom modifier. Any domain abilities that can be used a limited number of times per day can be used only once each time that particular domain is invoked. An appeaser can gain a mollified domain one additional time per day (taking Charisma damage each time) at 4th level and every 3 levels thereafter, to a maximum of seven times per day at 19th level. An appeaser can invoke only a single mollified domain at a time.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, spellcasting/spell-list hook, cleric domain hook, ki/monk hook.
+  - domain system.
+  - ki subsystem.
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -63,4 +65,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Channel Utility (Su)
 - Divine Apologist (Ex)
 - Mollified Domain (Su)
-

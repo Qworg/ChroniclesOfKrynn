@@ -6,27 +6,26 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Paladin%20Legate
 - **Index:** docs/systems/archetypes/paladin.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Celestial Armor (Sp)
 - **Replaced / altered class features:** mercy
 
-## Replacement details
+## Implementation details
 
 ### Replaces: mercy
 
 - **Archetype feature:** Celestial Armor (Sp)
 - **Description:** At 3rd level, a legate can conjure armor as a standard action.
-- **Mechanics:**
-  - Type: Sp.
-  - Level hooks: 3, 6.
-  - Mechanics summary: At 3rd level, a legate can conjure armor as a standard action. This ability acts as the spell instant armor (Pathfinder RPG Advanced Player’s Guide 229), using her paladin level as her caster level, except as follows. At 6th level and every 3 paladin levels thereafter, the armor gains an additional +1 enhancement bonus. These bonuses can be used to add any of the following armor special abilities: champion UE , fortification (heavy, light, or medium), invulnerability, or spell resistance (13, 15, 17, or 19). In addition, the legate can grant her armor the energy resistance special ability at the cost of a +3 bonus, the improved energy resistance special ability at the cost of a +5 bonus, or the righteous UE special ability at a cost of a +4 bonus. The armor must have least a +1 enhancement bonus before any special abilities can be added.
+- **Detailed mechanics:**
+  - **Type:** Sp.
+  - **Level hooks:** 3, 6.
+  - **Rules text to implement:** At 3rd level, a legate can conjure armor as a standard action. This ability acts as the spell instant armor (Pathfinder RPG Advanced Player’s Guide 229), using her paladin level as her caster level, except as follows. At 6th level and every 3 paladin levels thereafter, the armor gains an additional +1 enhancement bonus. These bonuses can be used to add any of the following armor special abilities: champion UE, fortification (heavy, light, or medium), invulnerability, or spell resistance (13, 15, 17, or 19). In addition, the legate can grant her armor the energy resistance special ability at the cost of a +3 bonus, the improved energy resistance special ability at the cost of a +5 bonus, or the righteous UE special ability at a cost of a +4 bonus. The armor must have least a +1 enhancement bonus before any special abilities can be added. The bonus and special abilities granted are determined when this ability is used and cannot be changed until this ability is used again. If the legate has a steed bond and is riding her steed, she can include her steed when summoning celestial armor, granting the steed barding with the same bonuses and special abilities as her own. The legate can use this ability a number of times per day equal to her Wisdom bonus plus half her paladin level.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, spellcasting/spell-list hook, paladin mercy hook.
+  - summoning subsystem.
 
 ## Parsed source feature headings
 
 - Celestial Armor (Sp)
-

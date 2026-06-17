@@ -6,37 +6,54 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Rogue%20Swashbuckler
 - **Index:** docs/systems/archetypes/rogue.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Martial Training (Ex); Daring (Ex); Rogue Talents; Advanced Talents
 - **Replaced / altered class features:** trapfinding; trap sense
 
-## Replacement details
+## Implementation details
 
 ### Replaces: trapfinding
 
 - **Archetype feature:** Martial Training (Ex)
 - **Description:** At 1st level, the swashbuckler may select one martial weapon to add to her list of weapon proficiencies.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 1.
-  - Mechanics summary: At 1st level, the swashbuckler may select one martial weapon to add to her list of weapon proficiencies. In addition, she may take the combat trick rogue talent up to two times.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 1.
+  - **Rules text to implement:** At 1st level, the swashbuckler may select one martial weapon to add to her list of weapon proficiencies. In addition, she may take the combat trick rogue talent up to two times.
 - **Implementation flags:**
-  - Needs implementation review: swashbuckler class mechanics.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: trap sense
 
 - **Archetype feature:** Daring (Ex)
 - **Description:** At 3rd level, a swashbuckler gains a +1 morale bonus on Acrobatics checks and saving throws against fear.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 3.
-  - Mechanics summary: At 3rd level, a swashbuckler gains a +1 morale bonus on Acrobatics checks and saving throws against fear. This bonus increases by +1 for every 3 levels beyond 3rd.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3.
+  - **Rules text to implement:** At 3rd level, a swashbuckler gains a +1 morale bonus on Acrobatics checks and saving throws against fear. This bonus increases by +1 for every 3 levels beyond 3rd.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus.
-  - Needs implementation review: swashbuckler class mechanics.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Rogue Talents
+- **Description:** The following rogue talents complement the swashbuckler archetype: offensive defense, positioning attack, powerful sneak, and weapon training*.
+- **Detailed mechanics:**
+  - **Rules text to implement:** The following rogue talents complement the swashbuckler archetype: offensive defense, positioning attack, powerful sneak, and weapon training*.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Advanced Talents
+- **Description:** The following advanced rogue talents complement the swashbuckler archetype: crippling strike*, entanglement of blades, and redirect attack.
+- **Detailed mechanics:**
+  - **Rules text to implement:** The following advanced rogue talents complement the swashbuckler archetype: crippling strike*, entanglement of blades, and redirect attack.
+- **Implementation flags:**
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -44,4 +61,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Daring (Ex)
 - Rogue Talents
 - Advanced Talents
-

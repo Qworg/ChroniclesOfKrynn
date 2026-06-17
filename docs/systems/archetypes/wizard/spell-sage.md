@@ -6,7 +6,7 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Wizard%20Spell%20Sage
 - **Index:** docs/systems/archetypes/wizard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
@@ -18,27 +18,44 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 ### Replaces: arcane bond
 
 - **Archetype feature:** Focused Spells (Su)
-- **Description:** At 1st level, once per day the spell sage’s understanding of spells allows him to increase his caster level by 4 for a single spell cast.
+- **Description:** A few times per day the wizard can sharply boost caster level for one spell.
 - **Mechanics:**
-  - Type: Su.
-  - Level hooks: 1, 8, 16.
-  - Mechanics summary: At 1st level, once per day the spell sage’s understanding of spells allows him to increase his caster level by 4 for a single spell cast. He can do this twice per day at 8th level, and three times per day at 16th level.
-- **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook.
+  - Type: Su
+  - Level hooks: 1, 8, 16
+  - Action/timing: Declared as part of casting the target spell
+  - Duration: Applies to that single spell cast
+  - Uses: 1/day at 1st level; 2/day at 8th; 3/day at 16th
+  - Core function:
+    - Increase caster level by 4 for one spell.
+    - This bonus stacks with other caster-level increases.
+  - Scaling: Daily uses increase at 8th and 16th level.
+  - Interactions: The bonus applies only to the current spell and then ends.
+  - Edge cases: The +4 applies regardless of slot adjustments caused by metamagic or other effects.
+  - Implementation flags:
+    - Likely existing hooks: temporary caster-level boost for a single cast, daily-use tracking.
 
 ### Replaces: arcane school
 
 - **Archetype feature:** Spell Study (Su)
-- **Description:** At 2nd level, the sage’s understanding of the spells of bards, clerics, and druids is so great that he can use his own magic in an inefficient, roundabout way to duplicate those classes’ spells.
+- **Description:** The wizard can slowly improvise off-list bard, cleric, or druid spells by spending extra time and two prepared wizard slots.
 - **Mechanics:**
-  - Type: Su.
-  - Level hooks: 2, 1, 6, 16.
-  - Mechanics summary: At 2nd level, the sage’s understanding of the spells of bards, clerics, and druids is so great that he can use his own magic in an inefficient, roundabout way to duplicate those classes’ spells. Once per day, a spell sage can spontaneously cast any spell on the bard, cleric, or druid spell list as if it were a wizard spell he knew and had prepared. Casting the spell requires the spell sage to spend 1 full round per spell level of the desired spell (if the spell is on multiple spell lists indicated above, using the lowest level from among those lists) and requires expending two prepared spells of that spell level or higher; if the spell’s casting time is normally 1 full round or longer, this is added to the spell sage’s... For example, if a spell sage wants to use spell study to cast cure light wounds (cleric spell level 1st), he must spend 2 full rounds casting and expend two prepared wizard spells of 1st level or higher. At 6th level and every 5 levels thereafter, a spell sage can use this ability an additional time per day (to a maximum of four times per day at 16th level).
-- **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook.
+  - Type: Su
+  - Level hooks: 2, 6, 11, 16
+  - Action/timing: Extended casting time of 1 full round per spell level, added to any longer normal casting time
+  - Duration: Instantaneous for the cast spell itself
+  - Uses: 1/day at 2nd level, plus one additional use at 6th, 11th, and 16th level
+  - Core function:
+    - Cast any spell from the bard, cleric, or druid list as though it were a wizard spell.
+    - Spend two prepared wizard spell slots of the target spell's level or higher.
+    - Add 1 full round of casting time per spell level to the spell, plus any longer casting time the spell already has.
+    - If the spell appears on more than one of the qualifying lists, use the lowest listed spell level.
+  - Scaling: Daily uses increase at 6th, 11th, and 16th level to a maximum of 4/day.
+  - Interactions: The borrowed spell uses wizard statistics for caster level, save DCs, and related calculations.
+  - Edge cases: Slot cost is based on the lowest eligible list level even if the wizard conceptually learns the spell from a different list.
+  - Implementation flags:
+    - Likely existing hooks: extended-cast-time cross-list spontaneous access, dual-slot expenditure, multi-list level comparison.
 
 ## Parsed source feature headings
 
 - Focused Spells (Su)
 - Spell Study (Su)
-

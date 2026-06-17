@@ -6,7 +6,7 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Wizard%20Chronomancer
 - **Index:** docs/systems/archetypes/wizard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
@@ -15,39 +15,27 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 
 ## Replacement details
 
-### Replaces: arcane bond
+### Replaces: arcane bond; bonus feats at 10th, 15th, and 20th level
 
 - **Archetype feature:** Temporal Pool (Su)
-- **Description:** A chronomancer gains a reservoir of temporal energy to manipulate the time stream in a variety of ways listed below.
+- **Description:** The chronomancer stores temporal energy in a shared pool that powers initiative and saving-throw manipulation.
 - **Mechanics:**
-  - Type: Su.
-  - Level hooks: 5, 10, 15, 20.
-  - Mechanics summary: A chronomancer gains a reservoir of temporal energy to manipulate the time stream in a variety of ways listed below. This temporal pool has a number of points equal to half his class level + his Intelligence modifier (minimum 1). This pool refreshes once per day when the chronomancer prepares his spells. Forewarned : The chronomancer can expend 1 point from his temporal pool when he rolls initiative to allow himself or an ally within 30 feet to roll 1d4 and add it to that character’s initiative result. At 5th level, the chronomancer can expend 2 points from his temporal pool as an immediate action to apply this benefit to a saving throw he has just rolled (but before the result is revealed). At 10th level, the die size increases to 1d6.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, spellcasting/spell-list hook, ki/monk hook.
-
-### Replaces: the bonus feats gained at 10th, 15th
-- **Archetype feature:** Temporal Pool (Su)
-- **Description:** A chronomancer gains a reservoir of temporal energy to manipulate the time stream in a variety of ways listed below.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 5, 10, 15, 20.
-  - Mechanics summary: A chronomancer gains a reservoir of temporal energy to manipulate the time stream in a variety of ways listed below. This temporal pool has a number of points equal to half his class level + his Intelligence modifier (minimum 1). This pool refreshes once per day when the chronomancer prepares his spells. Forewarned : The chronomancer can expend 1 point from his temporal pool when he rolls initiative to allow himself or an ally within 30 feet to roll 1d4 and add it to that character’s initiative result. At 5th level, the chronomancer can expend 2 points from his temporal pool as an immediate action to apply this benefit to a saving throw he has just rolled (but before the result is revealed). At 10th level, the die size increases to 1d6.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, spellcasting/spell-list hook, ki/monk hook.
-
-### Replaces: 20th levels
-
-- **Archetype feature:** Temporal Pool (Su)
-- **Description:** A chronomancer gains a reservoir of temporal energy to manipulate the time stream in a variety of ways listed below.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 5, 10, 15, 20.
-  - Mechanics summary: A chronomancer gains a reservoir of temporal energy to manipulate the time stream in a variety of ways listed below. This temporal pool has a number of points equal to half his class level + his Intelligence modifier (minimum 1). This pool refreshes once per day when the chronomancer prepares his spells. Forewarned : The chronomancer can expend 1 point from his temporal pool when he rolls initiative to allow himself or an ally within 30 feet to roll 1d4 and add it to that character’s initiative result. At 5th level, the chronomancer can expend 2 points from his temporal pool as an immediate action to apply this benefit to a saving throw he has just rolled (but before the result is revealed). At 10th level, the die size increases to 1d6.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, spellcasting/spell-list hook, ki/monk hook.
+  - Type: Su
+  - Level hooks: 1, 5, 10
+  - Action/timing: Immediate action before initiative is finalized; immediate action after rolling a saving throw but before the result is revealed; standard action for other pool options from the full archetype
+  - Duration: Pool refreshes whenever the wizard prepares spells
+  - Uses: Pool of points equal to half wizard level + Intelligence modifier, minimum 1
+  - Core function:
+    - Spend 1 point when rolling initiative to let the wizard or one ally within 30 feet add 1d4 to the initiative result.
+    - At 5th level, spend 2 points as an immediate action after rolling a saving throw to add the pool's bonus die before the outcome is known.
+    - At 10th level, the saving-throw bonus die improves from d4 to d6.
+    - The same pool also fuels later chronomancer options gained from the replaced bonus-feat slots.
+  - Scaling: Pool size rises with level and Intelligence, and the saving-throw bonus die increases to d6 at 10th level.
+  - Interactions: Initiative and saving-throw boosts draw from the same pool and do not use spell slots.
+  - Edge cases: The saving-throw option must be declared after the roll is made but before success or failure is announced.
+  - Implementation flags:
+    - Likely existing hooks: point-pool tracking refreshed on spell prep, initiative roll modification, post-roll saving-throw bonus.
 
 ## Parsed source feature headings
 
 - Temporal Pool (Su)
-

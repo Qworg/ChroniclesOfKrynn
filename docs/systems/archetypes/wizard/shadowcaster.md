@@ -6,7 +6,7 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Wizard%20Shadowcaster
 - **Index:** docs/systems/archetypes/wizard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
@@ -18,39 +18,66 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 ### Replaces: arcane bond
 
 - **Archetype feature:** Shadow Spells (Su)
-- **Description:** At 1st level, a shadowcaster uses his shadow to prepare additional spells.
+- **Description:** Preparing spells in dim light allows the wizard to hide extra spell levels in his own shadow, but they can be cast only under the right lighting.
 - **Mechanics:**
-  - Type: Su.
-  - Level hooks: 1, 6, 3.
-  - Mechanics summary: At 1st level, a shadowcaster uses his shadow to prepare additional spells. He must spend his entire period of spell preparation in dim illumination to use this ability. He may prepare a number of additional spell levels of spells equal to the level of the highestlevel wizard spell he can cast. For example, if he can cast 6th-level wizard spells, he could prepare six 1st-level spells, two 3rd level-spells, or any similar combination that adds up to a total of six spell levels. These spells are stored in his shadow. He can only cast these spells when he is in an area of normal light or dim light.
-- **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, spellcasting/spell-list hook.
+  - Type: Su
+  - Level hooks: 1
+  - Action/timing: Passive during spell preparation; casting restriction applies passively later
+  - Duration: Shadow-stored spells remain available until cast or until the next preparation reset
+  - Uses: Extra spell levels equal to the highest wizard spell level currently castable; refreshes on spell preparation
+  - Core function:
+    - If the entire preparation period is spent in dim light, prepare extra spells in the wizard's shadow.
+    - The total extra spell levels equal the highest wizard spell level the wizard can currently cast.
+    - Those extra spells can be cast only while the wizard is in normal light or dim light.
+    - They cannot be cast in darkness or in bright light.
+  - Scaling: The extra spell-level pool grows as higher spell levels become available.
+  - Interactions: Leaving dim light during preparation breaks access to the shadow-spell pool for that day.
+  - Edge cases: Magical darkness does not count as the usable dim-light condition for casting these spells.
+  - Implementation flags:
+    - Likely existing hooks: bonus prepared-spell pool conditioned on preparation lighting, shadow-based extra slots, light-level casting restriction.
 
-### Replaces: the shadowcaster’s 5th-level wizard bonus feat
+### Replaces: the 5th-level wizard bonus feat
 
 - **Archetype feature:** Shadowsight (Ex)
-- **Description:** At 5th level, a shadowcaster gains darkvision 60 feet.
+- **Description:** The shadowcaster learns to see in the dark.
 - **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 5.
-  - Mechanics summary: At 5th level, a shadowcaster gains darkvision 60 feet.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus.
+  - Type: Ex
+  - Level hooks: 5
+  - Action/timing: Passive
+  - Duration: Permanent
+  - Uses: No daily cap
+  - Core function:
+    - Gain darkvision 60 feet.
+    - This sight works in ordinary darkness without needing a separate light source.
+    - The feature does not create light or alter the surrounding illumination level.
+  - Scaling: None
+  - Interactions: If another source grants darkvision, use whichever range is better.
+  - Edge cases: This does not pierce magical darkness by itself.
+  - Implementation flags:
+    - Likely existing hooks: darkvision 60-foot grant.
 
-### Replaces: the shadowcaster’s 10th-level wizard bonus feat
+### Replaces: the 10th-level wizard bonus feat
 
 - **Archetype feature:** Shadowy Specialization (Ex)
-- **Description:** At 10th level, when a shadowcaster casts shades , shadow conjuration , shadow evocation , and similar illusion spells that have a listed fraction of the strength of real effects, he increases the percentage of damage caused by the spell’s effect or summoned creatures by one-fifth (+20%) against creatures that make their saving throw against the effect, up to a maximum of 1..
+- **Description:** Shadow-illusion spells become more real to creatures that succeed on their saves.
 - **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 10.
-  - Mechanics summary: At 10th level, when a shadowcaster casts shades , shadow conjuration , shadow evocation , and similar illusion spells that have a listed fraction of the strength of real effects, he increases the percentage of damage caused by the spell’s effect or summoned creatures by one-fifth (+20%) against creatures that make their saving throw against the effect, up to a maximum of 1... For example, shadow evocation and shadow conjuration deal 40% normal damage on a successful save instead of 20%.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, saving throw hook, spellcasting/spell-list hook.
+  - Type: Ex
+  - Level hooks: 10
+  - Action/timing: Passive modifier when casting qualifying illusion spells
+  - Duration: Permanent
+  - Uses: No daily cap
+  - Core function:
+    - Increase the partial real-effect percentage by 20 points for shades, shadow conjuration, shadow evocation, and similar spells when a target succeeds on its save.
+    - For example, a spell that would normally be 20% real on a successful save becomes 40% real instead.
+    - The adjusted realness cannot exceed 100%.
+  - Scaling: None
+  - Interactions: This affects only the reduced-effect clause on a successful save; creatures that fail their save are still fully affected as normal.
+  - Edge cases: Illusion spells without a listed partial-effect percentage are unaffected.
+  - Implementation flags:
+    - Likely existing hooks: shadow-illusion partial-effect percentage increase by 20 points.
 
 ## Parsed source feature headings
 
 - Shadow Spells (Su)
 - Shadowsight (Ex)
 - Shadowy Specialization (Ex)
-

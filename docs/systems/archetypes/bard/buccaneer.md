@@ -6,57 +6,57 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Bard%20Buccaneer
 - **Index:** docs/systems/archetypes/bard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Hilt Bash (Ex); Song of Surrender (Su); Knock Out (Ex); Mass Song of Surrender (Su)
 - **Replaced / altered class features:** bardic knowledge; suggestion; lore master; mass suggestion
 
-## Replacement details
+## Implementation details
 
 ### Replaces: bardic knowledge
 
 - **Archetype feature:** Hilt Bash (Ex)
 - **Description:** A buccaneer develops the ability to fight with the hilts and flats of his weapons, aiming to leave his victims alive.
-- **Mechanics:**
-  - Type: Ex.
-  - Mechanics summary: A buccaneer develops the ability to fight with the hilts and flats of his weapons, aiming to leave his victims alive. He can use a weapon that normally deals lethal damage to deal nonlethal damage with no penalty on his attack roll.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** A buccaneer develops the ability to fight with the hilts and flats of his weapons, aiming to leave his victims alive. He can use a weapon that normally deals lethal damage to deal nonlethal damage with no penalty on his attack roll.
 - **Implementation flags:**
-  - Likely existing hooks: numeric penalty.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: suggestion
 
 - **Archetype feature:** Song of Surrender (Su)
 - **Description:** A buccaneer of 4th level or higher can use his performance to encourage an enemy to surrender.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 4.
-  - Mechanics summary: A buccaneer of 4th level or higher can use his performance to encourage an enemy to surrender. To be affected, an enemy must be within 30 feet and be able to see and hear the buccaneer’s performance. This effect lasts for 1 round—essentially, the affected enemy takes no actions on its next turn other than to lie prone, although it is not considered flat-footed or helpless. A Will saving throw (DC 10 + 1/2 the buccaneer’s level + the buccaneer’s Charisma modifier) negates the effect.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 4.
+  - **Rules text to implement:** A buccaneer of 4th level or higher can use his performance to encourage an enemy to surrender. To be affected, an enemy must be within 30 feet and be able to see and hear the buccaneer’s performance. An affected enemy feels the irresistible urge to drop any held weapons and fall prone. This effect lasts for 1 round—essentially, the affected enemy takes no actions on its next turn other than to lie prone, although it is not considered flat-footed or helpless. A Will saving throw (DC 10 + 1/2 the buccaneer’s level + the buccaneer’s Charisma modifier) negates the effect. This ability affects only a single creature. Song of surrender is an enchantment (compulsion), mindaffecting, language-dependent ability and relies on audible components.
 - **Implementation flags:**
-  - Likely existing hooks: save DC calculation, rage/rage-power hook.
+  - rage/rage power subsystem.
 
 ### Replaces: lore master
 
 - **Archetype feature:** Knock Out (Ex)
 - **Description:** At 5th level, a buccaneer may focus his blows in an attempt to knock out an opponent.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 5, 17.
-  - Mechanics summary: At 5th level, a buccaneer may focus his blows in an attempt to knock out an opponent. Once per day as a swift action, the buccaneer can choose one target to attempt to knock out. The buccaneer adds his Charisma bonus (if any) on his attack roll and adds his buccaneer level on any nonlethal damage rolls made against the target. The bonus lasts until the buccaneer deals nonlethal damage to his target or until the buccaneer chooses a new target to attempt to knock out. He can use this ability one additional time per day for every six levels he possesses beyond 5th, to a maximum of three times per day at 17th level.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 5, 17.
+  - **Rules text to implement:** At 5th level, a buccaneer may focus his blows in an attempt to knock out an opponent. Once per day as a swift action, the buccaneer can choose one target to attempt to knock out. The buccaneer adds his Charisma bonus (if any) on his attack roll and adds his buccaneer level on any nonlethal damage rolls made against the target. The bonus lasts until the buccaneer deals nonlethal damage to his target or until the buccaneer chooses a new target to attempt to knock out. He can use this ability one additional time per day for every six levels he possesses beyond 5th, to a maximum of three times per day at 17th level.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: mass suggestion
 
 - **Archetype feature:** Mass Song of Surrender (Su)
 - **Description:** This ability functions just like song of surrender but allows a buccaneer of 16th level or higher to affect all enemies within 30 feet.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 16.
-  - Mechanics summary: This ability functions just like song of surrender but allows a buccaneer of 16th level or higher to affect all enemies within 30 feet. Enemies within range of this effect still receive a saving throw.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 16.
+  - **Rules text to implement:** This ability functions just like song of surrender but allows a buccaneer of 16th level or higher to affect all enemies within 30 feet. Enemies within range of this effect still receive a saving throw. Mass song of surrender is an enchantment (compulsion), mind-affecting, language-dependent ability that relies on audible components.
 - **Implementation flags:**
-  - No obvious unsupported subsystem detected from the parsed mechanics; still map feature keys and verify behavior against current class systems.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ## Parsed source feature headings
 
@@ -64,4 +64,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Song of Surrender (Su)
 - Knock Out (Ex)
 - Mass Song of Surrender (Su)
-

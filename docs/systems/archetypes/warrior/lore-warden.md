@@ -6,72 +6,53 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Fighter%20Lore%20Warden
 - **Index:** docs/systems/archetypes/warrior.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Scholastic (Ex); Skill Over Strength (Ex); Swords Secret (Ex)
 - **Replaced / altered class features:** the fighter’s proficiency with medium armor, heavy armor, and shields; bravery and the fighter bonus feat gained at 2nd level
 
-## Replacement details
+## Implementation details
 
 ### Replaces: the fighter’s proficiency with medium armor, heavy armor, and shields
 
 - **Archetype feature:** Scholastic (Ex)
 - **Description:** A lore warden gains 2 additional skill ranks each level.
-- **Mechanics:**
-  - Type: Ex.
-  - Mechanics summary: A lore warden gains 2 additional skill ranks each level. These ranks must be spent on Intelligence-based skills. All Craft and Knowledge skills are class skills for lore wardens, as are Linguistics and Spellcraft.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Rules text to implement:** A lore warden gains 2 additional skill ranks each level. These ranks must be spent on Intelligence-based skills. All Craft and Knowledge skills are class skills for lore wardens, as are Linguistics and Spellcraft.
 - **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, spellcasting/spell-list hook, ki/monk hook.
+  - ki subsystem.
+  - crafting subsystem.
+  - skill/class-skill modification.
 
-### Replaces: bravery
+### Replaces: bravery and the fighter bonus feat gained at 2nd level
 
 - **Archetype feature:** Skill Over Strength (Ex)
 - **Description:** At 2nd level, a lore warden qualifies for feats and other abilities as though she had the Combat Expertise feat.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 2, 6, 10.
-  - Mechanics summary: At 2nd level, a lore warden qualifies for feats and other abilities as though she had the Combat Expertise feat. At 6th level, she gains Combat Expertise as a bonus feat, even if she would not normally qualify for the feat. If she already has Combat Expertise, she instead gains any one combat feat that includes Combat Expertise as a prerequisite (and for which she otherwise qualifies). At 10th level, she can treat her base attack bonus as though it were 2 higher for the purpose of calculating the effects of Combat Expertise.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 2, 6, 10.
+  - **Rules text to implement:** At 2nd level, a lore warden qualifies for feats and other abilities as though she had the Combat Expertise feat. At 6th level, she gains Combat Expertise as a bonus feat, even if she would not normally qualify for the feat. If she already has Combat Expertise, she instead gains any one combat feat that includes Combat Expertise as a prerequisite (and for which she otherwise qualifies). At 10th level, she can treat her base attack bonus as though it were 2 higher for the purpose of calculating the effects of Combat Expertise.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, ki/monk hook.
+  - ki subsystem.
+  - feat grant/prerequisite handling.
+  - skill/class-skill modification.
 
-### Replaces: the fighter bonus feat gained at 2nd level
-
-- **Archetype feature:** Skill Over Strength (Ex)
-- **Description:** At 2nd level, a lore warden qualifies for feats and other abilities as though she had the Combat Expertise feat.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 2, 6, 10.
-  - Mechanics summary: At 2nd level, a lore warden qualifies for feats and other abilities as though she had the Combat Expertise feat. At 6th level, she gains Combat Expertise as a bonus feat, even if she would not normally qualify for the feat. If she already has Combat Expertise, she instead gains any one combat feat that includes Combat Expertise as a prerequisite (and for which she otherwise qualifies). At 10th level, she can treat her base attack bonus as though it were 2 higher for the purpose of calculating the effects of Combat Expertise.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, skill bonus/class-skill changes, typed/untyped numeric bonus, ki/monk hook.
-
-### Replaces: armor training
+### Replaces: armor training and armor mastery
 
 - **Archetype feature:** Swords Secret (Ex)
 - **Description:** A lore warden learns specialized techniques that help her to quickly analyze and defeat her foes.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 3, 11, 19, 15.
-  - Mechanics summary: A lore warden learns specialized techniques that help her to quickly analyze and defeat her foes. At 3rd level, a lore warden gains one swords secret, and she gains an additional swords secret for every 4 fighter levels gained after 3rd. Except where noted, a lore warden cannot select the same swords secret more than once. Exploit Weakness (Ex) : The lore warden adds one-third her class level on attack rolls to confirm critical hits. At 11th level, whenever she confirms a critical hit, her weapon attacks ignore the first 5 points of damage reduction or hardness the target has until the end of her next turn. At 19th level, the lore warden can automatically confirm a critical hit once per round when she threatens a critical hit.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3, 11, 19, 15.
+  - **Rules text to implement:** A lore warden learns specialized techniques that help her to quickly analyze and defeat her foes. At 3rd level, a lore warden gains one swords secret, and she gains an additional swords secret for every 4 fighter levels gained after 3rd. Except where noted, a lore warden cannot select the same swords secret more than once. Exploit Weakness (Ex) : The lore warden adds one-third her class level on attack rolls to confirm critical hits. At 11th level, whenever she confirms a critical hit, her weapon attacks ignore the first 5 points of damage reduction or hardness the target has until the end of her next turn. At 19th level, the lore warden can automatically confirm a critical hit once per round when she threatens a critical hit. Hair’s Breadth (Ex) : Once per day when subject to a critical hit, the lore warden can attempt an Acrobatics check to reduce the damage as an immediate action. If the result of this Acrobatics check is greater than the opponent’s confirmation roll, she negates the critical hit; the attack still hits and deals normal damage. The lore warden must be at least 11th level to select this swords secret. At 15th level she can use this secret one additional time per day. Know Thy Enemy (Ex) : When the lore warden succeeds at a Knowledge check to identify a creature’s abilities and weaknesses, she can also use a standard action to grant herself a +2 insight bonus on all attack and weapon damage rolls made against that enemy. This bonus lasts for a number of rounds equal to half her class level (minimum 2 rounds), or until the lore warden uses this ability against a different creature. At 11th level, she also gains a +2 bonus to her AC against the creature when using this ability. At 19th level, the insight bonus increases to +3. Maneuver Training (Ex) : The lore warden gains a brawler’s maneuver training class feature, treating her fighter level as her brawler level. Swift Assessment (Ex) : The lore warden can now use her know thy enemy swords secret as a move action. At 15th level, she can use this ability as a swift action. She must have the know thy enemy swords secret before choosing this swords secret.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus.
-
-### Replaces: armor mastery
-
-- **Archetype feature:** Swords Secret (Ex)
-- **Description:** A lore warden learns specialized techniques that help her to quickly analyze and defeat her foes.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 3, 11, 19, 15.
-  - Mechanics summary: A lore warden learns specialized techniques that help her to quickly analyze and defeat her foes. At 3rd level, a lore warden gains one swords secret, and she gains an additional swords secret for every 4 fighter levels gained after 3rd. Except where noted, a lore warden cannot select the same swords secret more than once. Exploit Weakness (Ex) : The lore warden adds one-third her class level on attack rolls to confirm critical hits. At 11th level, whenever she confirms a critical hit, her weapon attacks ignore the first 5 points of damage reduction or hardness the target has until the end of her next turn. At 19th level, the lore warden can automatically confirm a critical hit once per round when she threatens a critical hit.
-- **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus.
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
 - Scholastic (Ex)
 - Skill Over Strength (Ex)
 - Swords Secret (Ex)
-

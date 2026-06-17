@@ -6,78 +6,81 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Alchemist%20Gun%20Chemist
 - **Index:** docs/systems/archetypes/alchemist.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Weapon and Armor Proficiency; Alchemical Ordnance (Su); Gunsmith; Discoveries; Cartridge Savant (Ex); Repeat Fire (Ex)
 - **Replaced / altered class features:** Weapon and Armor Proficiencies; Bombs; Brew Potion; Throw Anything; Poison Resistance; Swift Poisoning
 
-## Replacement details
+## Implementation details
 
-### Replaces: the gun chemist’s weapon
-
-- **Archetype feature:** Weapon and Armor Proficiency
-- **Description:** Gun chemists are proficient with all simple weapons, firearms, and light armor.
-- **Mechanics:**
-  - Mechanics summary: Gun chemists are proficient with all simple weapons, firearms, and light armor.
-- **Implementation flags:**
-  - Needs implementation review: firearms / gunslinger rules.
-
-### Replaces: armor proficiencies
+### Replaces: the gun chemist’s weapon and armor proficiencies
 
 - **Archetype feature:** Weapon and Armor Proficiency
 - **Description:** Gun chemists are proficient with all simple weapons, firearms, and light armor.
-- **Mechanics:**
-  - Mechanics summary: Gun chemists are proficient with all simple weapons, firearms, and light armor.
+- **Detailed mechanics:**
+  - **Rules text to implement:** Gun chemists are proficient with all simple weapons, firearms, and light armor.
 - **Implementation flags:**
-  - Needs implementation review: firearms / gunslinger rules.
+  - firearm subsystem.
 
 ### Replaces: bombs
 
 - **Archetype feature:** Alchemical Ordnance (Su)
 - **Description:** A gun chemist is adept at using his know-how to infuse his ammunition with volatile chemicals and his own magical reserves.
-- **Mechanics:**
-  - Type: Su.
-  - Mechanics summary: A gun chemist is adept at using his know-how to infuse his ammunition with volatile chemicals and his own magical reserves. When loading a firearm, he can infuse the ammunition as a free action. The compounds are unstable, and if not fired within a number of rounds equal to the gun chemist’s Intelligence modifier (though no sooner than the end of his next turn), the alchemical ordnance becomes inert and loses its additional effects; he can still fire the firearm as normal. Each day, the gun chemist can infuse a number of pieces of alchemical ordnance equal to his class level + his Intelligence modifier, and he can fire no more than one piece per round. Alchemical ordnance deals damage as normal, plus an amount of fire damage equal to 1d6 + the gun chemist’s Intelligence modifier. The damage of the gun chemist’s alchemical ordnance increases by 1d6 points at every odd-numbered class level (this bonus damage is not multiplied on a critical hit or by using feats such as Vital Strike ).
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Rules text to implement:** A gun chemist is adept at using his know-how to infuse his ammunition with volatile chemicals and his own magical reserves. When loading a firearm, he can infuse the ammunition as a free action. The compounds are unstable, and if not fired within a number of rounds equal to the gun chemist’s Intelligence modifier (though no sooner than the end of his next turn), the alchemical ordnance becomes inert and loses its additional effects; he can still fire the firearm as normal. Each day, the gun chemist can infuse a number of pieces of alchemical ordnance equal to his class level + his Intelligence modifier, and he can fire no more than one piece per round. Alchemical ordnance deals damage as normal, plus an amount of fire damage equal to 1d6 + the gun chemist’s Intelligence modifier. The damage of the gun chemist’s alchemical ordnance increases by 1d6 points at every odd-numbered class level (this bonus damage is not multiplied on a critical hit or by using feats such as Vital Strike ). The explosive nature of alchemical ordnance causes the attack— both the firearm’s base damage and the alchemical ordnance’s additional damage—to deal full damage to swarms of any size. If the gun chemist uses alchemical ordnance to make a scattering shot with a weapon with the scatter quality, each creature in the area instead takes additional fire damage equal to the alchemical ordnance’s minimum damage (so if the alchemical ordnance would deal 2d6+4 points of fire damage normally, it deals only 6 points of fire damage with a scattering shot). The gun chemist’s alchemical ordnance functions safely only in weapons he wields. If anyone but a gun chemist attempts to fire a firearm loaded with alchemical ordnance that is not yet inert, the firearm’s misfire value increases by 4. If the firearm would explode as the result of such a misfire, the explosion deals additional fire damage equal to that of the alchemical ordnance. Alchemical ordnance is treated like an alchemist’s bomb for the purpose of discoveries, though such discoveries ignore any effects associated with a bomb’s splash damage or radius unless the gun chemist also applies the exploding bullet discovery. A scattering shot modified by a discovery applies additional effects as though affected creatures were caught in the splash damage of a bomb rather than subject to a direct hit. The DCs of saving throws associated with alchemical ordnance are equal to 10 + half the gun chemist’s alchemist level + the gun chemist’s Intelligence modifier.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus, save DC calculation, alchemist bomb hook, alchemist discovery hook.
-  - Needs implementation review: firearms / gunslinger rules.
+  - firearm subsystem.
+  - feat grant/prerequisite handling.
 
 ### Replaces: Brew Potion and Throw Anything
 
 - **Archetype feature:** Gunsmith
-- **Description:** A gun chemist gains a battered gun identical to the one gained by a 1st level gunslinger , as well as the Gunsmithing feat (including the ability to restore his battered gun as if he were a gunslinger).
-- **Mechanics:**
-  - Level hooks: 1.
-  - Mechanics summary: A gun chemist gains a battered gun identical to the one gained by a 1st level gunslinger , as well as the Gunsmithing feat (including the ability to restore his battered gun as if he were a gunslinger). As a standard action, the gun chemist can expend one use of his alchemical ordnance to remove the broken condition from a single firearm he is currently wielding, as long as that condition was gained from a misfire.
+- **Description:** A gun chemist gains a battered gun identical to the one gained by a 1st level gunslinger, as well as the Gunsmithing feat (including the ability to restore his battered gun as if he were a gunslinger).
+- **Detailed mechanics:**
+  - **Level hooks:** 1.
+  - **Rules text to implement:** A gun chemist gains a battered gun identical to the one gained by a 1st level gunslinger, as well as the Gunsmithing feat (including the ability to restore his battered gun as if he were a gunslinger). As a standard action, the gun chemist can expend one use of his alchemical ordnance to remove the broken condition from a single firearm he is currently wielding, as long as that condition was gained from a misfire.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions.
-  - Needs implementation review: firearms / gunslinger rules.
+  - firearm subsystem.
+  - feat grant/prerequisite handling.
+
+### Alters: Manual mapping required; no explicit replacement clause parsed for this source feature
+
+- **Archetype feature:** Discoveries
+- **Description:** A gun chemist selects alchemist discoveries as normal.
+- **Detailed mechanics:**
+  - **Level hooks:** 4, 8.
+  - **Rules text to implement:** A gun chemist selects alchemist discoveries as normal. He can also select from the discoveries below, which are unique to the gun chemist. Discoveries marked with an asterisk (*) do not stack, including with other alchemist discoveries marked by an asterisk that modify bombs. Only one such discovery can be applied to an individual alchemical ordnance. Chemical Stability : When firing an alchemical ordnance, the gun chemist reduces the misfire value of the firearm by 1 (minimum 0) and ignores any increased misfire value from using an alchemical cartridge. Exploding Bullet* : The gun chemist’s alchemical ordnance splashes adjacent targets as though it were a splash weapon, dealing the alchemical ordnance’s minimum additional damage to other creatures caught in the splash (Reflex half). A gun chemist must be at least 4th level before selecting this discovery. Fast Ordnance : A gun chemist with this discovery can fire more than one piece of alchemical ordnance as part of a full attack. A gun chemist must be at least 8th level before selecting this discovery.
+- **Implementation flags:**
+  - firearm subsystem.
+  - feat grant/prerequisite handling.
 
 ### Replaces: poison resistance
 
 - **Archetype feature:** Cartridge Savant (Ex)
 - **Description:** At 2nd level, a gun chemist can make optimal and highly efficient use of alchemical cartridges, such as flare cartridges.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 2, 5, 20.
-  - Mechanics summary: At 2nd level, a gun chemist can make optimal and highly efficient use of alchemical cartridges, such as flare cartridges . If the gun chemist fires such an alchemical cartridge and it allows a saving throw to negate or reduce the cartridge’s effect, the saving throw’s DC increases by 1 (to a maximum DC of 22). The DC increases by an additional 1 at 5th level and every 3 levels thereafter (to a maximum of 7 higher at 20th level). When a gun chemist fires an alchemical cartridge that deals a type of damage in place of a firearm’s normal damage (such as a dragon’s breath cartridge ), he can increase the damage dealt by an amount equal to his Intelligence modifier.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 2, 5, 20.
+  - **Rules text to implement:** At 2nd level, a gun chemist can make optimal and highly efficient use of alchemical cartridges, such as flare cartridges. If the gun chemist fires such an alchemical cartridge and it allows a saving throw to negate or reduce the cartridge’s effect, the saving throw’s DC increases by 1 (to a maximum DC of 22). The DC increases by an additional 1 at 5th level and every 3 levels thereafter (to a maximum of 7 higher at 20th level). When a gun chemist fires an alchemical cartridge that deals a type of damage in place of a firearm’s normal damage (such as a dragon’s breath cartridge ), he can increase the damage dealt by an amount equal to his Intelligence modifier.
 - **Implementation flags:**
-  - Likely existing hooks: save DC calculation.
-  - Needs implementation review: firearms / gunslinger rules.
+  - firearm subsystem.
+  - poison subsystem.
 
 ### Replaces: swift poisoning
 
 - **Archetype feature:** Repeat Fire (Ex)
 - **Description:** At 6th level, a gun chemist gains Rapid Reload as a bonus feat and must select a type of firearm.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 6.
-  - Mechanics summary: At 6th level, a gun chemist gains Rapid Reload as a bonus feat and must select a type of firearm. If he already has this feat, he can instead gain one combat feat for which he qualifies.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 6.
+  - **Rules text to implement:** At 6th level, a gun chemist gains Rapid Reload as a bonus feat and must select a type of firearm. If he already has this feat, he can instead gain one combat feat for which he qualifies.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions, typed/untyped numeric bonus.
-  - Needs implementation review: firearms / gunslinger rules.
+  - firearm subsystem.
+  - poison subsystem.
+  - feat grant/prerequisite handling.
 
 ## Parsed source feature headings
 
@@ -87,4 +90,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Discoveries
 - Cartridge Savant (Ex)
 - Repeat Fire (Ex)
-

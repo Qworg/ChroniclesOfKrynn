@@ -6,7 +6,7 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Wizard%20Arcane%20Bomber
 - **Index:** docs/systems/archetypes/wizard.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
@@ -18,38 +18,68 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 ### Replaces: arcane bond
 
 - **Archetype feature:** Bomb (Su)
-- **Description:** At 1st level, the arcane bomber gains an ability nearly identical to the alchemist’s bomb ability.
+- **Description:** The wizard gains a bomb attack tied to one fixed energy type chosen at 1st level.
 - **Mechanics:**
-  - Type: Su.
-  - Level hooks: 1.
-  - Mechanics summary: At 1st level, the arcane bomber gains an ability nearly identical to the alchemist’s bomb ability. Unlike the alchemist, at 1st level, the arcane bomber chooses one type of energy from the following list: acid, cold, fire, and electricity. He can throw bombs of that type, but cannot modify them with discoveries. This ability stacks with the alchemist bomb ability to determine the level of bomb damage, but an arcane bomber that becomes an alchemist does not gain that class’s bomb ability, nor does an alchemist that becomes an arcane bomber gain this bomb ability.
-- **Implementation flags:**
-  - Likely existing hooks: alchemist bomb hook.
+  - Type: Su
+  - Level hooks: 1
+  - Action/timing: Standard action to throw
+  - Duration: Instantaneous
+  - Uses: Alchemist bomb formula using Intelligence modifier + wizard level per day
+  - Core function:
+    - Gain an ability equivalent to the alchemist's bomb at 1st level.
+    - Choose acid, cold, fire, or electricity at character creation; all bombs use that energy type.
+    - Alchemist discoveries cannot modify this bomb ability.
+    - If the character later gains alchemist levels, bomb damage scales from combined qualifying levels rather than granting a second bomb feature.
+  - Scaling: Damage follows the alchemist bomb table using total qualifying levels.
+  - Interactions: Stacks with alchemist bomb only for level-based damage progression; it does not grant discoveries or duplicate bomb access.
+  - Edge cases: A wizard/alchemist has one bomb ability, not two separate bomb pools.
+  - Implementation flags:
+    - Likely existing hooks: alchemist bomb hook, energy-type selection at build time.
 
-### Replaces: cantrips, but the arcana bomber gains the detect magic and read magic cantrips and places them in his spellbook
+### Replaces: cantrips (retains detect magic and read magic)
 
 - **Archetype feature:** Spellblast Bombs (Su)
-- **Description:** At 1st level, as a swift action, an arcane bomber can sacrifice one of his spells to empower the next bomb he throws during his turn.
+- **Description:** Prepared spell slots can be burned to sharpen one bomb thrown that turn.
 - **Mechanics:**
-  - Type: Su.
-  - Level hooks: 1.
-  - Mechanics summary: At 1st level, as a swift action, an arcane bomber can sacrifice one of his spells to empower the next bomb he throws during his turn. When he does, he gains a bonus to hit with the next bomb he throws before the end of his turn equal to the level of the spell he sacrificed, and a bonus to damage equal to twice the level of the spell. He can cast either of these as 1st-level spells.
-- **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, spellcasting/spell-list hook, alchemist bomb hook.
+  - Type: Su
+  - Level hooks: 1
+  - Action/timing: Swift action declared before the bomb throw; the throw itself is a standard action
+  - Duration: Applies to the next bomb thrown before the end of the turn
+  - Uses: Any prepared spell slot; no separate daily cap
+  - Core function:
+    - Sacrifice a prepared spell of any level as a swift action before throwing a bomb.
+    - Add the sacrificed spell's level to the attack roll for the next bomb thrown that turn.
+    - Add twice the sacrificed spell's level to that bomb's damage.
+    - Detect magic and read magic remain available and are entered in the spellbook as 1st-level spells.
+  - Scaling: Attack and damage bonuses rise linearly with the spell level spent.
+  - Interactions: Requires the Bomb ability and uses the normal bomb-throw action economy.
+  - Edge cases: If no bomb is thrown before the turn ends, the spent spell is lost with no benefit.
+  - Implementation flags:
+    - Likely existing hooks: swift action declaration hook, numeric attack and damage bonus, alchemist bomb throw.
 
 ### Replaces: arcane school
 
 - **Archetype feature:** School of the Bomb
-- **Description:** The creation and use of bombs is often so engrossing or intellectually taxing that an arcane bomber forsakes four schools of magic.
+- **Description:** The bomber abandons formal specialization in exchange for an unusually heavy opposition-school burden.
 - **Mechanics:**
-  - Level hooks: 1.
-  - Mechanics summary: The creation and use of bombs is often so engrossing or intellectually taxing that an arcane bomber forsakes four schools of magic. These opposition schools are chosen at 1st level and cannot be changed later. An arcane bomber who prepares spells from his opposition school must use two spell slots of that level to prepare the spell. In addition, the arcane bomber takes a –4 penalty on any skill checks made when crafting a magic item that has a spell from one of his opposition schools.
-- **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, numeric penalty, spellcasting/spell-list hook, alchemist bomb hook, ki/monk hook.
+  - Type: None stated
+  - Level hooks: 1
+  - Action/timing: Passive build-time choice
+  - Duration: Permanent
+  - Uses: No daily cap
+  - Core function:
+    - Choose four opposition schools at 1st level, and those choices cannot be changed later.
+    - Preparing a spell from an opposition school costs two spell slots of that level.
+    - Take a -4 penalty on checks to craft magic items that require an opposition-school spell.
+    - Gain no school powers or bonus school spell slots.
+  - Scaling: None
+  - Interactions: Replaces the entire arcane school package and is stricter than the normal two-school opposition rule.
+  - Edge cases: The crafting penalty affects the relevant skill check, not the item's gp cost.
+  - Implementation flags:
+    - Likely existing hooks: opposition-school selection, doubled-slot preparation rule, crafting skill penalty.
 
 ## Parsed source feature headings
 
 - Bomb (Su)
 - Spellblast Bombs (Su)
 - School of the Bomb
-

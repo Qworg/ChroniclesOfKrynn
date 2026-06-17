@@ -6,39 +6,39 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Alchemist%20Toxicant
 - **Index:** docs/systems/archetypes/alchemist.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Toxic Secretion (Ex); Toxic Digestion (Ex)
 - **Replaced / altered class features:** mutagen; persistent mutagen
 
-## Replacement details
+## Implementation details
 
 ### Replaces: mutagen
 
 - **Archetype feature:** Toxic Secretion (Ex)
 - **Description:** At 1st level, a toxicant has learned to mimic creatures with the ability to secrete harmful toxins through the skin.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 1, 4, 20, 3.
-  - Mechanics summary: At 1st level, a toxicant has learned to mimic creatures with the ability to secrete harmful toxins through the skin. Once per day, in a process that takes 10 minutes, the toxicant can create and imbibe a tincture that causes her skin to secrete a mild toxin. The toxicant is immune to this secretion, but any creature that hits her with a natural attack or unarmed strike must succeed at a Fortitude save (DC = 10 + 1/2 the toxicant’s alchemist level + the toxicant’s Intelligence modifier). On a failed save, the target takes an amount of damage equal to the toxicant’s Intelligence modifier. At 4th level, a target that fails its save must succeed at a second save 1 round later or take the same amount of damage again. This effect repeats as long as the target continues to fail its saving throws, to a maximum number of rounds equal to 1 + 1 for every 4 alchemist levels the toxicant possesses (to a maximum of 6 rounds at 20th level).
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 1, 4, 20, 3.
+  - **Rules text to implement:** At 1st level, a toxicant has learned to mimic creatures with the ability to secrete harmful toxins through the skin. Once per day, in a process that takes 10 minutes, the toxicant can create and imbibe a tincture that causes her skin to secrete a mild toxin. The toxicant is immune to this secretion, but any creature that hits her with a natural attack or unarmed strike must succeed at a Fortitude save (DC = 10 + 1/2 the toxicant’s alchemist level + the toxicant’s Intelligence modifier). On a failed save, the target takes an amount of damage equal to the toxicant’s Intelligence modifier. At 4th level, a target that fails its save must succeed at a second save 1 round later or take the same amount of damage again. This effect repeats as long as the target continues to fail its saving throws, to a maximum number of rounds equal to 1 + 1 for every 4 alchemist levels the toxicant possesses (to a maximum of 6 rounds at 20th level). This is a poison effect ( Ultimate Magic 138). The toxicant can suppress this secretion as a standard action, in which case it remains suppressed for 1 hour or until the toxicant reactivates it as a standard action. At 3rd level and every 3 levels thereafter, the toxicant can choose a condition to have her toxin impose. Once this choice is made, it can’t be changed. A creature that fails its save against the toxic secretion also gains these conditions until it succeeds at a save against the secretion, or until the toxin’s duration ends. At higher alchemist levels, the toxicant gains access to stronger conditions; some replace lower-level conditions, which must be selected first. The following conditions are available at the given alchemist levels: 3rd—bleed (1d6), dazzled, fatigued, or sickened; 6th—dazed or shaken; 9th—blinded (replaces dazzled) or staggered (replaces dazed); 12th—exhausted (replaces fatigued); 18th—stunned (replaces exhausted and staggered). As a swift action, the toxicant can collect and concentrate this secretion into a poison she can deliver as a touch attack or apply to a weapon. Targets of such attacks must attempt saving throws as if they had touched the toxicant’s toxic secretion. The toxicant can do this a number of times per day equal to her alchemist level + her Intelligence modifier.
 - **Implementation flags:**
-  - Likely existing hooks: saving throw hook, save DC calculation, mutagen hook, ki/monk hook, natural attack system.
+  - ki subsystem.
+  - poison subsystem.
 
 ### Replaces: persistent mutagen
 
 - **Archetype feature:** Toxic Digestion (Ex)
 - **Description:** At 14th level, a toxicant can drink a poison as a standard action and suspend it within her own body.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 14.
-  - Mechanics summary: At 14th level, a toxicant can drink a poison as a standard action and suspend it within her own body. She is not affected by the poison, and doesn’t need to attempt saving throws against it. When the toxicant next uses her toxic secretion on a creature that attacks her with a natural or unarmed attack, she can expose the attacker to the digested poison (with that poison’s normal duration, effects, and save DC) rather than her normal toxic secretion, even if the digested poison isn’t normally a contact poison. The alchemist can maintain only a single digested poison at a time.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 14.
+  - **Rules text to implement:** At 14th level, a toxicant can drink a poison as a standard action and suspend it within her own body. She is not affected by the poison, and doesn’t need to attempt saving throws against it. When the toxicant next uses her toxic secretion on a creature that attacks her with a natural or unarmed attack, she can expose the attacker to the digested poison (with that poison’s normal duration, effects, and save DC) rather than her normal toxic secretion, even if the digested poison isn’t normally a contact poison. The alchemist can maintain only a single digested poison at a time. If she digests a new poison, any older digested poison is lost.
 - **Implementation flags:**
-  - Likely existing hooks: saving throw hook, save DC calculation, mutagen hook.
+  - poison subsystem.
 
 ## Parsed source feature headings
 
 - Toxic Secretion (Ex)
 - Toxic Digestion (Ex)
-

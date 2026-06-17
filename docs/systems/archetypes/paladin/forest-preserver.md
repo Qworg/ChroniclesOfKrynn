@@ -6,89 +6,91 @@
 - **Source:** https://aonprd.com/ArchetypeDisplay.aspx?FixedName=Paladin%20Forest%20Preserver
 - **Index:** docs/systems/archetypes/paladin.md
 
-These notes are implementation-oriented summaries of source mechanics. They avoid copying full rules prose; use the linked source for final rules verification.
+These notes are implementation-oriented. They summarize source mechanics for coding and should be checked against the linked rules page before implementation.
 
 ## Index summary
 
 - **New / altered feature names:** Class Skills; Favored Terrain (Ex); Woodland Stride (Ex); Sacred Botany (Ex); Fireproof Aura (Su); Sacred Grove (Su); Aura of Preservation (Su)
 - **Replaced / altered class features:** Class Skills; Aura of Courage; Divine Health; Channel Positive Energy; Aura of Resolve; Aura of Justice; Aura of Faith
 
-## Replacement details
+## Implementation details
 
 ### Alters: the paladin’s class skills
 
 - **Archetype feature:** Class Skills
 - **Description:** A forest preserver adds Climb, Knowledge (nature), and Survival to her list of class skills.
-- **Mechanics:**
-  - Mechanics summary: A forest preserver adds Climb, Knowledge (nature), and Survival to her list of class skills. She does not gain Diplomacy, Knowledge (nobility), or Sense Motive as class skills.
+- **Detailed mechanics:**
+  - **Rules text to implement:** A forest preserver adds Climb, Knowledge (nature), and Survival to her list of class skills. She does not gain Diplomacy, Knowledge (nobility), or Sense Motive as class skills.
 - **Implementation flags:**
-  - Likely existing hooks: skill bonus/class-skill changes, ki/monk hook.
+  - ki subsystem.
+  - skill/class-skill modification.
 
 ### Replaces: aura of courage
 
 - **Archetype feature:** Favored Terrain (Ex)
 - **Description:** At 3rd level, a forest preserver gains the ranger’s favored terrain ability but must select either forest or jungle as her favored terrain.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 3.
-  - Mechanics summary: At 3rd level, a forest preserver gains the ranger’s favored terrain ability but must select either forest or jungle as her favored terrain. The bonuses granted by this ability increase by 2 for every 5 levels after 3rd, but she does not gain additional favored terrains.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3.
+  - **Rules text to implement:** At 3rd level, a forest preserver gains the ranger’s favored terrain ability but must select either forest or jungle as her favored terrain. The bonuses granted by this ability increase by 2 for every 5 levels after 3rd, but she does not gain additional favored terrains.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, rage/rage-power hook, favored terrain hook.
+  - rage/rage power subsystem.
 
 ### Replaces: divine health
 
 - **Archetype feature:** Woodland Stride (Ex)
 - **Description:** At 3rd level, a forest preserver (as well as her divine bond creature, if she has one) gains woodland stride, as per the druid class feature.
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 3.
-  - Mechanics summary: At 3rd level, a forest preserver (as well as her divine bond creature, if she has one) gains woodland stride, as per the druid class feature.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 3.
+  - **Rules text to implement:** At 3rd level, a forest preserver (as well as her divine bond creature, if she has one) gains woodland stride, as per the druid class feature.
 - **Implementation flags:**
-  - Likely existing hooks: feat grants/restrictions.
+  - feat grant/prerequisite handling.
 
 ### Replaces: channel positive energy
 
 - **Archetype feature:** Sacred Botany (Ex)
-- **Description:** At 4th level, a forest preserver adds the following spells to her spell list: 1st— detect animals or plants , entangle , goodberry , shillelagh ; 2nd— barkskin , eagle eye , tree shape , warp wood , wood shape ; 3rd— diminish plants , plant growth , snare , speak with plants , spike growth ; 4th— antiplant shell , awaken (trees only) , blight , command plants , commune wit..
-- **Mechanics:**
-  - Type: Ex.
-  - Level hooks: 4.
-  - Mechanics summary: At 4th level, a forest preserver adds the following spells to her spell list: 1st— detect animals or plants , entangle , goodberry , shillelagh ; 2nd— barkskin , eagle eye , tree shape , warp wood , wood shape ; 3rd— diminish plants , plant growth , snare , speak with plants , spike growth ; 4th— antiplant shell , awaken (trees only) , blight , command plants , commune wit... In addition, she treats her caster level as 1 higher when casting these spells in her favored terrain.
+- **Description:** At 4th level, a forest preserver adds the following spells to her spell list: 1st— detect animals or plants, entangle, goodberry, shillelagh ; 2nd— barkskin, eagle eye, tree shape, warp wood, wood shape ; 3rd— diminish plants, plant growth, snare, speak with plants, spike growth ; 4th— antiplant shell, awaken (trees only), blight, command plants, commune with nature, thorn body, tree stride, wall of thorns.
+- **Detailed mechanics:**
+  - **Type:** Ex.
+  - **Level hooks:** 4.
+  - **Rules text to implement:** At 4th level, a forest preserver adds the following spells to her spell list: 1st— detect animals or plants, entangle, goodberry, shillelagh ; 2nd— barkskin, eagle eye, tree shape, warp wood, wood shape ; 3rd— diminish plants, plant growth, snare, speak with plants, spike growth ; 4th— antiplant shell, awaken (trees only), blight, command plants, commune with nature, thorn body, tree stride, wall of thorns. In addition, she treats her caster level as 1 higher when casting these spells in her favored terrain.
 - **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook, favored terrain hook, ki/monk hook.
+  - ki subsystem.
+  - archetype spell-list override.
 
 ### Replaces: aura of resolve
 
 - **Archetype feature:** Fireproof Aura (Su)
 - **Description:** At 8th level, a forest preserver and creatures within 10 feet of her gain a +2 bonus on saving throws against fire effects and gain fire resistance 5; these are doubled for plant allies, which also gain evasion against fire effects only.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 8.
-  - Mechanics summary: At 8th level, a forest preserver and creatures within 10 feet of her gain a +2 bonus on saving throws against fire effects and gain fire resistance 5; these are doubled for plant allies, which also gain evasion against fire effects only. Whenever a fire spell would affect a creature within the fireproof aura, the forest preserver can expend three uses of her lay on hands ability as an immediate action to attempt to counter the effect, as if she had readied a dispel magic spell (caster level = her paladin level) to counterspell.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 8.
+  - **Rules text to implement:** At 8th level, a forest preserver and creatures within 10 feet of her gain a +2 bonus on saving throws against fire effects and gain fire resistance 5; these are doubled for plant allies, which also gain evasion against fire effects only. Whenever a fire spell would affect a creature within the fireproof aura, the forest preserver can expend three uses of her lay on hands ability as an immediate action to attempt to counter the effect, as if she had readied a dispel magic spell (caster level = her paladin level) to counterspell. This ability functions only if the forest preserver is conscious.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, spellcasting/spell-list hook.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ### Replaces: aura of justice
 
 - **Archetype feature:** Sacred Grove (Su)
 - **Description:** At 11th level, a forest preserver can expend two uses of her smite evil ability to consecrate a 20-foot-radius area that must contain a living tree.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 11.
-  - Mechanics summary: At 11th level, a forest preserver can expend two uses of her smite evil ability to consecrate a 20-foot-radius area that must contain a living tree. This fills the area with dense undergrowth, though it does not impede her allies’ movement. In addition, animals, fey, and plants allied with the forest preserver gain a +1 sacred bonus on attack rolls, damage rolls, and saving throws, and animals, fey, and plants called or summoned within this area gain 1 hit point per Hit Die as long as the calling or summoning effect lasts or until the sacred grove effect ends (whichever comes first). If the area contains a shrine or hallowed area dedicated to a good-aligned deity (or at the GM’s discretion, a place of natural magical power, such as a natural portal to the First World), these bonuses are doubled. When she uses this ability in her favored terrain, she can also imbue plants in the area with limited animation, allowing them to obscure vision and impede movement and attacks as if the area were affected by solid fog . A sacred grove remains enhanced in this way for a number of minutes equal to the paladin’s level.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 11.
+  - **Rules text to implement:** At 11th level, a forest preserver can expend two uses of her smite evil ability to consecrate a 20-foot-radius area that must contain a living tree. This fills the area with dense undergrowth, though it does not impede her allies’ movement. In addition, animals, fey, and plants allied with the forest preserver gain a +1 sacred bonus on attack rolls, damage rolls, and saving throws, and animals, fey, and plants called or summoned within this area gain 1 hit point per Hit Die as long as the calling or summoning effect lasts or until the sacred grove effect ends (whichever comes first). If the area contains a shrine or hallowed area dedicated to a good-aligned deity (or at the GM’s discretion, a place of natural magical power, such as a natural portal to the First World), these bonuses are doubled. When she uses this ability in her favored terrain, she can also imbue plants in the area with limited animation, allowing them to obscure vision and impede movement and attacks as if the area were affected by solid fog. A sacred grove remains enhanced in this way for a number of minutes equal to the paladin’s level.
 - **Implementation flags:**
-  - Likely existing hooks: typed/untyped numeric bonus, favored terrain hook, smite hook.
+  - summoning subsystem.
 
 ### Replaces: aura of faith
 
 - **Archetype feature:** Aura of Preservation (Su)
 - **Description:** At 14th level, a forest preserver grants animals and plants within 10 feet spell resistance equal to 11 + her paladin level.
-- **Mechanics:**
-  - Type: Su.
-  - Level hooks: 14.
-  - Mechanics summary: At 14th level, a forest preserver grants animals and plants within 10 feet spell resistance equal to 11 + her paladin level. This spell resistance doesn’t apply against harmless effects created by the forest preserver or allies within 10 feet of her.
+- **Detailed mechanics:**
+  - **Type:** Su.
+  - **Level hooks:** 14.
+  - **Rules text to implement:** At 14th level, a forest preserver grants animals and plants within 10 feet spell resistance equal to 11 + her paladin level. This spell resistance doesn’t apply against harmless effects created by the forest preserver or allies within 10 feet of her. This ability functions only if the forest preserver is conscious.
 - **Implementation flags:**
-  - Likely existing hooks: spellcasting/spell-list hook.
+  - Map replaced feature keys and verify existing engine hooks before implementation..
 
 ## Parsed source feature headings
 
@@ -99,4 +101,3 @@ These notes are implementation-oriented summaries of source mechanics. They avoi
 - Fireproof Aura (Su)
 - Sacred Grove (Su)
 - Aura of Preservation (Su)
-
