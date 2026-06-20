@@ -1644,6 +1644,37 @@ int count_total_slots(struct char_data *ch, int class, int circle)
   return total_slots;
 }
 
+/* count_used_bonus_domain_slots - how many bonus domain spell slots a cleric is
+   currently using.  Domain Master perks let a cleric prepare extra DOMAIN spells
+   beyond their normal per-circle capacity.  Those extra spells live in the prep
+   queue / collection like any other prepared spell, so the number of bonus slots
+   in use is simply the amount by which prepared+queued spells exceed normal
+   capacity, summed across all circles.  Because of this, the slots restore
+   naturally through the normal cast + re-pray cycle - there is no separate counter
+   or timer to keep in sync. */
+int count_used_bonus_domain_slots(struct char_data *ch)
+{
+  int circle, used = 0, in_use;
+
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  if (get_class_highest_circle(ch, CLASS_CLERIC) <= 0)
+    return 0;
+
+  /* Sum every circle (not just the current highest) so a prepared spell that
+     became "over capacity" - e.g. after a level/stat loss - is still counted. */
+  for (circle = 0; circle <= TOP_CIRCLE; circle++)
+  {
+    in_use = count_total_slots(ch, CLASS_CLERIC, circle) -
+             compute_slots_by_circle(ch, CLASS_CLERIC, circle);
+    if (in_use > 0)
+      used += in_use;
+  }
+
+  return used;
+}
+
 /**
  * sustain_melody_recover_one_slot - Instantly recover one spontaneous slot
  * @ch: Character to recover a slot for (PC only)
@@ -3834,6 +3865,7 @@ void display_available_slots(struct char_data *ch, int class)
 {
   int slot, num_circles = 0, slot_array[NUM_CIRCLES],
             highest_circle = get_class_highest_circle(ch, class), line_length = 80;
+  int bonus_domain_slots_available = 0;
   bool printed = FALSE, found_slot = FALSE;
   char buf[MAX_INPUT_LENGTH] = {'\0'};
 
@@ -3853,6 +3885,18 @@ void display_available_slots(struct char_data *ch, int class)
     }
   }
 
+  /* Clerics can earn extra domain spell slots via Domain Master perks; report
+     how many remain so the availability line isn't misleadingly empty.  Usage is
+     derived from live prep state, so it falls and restores with the normal
+     cast + re-pray cycle. */
+  if (class == CLASS_CLERIC && !IS_NPC(ch))
+  {
+    bonus_domain_slots_available =
+        get_cleric_bonus_domain_spells(ch) - count_used_bonus_domain_slots(ch);
+    if (bonus_domain_slots_available < 0)
+      bonus_domain_slots_available = 0;
+  }
+
   send_to_char(ch, "\tYAvailable:");
 
   for (slot = 0; slot <= highest_circle; slot++)
@@ -3870,9 +3914,17 @@ void display_available_slots(struct char_data *ch, int class)
     }
   }
   if (!printed)
-    send_to_char(ch, " \tYno more %s!\tn\r\n", class == CLASS_ALCHEMIST ? "extracts" : "spells");
+  {
+    if (bonus_domain_slots_available > 0)
+      send_to_char(ch, " \tYno standard spell slots!\tn\r\n");
+    else
+      send_to_char(ch, " \tYno more %s!\tn\r\n", class == CLASS_ALCHEMIST ? "extracts" : "spells");
+  }
   else
     send_to_char(ch, "\tn\r\n");
+
+  if (bonus_domain_slots_available > 0)
+    send_to_char(ch, "\tYBonus domain spell slots available: \tn%d\r\n", bonus_domain_slots_available);
 
   if (APOTHEOSIS_SLOTS(ch) > 0)
     send_to_char(ch, "\tYStored apotheosis charges: \tn%d\r\n", APOTHEOSIS_SLOTS(ch));
@@ -5426,8 +5478,21 @@ ACMDU(do_gen_preparation)
   /* count_total_slots is a count of how many are used by circle */
   if ((num_slots_by_circle - count_total_slots(ch, class, circle_for_spell)) <= 0)
   {
-    send_to_char(ch, "You can't retain more spells of that circle!\r\n");
-    return;
+    /* Out of normal slots in this circle.  Clerics with Domain Master perks may
+       prepare one additional DOMAIN spell per bonus slot, beyond their normal
+       capacity.  Usage is derived from live prep state (count_used_bonus_domain_slots),
+       so adding this spell to the prep queue is what "spends" the slot, and casting
+       it (then re-praying) is what restores it - no separate counter needed. */
+    if (class == CLASS_CLERIC && !IS_NPC(ch) && is_domain_spell_of_ch(ch, spellnum) &&
+        count_used_bonus_domain_slots(ch) < get_cleric_bonus_domain_spells(ch))
+    {
+      send_to_char(ch, "You draw upon a bonus domain spell slot.\r\n");
+    }
+    else
+    {
+      send_to_char(ch, "You can't retain more spells of that circle!\r\n");
+      return;
+    }
   }
 
   /* wizards spellbook reqs */

@@ -562,6 +562,10 @@ int count_known_spells_by_circle(struct char_data *ch, int class, int circle);
      */
 int count_total_slots(struct char_data *ch, int class, int circle);
 
+/* count_used_bonus_domain_slots - bonus domain spell slots a cleric currently
+ * has committed to prepared/queued domain spells (derived from live prep state). */
+int count_used_bonus_domain_slots(struct char_data *ch);
+
 /**
      * num_psionicist_powers_known - Count total psionic powers known
      * @ch: Character to check (must be psionicist)
