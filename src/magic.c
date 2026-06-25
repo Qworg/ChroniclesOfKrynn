@@ -9191,8 +9191,8 @@ void mag_affects_full(int level, struct char_data *ch, struct char_data *victim,
 
     af[0].duration = 300;
     SET_BIT_AR(af[0].bitvector, AFF_MIRROR_IMAGED);
-    to_room = "$n grins as multiple images pop up and smile!";
-    to_vict = "You watch as multiple images pop up and smile at you!";
+    to_room = "$n grins as multiple images pop up and smiles!";
+    to_vict = "You watch as multiple images pop up and smiles at you!";
     GET_IMAGES(victim) = 4 + MIN(5, (int)(level / 3));
     break;
 
