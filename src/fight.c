@@ -936,7 +936,7 @@ int get_initiative_modifier(struct char_data *ch)
   initiative += HAS_FEAT(ch, FEAT_HEROIC_INITIATIVE) ? 4 : 0;
 
   /* Tactical Fighter perk: Improved Initiative I */
-  initiative += 2 * get_perk_rank(ch, PERK_FIGHTER_IMPROVED_INITIATIVE_1, CLASS_WARRIOR);
+  initiative += get_fighter_improved_initiative_bonus(ch);
 
   /* Inquisitor Favored Terrain: +2 initiative in favored terrain */
   if (is_inquisitor_in_favored_terrain(ch))
@@ -1030,10 +1030,7 @@ int compute_armor_class(struct char_data *attacker, struct char_data *ch, int is
     if (teamwork_using_shield(ch, FEAT_SHIELD_WALL))
       bonuses[BONUS_TYPE_SHIELD] += teamwork_using_shield(ch, FEAT_SHIELD_WALL);
     /* Shield Mastery perks bonus */
-    if (has_perk(ch, PERK_FIGHTER_SHIELD_MASTERY_1))
-      bonuses[BONUS_TYPE_SHIELD] += 2;
-    if (has_perk(ch, PERK_FIGHTER_SHIELD_MASTERY_2))
-      bonuses[BONUS_TYPE_SHIELD] += 2;
+    bonuses[BONUS_TYPE_SHIELD] += get_fighter_shield_ac_bonus(ch);
   }
 
   bonuses[BONUS_TYPE_SHIELD] += get_shield_ally_bonus(ch);
@@ -1874,7 +1871,7 @@ void update_pos_dam(struct char_data *victim)
       act("$n's die hard toughness let's $m push through.", FALSE, victim, 0, 0, TO_ROOM);
       GET_HIT(victim) = 1;
     }
-    else if (has_perk(victim, PERK_FIGHTER_LAST_STAND) && dice(1, 3) == 1)
+    else if (has_fighter_last_stand(victim) && dice(1, 3) == 1)
     {
       act("\tYYou take your last stand and push through.\tn", FALSE, victim, 0, 0, TO_CHAR);
       act("$n takes $s last stand, allowing $m to push through.", FALSE, victim, 0, 0, TO_ROOM);
@@ -4851,31 +4848,23 @@ int compute_damage_reduction_full(struct char_data *ch, int dam_type, bool displ
   }
 
   /* Defensive Stance perk */
-  if (has_perk_active(ch, PERK_FIGHTER_DEFENSIVE_STANCE))
   {
-    int dr_amount = 2;
+    int dr_amount = get_fighter_defensive_stance_dr(ch);
 
-    /* Check for Immovable Object first (highest DR) */
-    if (has_perk_active(ch, PERK_FIGHTER_IMMOVABLE_OBJECT))
-    {
-      dr_amount = 6;
-      if (display)
-        send_to_char(ch, "%-30s: %d\r\n", "Immovable Object", 6);
-    }
-    /* Check for Improved Damage Reduction */
-    else if (has_perk(ch, PERK_FIGHTER_IMPROVED_DAMAGE_REDUCTION))
-    {
-      dr_amount = 4;
-      if (display)
-        send_to_char(ch, "%-30s: %d\r\n", "Improved Damage Reduction", 4);
-    }
-    else
+    if (dr_amount > 0)
     {
       if (display)
-        send_to_char(ch, "%-30s: %d\r\n", "Defensive Stance Perk", 2);
-    }
+      {
+        if (dr_amount == 6)
+          send_to_char(ch, "%-30s: %d\r\n", "Immovable Object", dr_amount);
+        else if (dr_amount == 4)
+          send_to_char(ch, "%-30s: %d\r\n", "Improved Damage Reduction", dr_amount);
+        else
+          send_to_char(ch, "%-30s: %d\r\n", "Defensive Stance Perk", dr_amount);
+      }
 
-    damage_reduction += dr_amount;
+      damage_reduction += dr_amount;
+    }
   }
 
   if (HAS_FEAT(ch, FEAT_ARMOR_MASTERY) && (GET_EQ(ch, WEAR_BODY) || GET_EQ(ch, WEAR_SHIELD)))
@@ -7980,7 +7969,7 @@ int compute_damage_bonus(struct char_data *ch, struct char_data *vict, struct ob
     int pa_bonus = COMBAT_MODE_VALUE(ch);
 
     /* Power Attack Training perk adds +2 damage */
-    if (has_perk(ch, PERK_FIGHTER_POWER_ATTACK_TRAINING))
+    if (has_fighter_power_attack_training(ch))
     {
       pa_bonus += 2;
     }
@@ -8638,7 +8627,7 @@ int determine_threat_range(struct char_data *ch, struct obj_data *wielded, struc
     threat_range--;
 
   /* Improved Critical Threat perk */
-  if (has_perk(ch, PERK_FIGHTER_IMPROVED_CRITICAL_THREAT))
+  if (has_fighter_improved_critical_threat(ch))
     threat_range--;
 
   /* Berserker Improved Critical I */
@@ -8797,6 +8786,10 @@ int determine_critical_multiplier(struct char_data *ch, struct obj_data *wielded
       crit_multi++;
     }
   }
+
+  /* Perfect Critical perk improves critical multiplier */
+  if (has_fighter_perfect_critical(ch))
+    crit_multi++;
 
   /* Blackguard: Blackened Precision - while Profane Weapon Bond active, improve crit multiplier */
   if (!IS_NPC(ch) && has_blackguard_blackened_precision(ch) &&
@@ -9108,14 +9101,7 @@ int is_critical_hit(struct char_data *ch, struct obj_data *wielded, int diceroll
   int powerful_being = 0;
 
   /* Critical Awareness perk bonuses (Fighter) */
-  if (has_perk(ch, PERK_FIGHTER_CRITICAL_AWARENESS_1))
-  {
-    confirm_roll += 1;
-  }
-  if (has_perk(ch, PERK_FIGHTER_CRITICAL_AWARENESS_2))
-  {
-    confirm_roll += 1;
-  }
+  confirm_roll += get_fighter_critical_confirm_bonus(ch);
 
   /* Vital Strike perk bonuses (Rogue) */
   if (!IS_NPC(ch))
@@ -9185,6 +9171,9 @@ int is_critical_hit(struct char_data *ch, struct obj_data *wielded, int diceroll
 
   if (diceroll >= threat_range)
   { /* critical potential? */
+
+    if (has_fighter_perfect_critical(ch) && ((calc_bab + diceroll) >= victim_ac || diceroll == 20))
+      return 1;
 
     if (HAS_FEAT(ch, FEAT_POWER_CRITICAL))
     { /* Check the weapon type, make sure it matches. */
@@ -9438,7 +9427,7 @@ int compute_hit_damage(struct char_data *ch, struct char_data *victim, int w_typ
         dam += dice(1, 6);
 
       /* Devastating Critical perk - adds 1d6 damage on critical hits */
-      if (has_perk(ch, PERK_FIGHTER_DEVASTATING_CRITICAL))
+      if (has_fighter_devastating_critical(ch))
       {
         dam += dice(1, 6);
       }
@@ -11390,7 +11379,7 @@ int compute_attack_bonus_full(struct char_data *ch,     /* Attacker */
     int penalty = COMBAT_MODE_VALUE(ch);
 
     /* Power Attack Training perk reduces penalty by 1 (from -2 to -1) */
-    if (AFF_FLAGGED(ch, AFF_POWER_ATTACK) && has_perk(ch, PERK_FIGHTER_POWER_ATTACK_TRAINING))
+    if (AFF_FLAGGED(ch, AFF_POWER_ATTACK) && has_fighter_power_attack_training(ch))
     {
       penalty -= 1;
       if (penalty < 1)
@@ -12497,8 +12486,7 @@ int attack_of_opportunity(struct char_data *ch, struct char_data *victim, int pe
     max_aoo = GET_DEX_BONUS(ch);
 
   /* Tactical Fighter perks: Combat Reflexes I and II (Warrior) */
-  max_aoo += get_perk_rank(ch, PERK_FIGHTER_COMBAT_REFLEXES_1, CLASS_WARRIOR);
-  max_aoo += get_perk_rank(ch, PERK_FIGHTER_COMBAT_REFLEXES_2, CLASS_WARRIOR);
+  max_aoo += get_fighter_combat_reflexes_bonus(ch);
 
   /* Opportunist perk (Rogue) */
   if (!IS_NPC(ch))
@@ -14023,6 +14011,13 @@ int handle_successful_attack(struct char_data *ch, struct char_data *victim,
   dam += compute_hit_damage(ch, victim, w_type, diceroll, 0, is_critical, attack_type, dam_type);
   if (type == TYPE_ATTACK_OF_OPPORTUNITY && has_teamwork_feat(ch, FEAT_PAIRED_OPPORTUNISTS))
     dam += 2;
+  if (type == TYPE_ATTACK_OF_OPPORTUNITY)
+  {
+    int opportunist_dice = get_fighter_opportunist_dice(ch);
+
+    if (opportunist_dice > 0)
+      dam += dice(opportunist_dice, 6);
+  }
   dam += powerful_blow_bonus;     /* ornir is going to yell at me for this :p  -zusuk */
   dam += crushing_blow_bonus;     /* monk crushing blow +4d6 damage */
   dam += void_strike_bonus;       /* monk void strike +8d6 force damage */
@@ -14982,7 +14977,7 @@ int hit(struct char_data *ch, struct char_data *victim, int type, int dam_type, 
       victim_ac += 4;
     /* Tactical Fighter perk: Mobility I */
     if (has_dex_bonus_to_ac(ch, victim))
-      victim_ac += 2 * get_perk_rank(victim, PERK_FIGHTER_MOBILITY_1, CLASS_WARRIOR);
+      victim_ac += get_fighter_mobility_ac_bonus(victim);
     /* Shadow Scout perk: Uncanny Dodge II */
     if (!IS_NPC(victim))
       victim_ac += get_uncanny_dodge_aoo_ac_bonus(victim);
@@ -15041,6 +15036,17 @@ int hit(struct char_data *ch, struct char_data *victim, int type, int dam_type, 
     send_to_char(ch, "\tc{T:%d+", calc_bab);
     send_to_char(ch, "D:%d>=", diceroll);
     send_to_char(ch, "AC:%d}\tn", victim_ac);
+  }
+
+  if (!IS_NPC(ch) && char_has_mud_event(ch, ePERFECT_STRIKE_ARMED))
+  {
+    if (can_hit > 0 && !IS_IMMUNE_CRITS(ch, victim))
+    {
+      is_critical = TRUE;
+      send_combat_roll_info(ch, "\tW[PERFECT STRIKE]\tn");
+      send_combat_roll_info(victim, "\tR[PERFECT STRIKE]\tn");
+      event_cancel_specific(ch, ePERFECT_STRIKE_ARMED);
+    }
   }
 
   /* Total Defense calculation -
@@ -16444,6 +16450,15 @@ int perform_attacks(struct char_data *ch, int mode, int phase)
     GET_CONSECUTIVE_HITS(ch) = 0;
   }
 
+  /* Master of Arms adds one standard melee mainhand attack at max BAB. */
+  if (!dragon_disciple_natural_routine && !VITAL_STRIKING(ch))
+  {
+    int fighter_extra_attacks = get_fighter_extra_attacks(ch);
+
+    bonus_mainhand_attacks += fighter_extra_attacks;
+    attacks_at_max_bab += fighter_extra_attacks;
+  }
+
   // execute the calculated attacks from above
   if (VITAL_STRIKING(ch) || dragon_disciple_natural_routine)
     bonus_mainhand_attacks = 0;
@@ -16983,7 +16998,7 @@ void handle_cleave(struct char_data *ch)
       ATTACK_TYPE_PRIMARY); /* whack with mainhand */
 
   /* Great Cleave - feat or perk */
-  if ((HAS_FEAT(ch, FEAT_GREAT_CLEAVE) || has_perk(ch, PERK_FIGHTER_GREAT_CLEAVE) ||
+  if ((HAS_FEAT(ch, FEAT_GREAT_CLEAVE) || has_fighter_great_cleave(ch) ||
        has_berserker_cleaving_strikes(ch)) &&
       !is_using_ranged_weapon(ch, TRUE))
   {
@@ -17104,8 +17119,7 @@ void perform_violence(struct char_data *ch, int phase)
     if (ch && FIGHTING(ch) && !IS_NPC(ch) && can_stand(ch) && PRF_FLAGGED(ch, PRF_AUTO_STAND))
     {
       /* check if we can springleap out of this */
-      if ((HAS_FEAT(ch, FEAT_SPRING_ATTACK) ||
-           get_perk_rank(ch, PERK_FIGHTER_SPRING_ATTACK, CLASS_WARRIOR)) &&
+      if ((HAS_FEAT(ch, FEAT_SPRING_ATTACK) || has_fighter_spring_attack(ch)) &&
           CLASS_LEVEL(ch, CLASS_MONK) >= 5)
       {
         do_springleap(ch, 0, 0, 0);
@@ -17489,7 +17503,7 @@ void perform_violence(struct char_data *ch, int phase)
     /* handle cleave - now includes Cleaving Strike perks */
     if (phase == 1 &&
         (HAS_FEAT(ch, FEAT_CLEAVE) || HAS_FEAT(ch, FEAT_GREAT_CLEAVE) ||
-         has_perk(ch, PERK_FIGHTER_CLEAVING_STRIKE) || has_berserker_cleaving_strikes(ch)) &&
+         has_fighter_cleaving_strike(ch) || has_berserker_cleaving_strikes(ch)) &&
         !is_using_ranged_weapon(ch, TRUE))
       handle_cleave(ch);
   }

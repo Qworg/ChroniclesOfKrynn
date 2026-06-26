@@ -1962,6 +1962,23 @@ bool perform_knockdown(struct char_data *ch, struct char_data *vict, int skill, 
         /* You get a free swing on the tripped opponent. */
         hit(ch, vict, TYPE_UNDEFINED, DAM_RESERVED_DBC, 0, FALSE);
       }
+
+      if (skill == SKILL_TRIP && has_fighter_greater_trip(ch) && GET_POS(vict) > POS_DEAD)
+      {
+        struct char_data *tch = NULL, *next_tch = NULL;
+
+        for (tch = world[IN_ROOM(ch)].people; tch; tch = next_tch)
+        {
+          next_tch = tch->next_in_room;
+
+          if (tch == ch || tch == vict || !is_player_grouped(ch, tch) || !MOB_CAN_FIGHT(tch) ||
+              !can_act(tch))
+            continue;
+
+          if (attack_of_opportunity(tch, vict, 0) < 0)
+            break;
+        }
+      }
     }
   }
 
@@ -8985,9 +9002,101 @@ ACMD(do_rescue)
   perform_rescue(ch, vict);
 }
 
+ACMDCHECK(can_reposition)
+{
+  ACMDCHECK_PERMFAIL_IF(!has_fighter_positioning_expert(ch),
+                        "You have no idea how to reposition allies.\r\n");
+  return CAN_CMD;
+}
+
+ACMD(do_reposition)
+{
+  char arg[MAX_INPUT_LENGTH] = {'\0'};
+  struct char_data *vict = NULL, *tmp_ch = NULL, *next_ch = NULL, *first_foe = NULL;
+  int redirected = 0;
+
+  PREREQ_CAN_FIGHT();
+  PREREQ_CHECK(can_reposition);
+
+  one_argument(argument, arg, sizeof(arg));
+
+  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
+  {
+    send_to_char(ch, "Whom do you want to reposition with?\r\n");
+    return;
+  }
+
+  if (vict == ch)
+  {
+    send_to_char(ch, "You are already in your own position.\r\n");
+    return;
+  }
+
+  if (!is_player_grouped(ch, vict))
+  {
+    send_to_char(ch, "You can only reposition with a grouped ally.\r\n");
+    return;
+  }
+
+  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SINGLEFILE) && ch->next_in_room != vict &&
+      vict->next_in_room != ch)
+  {
+    send_to_char(ch, "You simply can't reach that far.\r\n");
+    return;
+  }
+
+  for (tmp_ch = world[IN_ROOM(ch)].people; tmp_ch; tmp_ch = next_ch)
+  {
+    next_ch = tmp_ch->next_in_room;
+
+    if (FIGHTING(tmp_ch) != vict || is_player_grouped(ch, tmp_ch))
+      continue;
+
+    if (!first_foe)
+      first_foe = tmp_ch;
+
+    if (FIGHTING(tmp_ch))
+    {
+      if (char_has_mud_event(tmp_ch, eCOMBAT_ROUND))
+      {
+        event_cancel_specific(tmp_ch, eCOMBAT_ROUND);
+      }
+      stop_fighting(tmp_ch);
+    }
+
+    set_fighting(tmp_ch, ch);
+    redirected++;
+  }
+
+  if (!redirected)
+  {
+    act("But nobody is fighting $M!", FALSE, ch, 0, vict, TO_CHAR);
+    return;
+  }
+
+  if (FIGHTING(ch))
+  {
+    if (char_has_mud_event(ch, eCOMBAT_ROUND))
+    {
+      event_cancel_specific(ch, eCOMBAT_ROUND);
+    }
+    stop_fighting(ch);
+  }
+
+  set_fighting(ch, first_foe);
+
+  act("You shift into $N's place, drawing $S attackers to you!", FALSE, ch, 0, vict, TO_CHAR);
+  act("$n shifts into your place, drawing your attackers away!", FALSE, ch, 0, vict, TO_VICT);
+  act("$n shifts into $N's place, drawing $S attackers away!", FALSE, ch, 0, vict, TO_NOTVICT);
+
+  USE_STANDARD_ACTION(ch);
+}
+
 ACMDCHECK(can_whirlwind)
 {
-  ACMDCHECK_PREREQ_HASFEAT(FEAT_WHIRLWIND_ATTACK, "You have no idea how.\r\n");
+  ACMDCHECK_PERMFAIL_IF(!HAS_FEAT(ch, FEAT_WHIRLWIND_ATTACK) &&
+                            !has_fighter_whirlwind_attack(ch),
+                        "You have no idea how.\r\n");
   return CAN_CMD;
 }
 
@@ -9048,6 +9157,86 @@ ACMD(do_whirlwind)
    * This function below adds a new event of "eWHIRLWIND", to "ch", and passes "NULL" as
    * additional data. The event will be called in "3 * PASSES_PER_SEC" or 3 seconds */
   // NEW_EVENT(eWHIRLWIND, ch, NULL, 3 * PASSES_PER_SEC);
+}
+
+ACMDCHECK(can_perfectstrike)
+{
+  ACMDCHECK_PERMFAIL_IF(!has_fighter_perfect_strike(ch),
+                        "You have no idea how to make a perfect strike.\r\n");
+  return CAN_CMD;
+}
+
+ACMD(do_perfectstrike)
+{
+  PREREQ_CAN_FIGHT();
+  PREREQ_CHECK(can_perfectstrike);
+
+  if (!FIGHTING(ch))
+  {
+    send_to_char(ch, "You must be fighting to make a perfect strike.\r\n");
+    return;
+  }
+
+  if (char_has_mud_event(ch, ePERFECT_STRIKE_USED))
+  {
+    send_to_char(ch, "You have already used perfect strike in this combat.\r\n");
+    return;
+  }
+
+  attach_mud_event(new_mud_event(ePERFECT_STRIKE_ARMED, ch, NULL), 12 * PASSES_PER_SEC);
+  attach_mud_event(new_mud_event(ePERFECT_STRIKE_USED, ch, NULL), 60 * PASSES_PER_SEC);
+
+  send_to_char(ch, "You focus completely, preparing a perfect strike!\r\n");
+  act("$n focuses completely, preparing a perfect strike!", FALSE, ch, 0, 0, TO_ROOM);
+
+  USE_SWIFT_ACTION(ch);
+}
+
+ACMDCHECK(can_unstoppable)
+{
+  ACMDCHECK_PERMFAIL_IF(!has_fighter_unstoppable_warrior(ch),
+                        "You have no idea how to become unstoppable.\r\n");
+  return CAN_CMD;
+}
+
+ACMD(do_unstoppable)
+{
+  struct affected_type af[5];
+  int i = 0;
+
+  PREREQ_CAN_FIGHT();
+  PREREQ_CHECK(can_unstoppable);
+
+  if (char_has_mud_event(ch, eUNSTOPPABLE_WARRIOR))
+  {
+    send_to_char(ch, "You must rest before you can become unstoppable again.\r\n");
+    return;
+  }
+
+  for (i = 0; i < 5; i++)
+  {
+    new_affect(&(af[i]));
+    af[i].spell = PERK_FIGHTER_UNSTOPPABLE_WARRIOR;
+    af[i].duration = 10;
+    af[i].modifier = 2;
+    af[i].bonus_type = BONUS_TYPE_MORALE;
+  }
+
+  af[0].location = APPLY_HITROLL;
+  af[1].location = APPLY_AC_NEW;
+  af[2].location = APPLY_SAVING_FORT;
+  af[3].location = APPLY_SAVING_REFL;
+  af[4].location = APPLY_SAVING_WILL;
+
+  for (i = 0; i < 5; i++)
+    affect_join(ch, af + i, FALSE, FALSE, FALSE, FALSE);
+
+  send_to_char(ch, "You become an unstoppable warrior!\r\n");
+  act("$n becomes an unstoppable warrior!", FALSE, ch, 0, 0, TO_ROOM);
+
+  attach_mud_event(new_mud_event(eUNSTOPPABLE_WARRIOR, ch, NULL), SECS_PER_MUD_DAY);
+
+  USE_STANDARD_ACTION(ch);
 }
 
 ACMDCHECK(can_deatharrow)
@@ -10817,7 +11006,9 @@ ACMD(do_hitall)
     return;
   }
 
-  if ((IS_NPC(ch) || !HAS_FEAT(ch, FEAT_WHIRLWIND_ATTACK)) && (!IS_PET(ch) || IS_FAMILIAR(ch)))
+  if ((IS_NPC(ch) || !HAS_FEAT(ch, FEAT_WHIRLWIND_ATTACK)) &&
+      !has_fighter_whirlwind_attack(ch) &&
+      (!IS_PET(ch) || IS_FAMILIAR(ch)))
   {
     send_to_char(ch, "But you do not know how to do that.\r\n");
     return;

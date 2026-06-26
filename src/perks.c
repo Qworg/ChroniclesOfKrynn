@@ -6894,6 +6894,44 @@ void define_fighter_perks(void)
   perk->effect_modifier = 0;
   perk->special_description = strdup("Extra 1d6 damage on critical hits");
 
+  /*** TIER IV PERKS (Tree 1: Weapon Specialist) ***/
+
+  /* Master of Arms */
+  perk = &perk_list[PERK_FIGHTER_MASTER_OF_ARMS];
+  perk->id = PERK_FIGHTER_MASTER_OF_ARMS;
+  perk->name = strdup("Master of Arms");
+  perk->description = strdup("+1 attack per round");
+  perk->associated_class = CLASS_WARRIOR;
+  perk->perk_category = PERK_CATEGORY_WEAPON_SPECIALIST;
+  perk->cost = 5;
+  perk->max_rank = 1;
+  perk->prerequisite_perk = PERK_FIGHTER_WEAPON_FOCUS_3;
+  perk->prerequisite_rank = 1;
+  perk->effect_type = PERK_EFFECT_SPECIAL;
+  perk->effect_value = 1;
+  perk->effect_modifier = 0;
+  perk->special_description =
+      strdup("Grants one additional melee attack per round. (Doc prereq also: Weapon "
+             "Specialization II max)");
+
+  /* Perfect Critical */
+  perk = &perk_list[PERK_FIGHTER_PERFECT_CRITICAL];
+  perk->id = PERK_FIGHTER_PERFECT_CRITICAL;
+  perk->name = strdup("Perfect Critical");
+  perk->description = strdup("Critical hits automatically confirm, critical multiplier +1");
+  perk->associated_class = CLASS_WARRIOR;
+  perk->perk_category = PERK_CATEGORY_WEAPON_SPECIALIST;
+  perk->cost = 5;
+  perk->max_rank = 1;
+  perk->prerequisite_perk = PERK_FIGHTER_DEVASTATING_CRITICAL;
+  perk->prerequisite_rank = 1;
+  perk->effect_type = PERK_EFFECT_SPECIAL;
+  perk->effect_value = 0;
+  perk->effect_modifier = 0;
+  perk->special_description =
+      strdup("Your critical threats always confirm and your critical multiplier increases by 1. "
+             "(Doc prereq also: Critical Awareness II)");
+
   /*** TREE 2: DEFENDER - TIER I ***/
 
   /* Armor Training I */
@@ -7268,6 +7306,114 @@ void define_fighter_perks(void)
   perk->effect_modifier = 0;
   perk->special_description =
       strdup("Allows moving before and after attacking without provoking AoO");
+
+  /*** TREE 3: TACTICAL FIGHTER - TIER III ***/
+
+  /* Greater Trip */
+  perk = &perk_list[PERK_FIGHTER_GREATER_TRIP];
+  perk->id = PERK_FIGHTER_GREATER_TRIP;
+  perk->name = strdup("Greater Trip");
+  perk->description =
+      strdup("Enemies you trip provoke attacks of opportunity from all your allies");
+  perk->associated_class = CLASS_WARRIOR;
+  perk->perk_category = PERK_CATEGORY_TACTICAL_FIGHTER;
+  perk->cost = 3;
+  perk->max_rank = 1;
+  perk->prerequisite_perk = PERK_FIGHTER_IMPROVED_TRIP;
+  perk->prerequisite_rank = 1;
+  perk->effect_type = PERK_EFFECT_SPECIAL;
+  perk->effect_value = 0;
+  perk->effect_modifier = 0;
+  perk->special_description =
+      strdup("Enemies you trip provoke attacks of opportunity from all your allies");
+
+  /* Whirlwind Attack */
+  perk = &perk_list[PERK_FIGHTER_WHIRLWIND_ATTACK];
+  perk->id = PERK_FIGHTER_WHIRLWIND_ATTACK;
+  perk->name = strdup("Whirlwind Attack");
+  perk->description =
+      strdup("Once per combat, attack all adjacent enemies (use the whirlwind command)");
+  perk->associated_class = CLASS_WARRIOR;
+  perk->perk_category = PERK_CATEGORY_TACTICAL_FIGHTER;
+  perk->cost = 4;
+  perk->max_rank = 1;
+  perk->prerequisite_perk = PERK_FIGHTER_SPRING_ATTACK;
+  perk->prerequisite_rank = 1;
+  perk->effect_type = PERK_EFFECT_SPECIAL;
+  perk->effect_value = 0;
+  perk->effect_modifier = 0;
+  perk->special_description = strdup("(Doc prereq also: Combat Reflexes I 2 ranks)");
+
+  /* Positioning Expert */
+  perk = &perk_list[PERK_FIGHTER_POSITIONING_EXPERT];
+  perk->id = PERK_FIGHTER_POSITIONING_EXPERT;
+  perk->name = strdup("Positioning Expert");
+  perk->description =
+      strdup("Switch places with an adjacent ally as a free action (use the reposition command)");
+  perk->associated_class = CLASS_WARRIOR;
+  perk->perk_category = PERK_CATEGORY_TACTICAL_FIGHTER;
+  perk->cost = 3;
+  perk->max_rank = 1;
+  perk->prerequisite_perk = PERK_FIGHTER_MOBILITY_1;
+  perk->prerequisite_rank = 2;
+  perk->effect_type = PERK_EFFECT_SPECIAL;
+  perk->effect_value = 0;
+  perk->effect_modifier = 0;
+  perk->special_description = strdup("");
+
+  /* Opportunist */
+  perk = &perk_list[PERK_FIGHTER_OPPORTUNIST];
+  perk->id = PERK_FIGHTER_OPPORTUNIST;
+  perk->name = strdup("Opportunist");
+  perk->description = strdup("Your attacks of opportunity deal +2d6 damage");
+  perk->associated_class = CLASS_WARRIOR;
+  perk->perk_category = PERK_CATEGORY_TACTICAL_FIGHTER;
+  perk->cost = 3;
+  perk->max_rank = 1;
+  perk->prerequisite_perk = PERK_FIGHTER_COMBAT_REFLEXES_2;
+  perk->prerequisite_rank = 1;
+  perk->effect_type = PERK_EFFECT_SPECIAL;
+  perk->effect_value = 2;
+  perk->effect_modifier = 0;
+  perk->special_description = strdup("");
+
+  /*** TREE 3: TACTICAL FIGHTER - TIER IV ***/
+
+  /* Perfect Strike */
+  perk = &perk_list[PERK_FIGHTER_PERFECT_STRIKE];
+  perk->id = PERK_FIGHTER_PERFECT_STRIKE;
+  perk->name = strdup("Perfect Strike");
+  perk->description =
+      strdup("Once per combat, declare one attack as an automatic critical hit (use the "
+             "perfectstrike command)");
+  perk->associated_class = CLASS_WARRIOR;
+  perk->perk_category = PERK_CATEGORY_TACTICAL_FIGHTER;
+  perk->cost = 5;
+  perk->max_rank = 1;
+  perk->prerequisite_perk = PERK_FIGHTER_IMPROVED_INITIATIVE_1;
+  perk->prerequisite_rank = 3;
+  perk->effect_type = PERK_EFFECT_SPECIAL;
+  perk->effect_value = 0;
+  perk->effect_modifier = 0;
+  perk->special_description = strdup("(Doc prereq also: Combat Reflexes II max)");
+
+  /* Unstoppable Warrior */
+  perk = &perk_list[PERK_FIGHTER_UNSTOPPABLE_WARRIOR];
+  perk->id = PERK_FIGHTER_UNSTOPPABLE_WARRIOR;
+  perk->name = strdup("Unstoppable Warrior");
+  perk->description =
+      strdup("Once per day, gain +2 to all saves, +2 AC, and +2 to hit for 10 rounds (use the "
+             "unstoppable command)");
+  perk->associated_class = CLASS_WARRIOR;
+  perk->perk_category = PERK_CATEGORY_TACTICAL_FIGHTER;
+  perk->cost = 5;
+  perk->max_rank = 1;
+  perk->prerequisite_perk = PERK_FIGHTER_GREATER_TRIP;
+  perk->prerequisite_rank = 1;
+  perk->effect_type = PERK_EFFECT_SPECIAL;
+  perk->effect_value = 2;
+  perk->effect_modifier = 0;
+  perk->special_description = strdup("(Doc prereq also: Spring Attack)");
 
   /*** OLDER PERKS (to be reorganized into tiers) ***/
 
@@ -24945,6 +25091,286 @@ int get_arcane_supremacy_damage_bonus(struct char_data *ch)
     return 2;
 
   return 0;
+}
+
+/* ============================================================================
+ * FIGHTER (WARRIOR) PERK HELPERS
+ * ============================================================================ */
+
+bool has_fighter_power_attack_training(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_POWER_ATTACK_TRAINING);
+}
+
+int get_fighter_critical_confirm_bonus(struct char_data *ch)
+{
+  int bonus = 0;
+
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  if (has_perk(ch, PERK_FIGHTER_CRITICAL_AWARENESS_1))
+    bonus += 1;
+
+  if (has_perk(ch, PERK_FIGHTER_CRITICAL_AWARENESS_2))
+    bonus += 1;
+
+  return bonus;
+}
+
+bool has_fighter_improved_critical_threat(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_IMPROVED_CRITICAL_THREAT);
+}
+
+bool has_fighter_devastating_critical(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_DEVASTATING_CRITICAL);
+}
+
+bool has_fighter_cleaving_strike(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_CLEAVING_STRIKE);
+}
+
+bool has_fighter_great_cleave(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_GREAT_CLEAVE);
+}
+
+int get_fighter_shield_ac_bonus(struct char_data *ch)
+{
+  int bonus = 0;
+
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  if (has_perk(ch, PERK_FIGHTER_SHIELD_MASTERY_1))
+    bonus += 2;
+
+  if (has_perk(ch, PERK_FIGHTER_SHIELD_MASTERY_2))
+    bonus += 2;
+
+  return bonus;
+}
+
+bool has_fighter_defensive_stance(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_DEFENSIVE_STANCE);
+}
+
+int get_fighter_defensive_stance_dr(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  if (!has_perk_active(ch, PERK_FIGHTER_DEFENSIVE_STANCE))
+    return 0;
+
+  if (has_perk_active(ch, PERK_FIGHTER_IMMOVABLE_OBJECT))
+    return 6;
+
+  if (has_perk(ch, PERK_FIGHTER_IMPROVED_DAMAGE_REDUCTION))
+    return 4;
+
+  return 2;
+}
+
+bool has_fighter_immovable_object(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_IMMOVABLE_OBJECT);
+}
+
+bool has_fighter_last_stand(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_LAST_STAND);
+}
+
+bool has_fighter_iron_will(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_IRON_WILL);
+}
+
+bool has_fighter_stalwart(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_STALWART);
+}
+
+int get_fighter_combat_reflexes_bonus(struct char_data *ch)
+{
+  int bonus = 0;
+
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  bonus += get_perk_rank(ch, PERK_FIGHTER_COMBAT_REFLEXES_1, CLASS_WARRIOR);
+  bonus += get_perk_rank(ch, PERK_FIGHTER_COMBAT_REFLEXES_2, CLASS_WARRIOR);
+
+  return bonus;
+}
+
+int get_fighter_improved_initiative_bonus(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  return 2 * get_perk_rank(ch, PERK_FIGHTER_IMPROVED_INITIATIVE_1, CLASS_WARRIOR);
+}
+
+int get_fighter_mobility_ac_bonus(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  return 2 * get_perk_rank(ch, PERK_FIGHTER_MOBILITY_1, CLASS_WARRIOR);
+}
+
+bool has_fighter_improved_trip(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_IMPROVED_TRIP);
+}
+
+bool has_fighter_improved_disarm(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_IMPROVED_DISARM);
+}
+
+bool has_fighter_improved_sunder(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_IMPROVED_SUNDER);
+}
+
+bool has_fighter_spring_attack(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_SPRING_ATTACK);
+}
+
+bool has_fighter_master_of_arms(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_MASTER_OF_ARMS);
+}
+
+int get_fighter_extra_attacks(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  if (has_fighter_master_of_arms(ch))
+    return 1;
+
+  return 0;
+}
+
+bool has_fighter_perfect_critical(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_PERFECT_CRITICAL);
+}
+
+bool has_fighter_greater_trip(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_GREATER_TRIP);
+}
+
+bool has_fighter_whirlwind_attack(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_WHIRLWIND_ATTACK);
+}
+
+bool has_fighter_positioning_expert(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_POSITIONING_EXPERT);
+}
+
+bool has_fighter_opportunist(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_OPPORTUNIST);
+}
+
+int get_fighter_opportunist_dice(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return 0;
+
+  if (has_perk(ch, PERK_FIGHTER_OPPORTUNIST))
+    return 2;
+
+  return 0;
+}
+
+bool has_fighter_perfect_strike(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_PERFECT_STRIKE);
+}
+
+bool has_fighter_unstoppable_warrior(struct char_data *ch)
+{
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  return has_perk(ch, PERK_FIGHTER_UNSTOPPABLE_WARRIOR);
 }
 
 /* ============================================================================

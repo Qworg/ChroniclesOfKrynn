@@ -907,6 +907,39 @@ int get_arcane_supremacy_dc_bonus(struct char_data *ch);
 int get_arcane_supremacy_caster_level_bonus(struct char_data *ch);
 int get_arcane_supremacy_damage_bonus(struct char_data *ch);
 
+/* Fighter (Warrior) perk helpers */
+bool has_fighter_power_attack_training(struct char_data *ch);
+int get_fighter_critical_confirm_bonus(struct char_data *ch);
+bool has_fighter_improved_critical_threat(struct char_data *ch);
+bool has_fighter_devastating_critical(struct char_data *ch);
+bool has_fighter_cleaving_strike(struct char_data *ch);
+bool has_fighter_great_cleave(struct char_data *ch);
+int get_fighter_shield_ac_bonus(struct char_data *ch);
+bool has_fighter_defensive_stance(struct char_data *ch);
+int get_fighter_defensive_stance_dr(struct char_data *ch);
+bool has_fighter_immovable_object(struct char_data *ch);
+bool has_fighter_last_stand(struct char_data *ch);
+bool has_fighter_iron_will(struct char_data *ch);
+bool has_fighter_stalwart(struct char_data *ch);
+int get_fighter_combat_reflexes_bonus(struct char_data *ch);
+int get_fighter_improved_initiative_bonus(struct char_data *ch);
+int get_fighter_mobility_ac_bonus(struct char_data *ch);
+bool has_fighter_improved_trip(struct char_data *ch);
+bool has_fighter_improved_disarm(struct char_data *ch);
+bool has_fighter_improved_sunder(struct char_data *ch);
+bool has_fighter_spring_attack(struct char_data *ch);
+/* New tier-4 / tier-3 perks */
+bool has_fighter_master_of_arms(struct char_data *ch);
+int get_fighter_extra_attacks(struct char_data *ch);
+bool has_fighter_perfect_critical(struct char_data *ch);
+bool has_fighter_greater_trip(struct char_data *ch);
+bool has_fighter_whirlwind_attack(struct char_data *ch);
+bool has_fighter_positioning_expert(struct char_data *ch);
+bool has_fighter_opportunist(struct char_data *ch);
+int get_fighter_opportunist_dice(struct char_data *ch);
+bool has_fighter_perfect_strike(struct char_data *ch);
+bool has_fighter_unstoppable_warrior(struct char_data *ch);
+
 /* Monk perk helper functions */
 int get_monk_unarmed_damage_bonus(struct char_data *ch);
 int get_monk_dr_bypass(struct char_data *ch);

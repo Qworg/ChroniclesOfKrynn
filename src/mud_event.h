@@ -261,6 +261,9 @@ typedef enum
   eDARK_MASTERS_WILL,            // warlock pact bonding Dark Master's Will 5-minute cooldown
   eWARLOCK_ONE_WITH_PATRON,      // warlock pact bonding One with Patron 50% HP trigger cooldown
   eDRAGON_DISCIPLE_FORM,         // dragon disciple dragon form daily use
+  eUNSTOPPABLE_WARRIOR,          /* Warrior perk: Unstoppable Warrior daily cooldown */
+  ePERFECT_STRIKE_USED,          /* Warrior perk: Perfect Strike used this combat */
+  ePERFECT_STRIKE_ARMED,         /* Warrior perk: next attack is an automatic critical */
 } event_id;
 
 /* probably a smart place to mention to not forget to update:

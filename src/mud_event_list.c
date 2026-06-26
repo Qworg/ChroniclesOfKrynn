@@ -521,6 +521,10 @@ struct mud_event_list mud_event_index[] = {
     {"One with Patron", event_countdown, EVENT_CHAR, NULL, NULL, FEAT_UNDEFINED, 0},
     {"Dragon Disciple Form", event_daily_use_cooldown, EVENT_CHAR, NULL,
      "One of your dragon form uses has recovered.", FEAT_DRAGON_DISCIPLE_DRAGON_FORM, 0},
+    {"Unstoppable Warrior", event_countdown, EVENT_CHAR,
+     "You can call upon Unstoppable Warrior again.", NULL, FEAT_UNDEFINED, 0},
+    {"Perfect Strike Used", event_countdown, EVENT_CHAR, NULL, NULL, FEAT_UNDEFINED, 0},
+    {"Perfect Strike Armed", event_countdown, EVENT_CHAR, NULL, NULL, FEAT_UNDEFINED, 0},
 };
 
 /* Expose registry count for validation */

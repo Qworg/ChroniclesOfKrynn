@@ -104,6 +104,12 @@ struct command_info *complete_cmd_info;
 
 ACMD_DECL(do_reboot);
 ACMD_DECL(do_relock);
+ACMD_DECL(do_perfectstrike);
+ACMDCHECK(can_perfectstrike);
+ACMD_DECL(do_reposition);
+ACMDCHECK(can_reposition);
+ACMD_DECL(do_unstoppable);
+ACMDCHECK(can_unstoppable);
 
 /* This is the Master Command List. You can put new commands in, take commands
  * out, change the order they appear in, etc.  You can adjust the "priority"
@@ -804,6 +810,7 @@ cpp_extern const struct command_info cmd_info[] = {
     {"gravitywell", "gravitywell", POS_FIGHTING, do_gravity_well, 1, 0, FALSE, ACTION_STANDARD, {0, 0}, can_gravity_well},
     {"singularimpact", "singularimpact", POS_FIGHTING, do_singular_impact, 1, 0, FALSE, ACTION_STANDARD, {0, 0}, can_singular_impact},
     {"perfectdeflection", "perfectdeflection", POS_FIGHTING, do_perfect_deflection, 1, 0, FALSE, ACTION_SWIFT, {0, 0}, can_perfect_deflection},
+    {"perfectstrike", "perfectstrike", POS_FIGHTING, do_perfectstrike, 1, 0, FALSE, ACTION_SWIFT, {0, 0}, can_perfectstrike},
     {"pushswitch", "pushswitch", POS_STANDING, do_pullswitch, 0, 0, FALSE, ACTION_MOVE, {0, 6}, NULL},
     {"pull", "pull", POS_STANDING, do_pullswitch, 0, 0, FALSE, ACTION_MOVE, {0, 6}, NULL},
     //{ "plist", "plist", POS_DEAD, do_plist, LVL_GRSTAFF, 0, TRUE, ACTION_NONE, {0, 0}, NULL},
@@ -863,6 +870,7 @@ cpp_extern const struct command_info cmd_info[] = {
     {"report", "repo", POS_RECLINING, do_report, 0, 0, TRUE, ACTION_NONE, {0, 0}, NULL},
     {"reroll", "rero", POS_DEAD, do_wizutil, LVL_GRSTAFF, SCMD_REROLL, TRUE, ACTION_NONE, {0, 0}, NULL},
     {"rescue", "resc", POS_FIGHTING, do_rescue, 1, 0, FALSE, ACTION_STANDARD | ACTION_MOVE, {6, 6}, can_rescue},
+    {"reposition", "reposition", POS_FIGHTING, do_reposition, 1, 0, FALSE, ACTION_STANDARD, {6, 0}, can_reposition},
     {"resistances", "res", POS_DEAD, do_affects, 0, SCMD_RESISTANCES, TRUE, ACTION_NONE, {0, 0}, NULL},
     {"restore", "resto", POS_DEAD, do_restore, LVL_GRSTAFF, 0, TRUE, ACTION_NONE, {0, 0}, NULL},
     {"resourceadmin", "resadmin", POS_DEAD, do_resourceadmin, LVL_GRSTAFF, 0, TRUE, ACTION_NONE, {0, 0}, NULL},
@@ -1104,6 +1112,7 @@ cpp_extern const struct command_info cmd_info[] = {
     {"unsheath", "unshe", POS_SITTING, do_unsheath, 1, 0, FALSE, ACTION_NONE, {0, 6}, NULL},
     {"unstore", "unstore", POS_FIGHTING, do_unstore, 1, 0, FALSE, ACTION_MOVE, {0, 0}, NULL},
     {"unstablemutagen", "unstablemutagen", POS_RECLINING, do_unstablemutagen, 1, 0, FALSE, ACTION_NONE, {0, 0}, NULL},
+    {"unstoppable", "unstoppable", POS_FIGHTING, do_unstoppable, 1, 0, FALSE, ACTION_STANDARD, {6, 0}, can_unstoppable},
     {"unstuck", "unstuck", POS_DEAD, do_unstuck, 1, 0, FALSE, ACTION_NONE, {0, 0}, NULL},
     {"uptime", "uptime", POS_DEAD, do_date, 1, SCMD_UPTIME, TRUE, ACTION_NONE, {0, 0}, NULL},
     {"use", "use", POS_FIGHTING, do_use_consumable, 0, SCMD_USE, FALSE, ACTION_SWIFT, {0, 6}, NULL},
