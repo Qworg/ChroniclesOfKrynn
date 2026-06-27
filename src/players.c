@@ -5287,14 +5287,21 @@ void load_quests(FILE *fl, struct char_data *ch)
 {
   int num = NOTHING;
   char line[MAX_INPUT_LENGTH + 1];
+  long line_pos = 0;
 
-  do
+  while ((line_pos = ftell(fl)) >= 0 && get_line(fl, line))
   {
-    get_line(fl, line);
-    sscanf(line, "%d", &num);
-    if (num != NOTHING)
-      add_completed_quest(ch, num);
-  } while (num != NOTHING);
+    if (sscanf(line, "%d", &num) != 1)
+    {
+      fseek(fl, line_pos, SEEK_SET);
+      break;
+    }
+
+    if (num == NOTHING)
+      continue;
+
+    add_completed_quest(ch, num);
+  }
 }
 
 /* Load introduction list */

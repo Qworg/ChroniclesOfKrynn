@@ -357,6 +357,9 @@ circle
 /*.gz
 /*.tar.gz
 
+# temporary files
+tmp-lib
+
 # Ignore MySQL backup files in root
 /mysql*.sql
 

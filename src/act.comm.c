@@ -1384,8 +1384,8 @@ ACMD(do_dialogue_quest)
       act("You succeed in beguiling $N!", FALSE, ch, 0, target, TO_CHAR);
       break;
     }
+    set_dialogue_quest_succeeded(ch, aquest_table[quest].vnum);
     generic_complete_quest(ch, quest_slot);
-    add_completed_quest(ch, next_quest);
   }
   // failure
   else
@@ -1402,12 +1402,18 @@ ACMD(do_dialogue_quest)
       act("You fail to beguile $N!", FALSE, ch, 0, target, TO_CHAR);
       break;
     }
+    if (next_quest == NOTHING || real_quest(next_quest) == NOTHING)
+    {
+      send_to_char(ch, "You will need to try again.\r\n");
+      return;
+    }
     set_dialogue_quest_failed(ch, aquest_table[quest].vnum);
     add_completed_quest(ch, aquest_table[quest].vnum);
     clear_quest(ch, quest_slot);
     quest = real_quest(next_quest);
     set_quest(ch, quest, quest_slot);
     send_to_char(ch, "\tC%s\r\n\tn", QST_INFO(quest));
+    save_char(ch, 0);
   }
 }
 

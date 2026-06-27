@@ -44,6 +44,8 @@
 /* Forward declarations */
 static void define_wizard_controller_perks(void);
 static void define_wizard_versatile_caster_perks(void);
+static void get_award_perk_classes(struct char_data *ch, int award_class,
+                                   int *perk_class_1, int *perk_class_2);
 void define_artificer_perks(void);
 
 #define PERK_RESPEC_GOLD_PER_LEVEL 1000
@@ -358,17 +360,120 @@ static void migrate_sorcerer_perk_points_to_wizard(struct char_data *ch)
 
 static bool character_can_use_perk_class(struct char_data *ch, int class_id)
 {
+  int i;
+  int perk_class;
+
   if (!ch || IS_NPC(ch))
     return FALSE;
 
   if (class_id < 0 || class_id >= NUM_CLASSES)
     return FALSE;
 
+  if (class_id == CLASS_SORCERER)
+    return (CLASS_LEVEL(ch, CLASS_SORCERER) > 0);
+
+  perk_class = normalize_perk_class_id(class_id);
+  if (perk_class < 0 || perk_class >= NUM_CLASSES)
+    return FALSE;
+
+  for (i = 0; i < NUM_CLASSES; i++)
+  {
+    int perk_class_1, perk_class_2;
+
+    if (CLASS_LEVEL(ch, i) <= 0)
+      continue;
+
+    get_award_perk_classes(ch, i, &perk_class_1, &perk_class_2);
+    perk_class_1 = normalize_perk_class_id(perk_class_1);
+    perk_class_2 = normalize_perk_class_id(perk_class_2);
+
+    if (perk_class_1 == perk_class || perk_class_2 == perk_class)
+      return TRUE;
+  }
+
+  return FALSE;
+}
+
+static int find_perk_class_source_class(struct char_data *ch, int class_id)
+{
+  int i;
+  int perk_class;
+
+  if (!ch || IS_NPC(ch))
+    return CLASS_UNDEFINED;
+
+  if (class_id < 0 || class_id >= NUM_CLASSES)
+    return CLASS_UNDEFINED;
+
+  if (class_id == CLASS_SORCERER)
+    return CLASS_LEVEL(ch, CLASS_SORCERER) > 0 ? CLASS_SORCERER : CLASS_UNDEFINED;
+
+  perk_class = normalize_perk_class_id(class_id);
+  if (perk_class < 0 || perk_class >= NUM_CLASSES)
+    return CLASS_UNDEFINED;
+
   if (CLASS_LEVEL(ch, class_id) > 0)
+  {
+    int perk_class_1, perk_class_2;
+
+    get_award_perk_classes(ch, class_id, &perk_class_1, &perk_class_2);
+    perk_class_1 = normalize_perk_class_id(perk_class_1);
+    perk_class_2 = normalize_perk_class_id(perk_class_2);
+
+    if (perk_class_1 == perk_class || perk_class_2 == perk_class)
+      return class_id;
+  }
+
+  for (i = 0; i < NUM_CLASSES; i++)
+  {
+    int perk_class_1, perk_class_2;
+
+    if (i == class_id || CLASS_LEVEL(ch, i) <= 0)
+      continue;
+
+    get_award_perk_classes(ch, i, &perk_class_1, &perk_class_2);
+    perk_class_1 = normalize_perk_class_id(perk_class_1);
+    perk_class_2 = normalize_perk_class_id(perk_class_2);
+
+    if (perk_class_1 == perk_class || perk_class_2 == perk_class)
+      return i;
+  }
+
+  return CLASS_UNDEFINED;
+}
+
+static const char *get_accessible_perk_class_display_name(struct char_data *ch, int class_id)
+{
+  if (class_id == CLASS_WIZARD && ch && CLASS_LEVEL(ch, CLASS_WIZARD) == 0 &&
+      CLASS_LEVEL(ch, CLASS_SORCERER) > 0)
+  {
+    return "Wizard (Sorcerer)";
+  }
+
+  if (class_id >= 0 && class_id < NUM_CLASSES)
+    return class_names[class_id];
+
+  return "Unknown";
+}
+
+static bool should_show_perk_class(struct char_data *ch, int class_id)
+{
+  int perk_class;
+
+  if (!ch || IS_NPC(ch))
+    return FALSE;
+
+  if (class_id < 0 || class_id >= NUM_CLASSES || class_id == CLASS_SORCERER)
+    return FALSE;
+
+  perk_class = normalize_perk_class_id(class_id);
+  if (perk_class < 0 || perk_class >= NUM_CLASSES)
+    return FALSE;
+
+  if (character_can_use_perk_class(ch, class_id))
     return TRUE;
 
-  return (normalize_perk_class_id(class_id) == CLASS_WIZARD &&
-          CLASS_LEVEL(ch, CLASS_SORCERER) > 0);
+  return ch->player_specials->saved.perk_points[perk_class] > 0;
 }
 
 static const char *get_perk_class_display_name(int requested_class, int perk_class)
@@ -18347,9 +18452,9 @@ static void get_award_perk_classes(struct char_data *ch, int award_class,
     second_class = best_class;
 
   if (perk_class_1)
-    *perk_class_1 = best_class;
+    *perk_class_1 = normalize_perk_class_id(best_class);
   if (perk_class_2)
-    *perk_class_2 = second_class;
+    *perk_class_2 = normalize_perk_class_id(second_class);
 }
 
 /**
@@ -18669,14 +18774,14 @@ bool reconcile_legacy_perk_progress(struct char_data *ch, int *points_granted)
 
 /**
  * Award perk point(s) to the character for advancing a stage.
- * Points are awarded to the class that is being leveled.
+ * Points are awarded to the base perk class(es) mapped from the advancing class.
  *
  * @param ch The character
  * @param class_id The class that is gaining the level
  */
 void award_stage_perk_points(struct char_data *ch, int class_id)
 {
-  int perk_class;
+  int perk_class_1, perk_class_2;
 
   if (!ch || IS_NPC(ch))
     return;
@@ -18688,13 +18793,34 @@ void award_stage_perk_points(struct char_data *ch, int class_id)
   }
 
   migrate_sorcerer_perk_points_to_wizard(ch);
-  perk_class = normalize_perk_class_id(class_id);
+  get_award_perk_classes(ch, class_id, &perk_class_1, &perk_class_2);
+  perk_class_1 = normalize_perk_class_id(perk_class_1);
+  perk_class_2 = normalize_perk_class_id(perk_class_2);
 
-  /* Award 1 perk point per stage (stages 1-3 only) */
-  ch->player_specials->saved.perk_points[perk_class]++;
+  if (perk_class_1 == perk_class_2 && perk_class_1 >= 0 && perk_class_1 < NUM_CLASSES)
+  {
+    ch->player_specials->saved.perk_points[perk_class_1] += 2;
+    send_to_char(ch, "\tGYou gain 2 perk points for your %s class! (Total: %d)\tn\r\n",
+                 class_names[perk_class_1],
+                 ch->player_specials->saved.perk_points[perk_class_1]);
+    return;
+  }
 
-  send_to_char(ch, "\tGYou gain 1 perk point for your %s class! (Total: %d)\tn\r\n",
-               class_names[perk_class], ch->player_specials->saved.perk_points[perk_class]);
+  if (perk_class_1 >= 0 && perk_class_1 < NUM_CLASSES)
+  {
+    ch->player_specials->saved.perk_points[perk_class_1]++;
+    send_to_char(ch, "\tGYou gain 1 perk point for your %s class! (Total: %d)\tn\r\n",
+                 class_names[perk_class_1],
+                 ch->player_specials->saved.perk_points[perk_class_1]);
+  }
+
+  if (perk_class_2 >= 0 && perk_class_2 < NUM_CLASSES)
+  {
+    ch->player_specials->saved.perk_points[perk_class_2]++;
+    send_to_char(ch, "\tGYou gain 1 perk point for your %s class! (Total: %d)\tn\r\n",
+                 class_names[perk_class_2],
+                 ch->player_specials->saved.perk_points[perk_class_2]);
+  }
 }
 
 /*****************************************************************************
@@ -18805,7 +18931,8 @@ int get_total_perk_points(struct char_data *ch)
  */
 void display_perk_points(struct char_data *ch)
 {
-  int i, points, has_points = FALSE;
+  int i, points;
+  bool has_points = FALSE;
 
   if (!ch || IS_NPC(ch))
     return;
@@ -18813,27 +18940,19 @@ void display_perk_points(struct char_data *ch)
   migrate_sorcerer_perk_points_to_wizard(ch);
   send_to_char(ch, "\tWPerk Points:\tn\r\n");
 
-  /* Display points for each class the character has levels in */
+  /* Display points for each perk tree the character can access. */
   for (i = 0; i < NUM_CLASSES; i++)
   {
-    const char *display_name = class_list[i].name;
+    const char *display_name;
 
-    if (i == CLASS_SORCERER)
+    if (!should_show_perk_class(ch, i))
       continue;
 
-    /* Only show classes with levels or unspent points */
-    if (CLASS_LEVEL(ch, i) > 0 || ch->player_specials->saved.perk_points[i] > 0 ||
-        (i == CLASS_WIZARD && CLASS_LEVEL(ch, CLASS_SORCERER) > 0))
-    {
-      if (i == CLASS_WIZARD && CLASS_LEVEL(ch, CLASS_SORCERER) > 0 &&
-          CLASS_LEVEL(ch, CLASS_WIZARD) == 0)
-        display_name = "Wizard (Sorcerer)";
-
-      points = ch->player_specials->saved.perk_points[i];
-      send_to_char(ch, "  %-20s: %s%d\tn point%s\r\n", display_name,
-                   points > 0 ? "\tG" : "\tD", points, points == 1 ? "" : "s");
-      has_points = TRUE;
-    }
+    display_name = get_accessible_perk_class_display_name(ch, i);
+    points = ch->player_specials->saved.perk_points[normalize_perk_class_id(i)];
+    send_to_char(ch, "  %-20s: %s%d\tn point%s\r\n", display_name,
+                 points > 0 ? "\tG" : "\tD", points, points == 1 ? "" : "s");
+    has_points = TRUE;
   }
 
   if (!has_points)
@@ -19088,12 +19207,12 @@ bool can_purchase_perk(struct char_data *ch, int perk_id, int class_id, char *er
     return FALSE;
   }
 
-  /* Check if character has levels in this class */
+  /* Check if any leveled class grants access to this perk tree. */
   if (!character_can_use_perk_class(ch, class_id))
   {
     if (error_msg)
       snprintf(error_msg, error_len,
-               "You must have at least one level in %s to purchase this perk.",
+               "You need levels in a class that grants %s perk-tree points to purchase this.",
                class_names[perk_class]);
     return FALSE;
   }
@@ -23229,6 +23348,8 @@ void list_perks_for_class(struct char_data *ch, int class_id, int list_mode)
   migrate_sorcerer_perk_points_to_wizard(ch);
   perk_class = normalize_perk_class_id(class_id);
   display_class_name = get_perk_class_display_name(requested_class, perk_class);
+  if (requested_class == CLASS_WIZARD)
+    display_class_name = get_accessible_perk_class_display_name(ch, requested_class);
   count = get_class_perks(perk_class, perk_ids, NUM_PERKS);
 
   if (count == 0)
@@ -23657,13 +23778,16 @@ ACMD(do_perk)
   /* No arguments - show perks for primary class */
   if (!*arg1)
   {
-    /* Find first class with available perks or levels */
+    /* Find first accessible perk tree. */
     int found_class = -1;
     int total_classes = 0;
 
     for (class_id = 0; class_id < NUM_CLASSES; class_id++)
     {
-      if (CLASS_LEVEL(ch, class_id) > 0)
+      if (class_id == CLASS_SORCERER)
+        continue;
+
+      if (character_can_use_perk_class(ch, class_id))
       {
         total_classes++;
         if (found_class == -1)
@@ -23673,7 +23797,7 @@ ACMD(do_perk)
 
     if (found_class == -1)
     {
-      send_to_char(ch, "You don't have any class levels yet.\r\n");
+      send_to_char(ch, "You don't have access to any perk trees yet.\r\n");
       return;
     }
 
@@ -23682,8 +23806,8 @@ ACMD(do_perk)
     /* If multiple classes, suggest using perk list */
     if (total_classes > 1)
     {
-      send_to_char(ch, "\r\n\tcYou have levels in multiple classes.\tn\r\n");
-      send_to_char(ch, "Use '\tcperk list\tn' to see all your classes and perk points.\r\n");
+      send_to_char(ch, "\r\n\tcYou have access to multiple perk trees.\tn\r\n");
+      send_to_char(ch, "Use '\tcperk list\tn' to see all your perk trees and points.\r\n");
       send_to_char(ch, "Use '\tcperk <class> [known|available|all]\tn' to filter a class's perks.\r\n");
     }
 
@@ -23696,7 +23820,7 @@ ACMD(do_perk)
     if (*arg4 || !parse_perk_list_tokens(arg2, arg3, &class_id, &list_mode))
     {
       send_to_char(ch, "Usage:\r\n");
-      send_to_char(ch, "  perk list                      - Show all your classes\r\n");
+      send_to_char(ch, "  perk list                      - Show all your perk trees\r\n");
       send_to_char(ch, "  perk list [known|available|all] [class]\r\n");
       send_to_char(ch, "  perk list [class] [known|available|all]\r\n");
       return;
@@ -23710,7 +23834,10 @@ ACMD(do_perk)
 
         for (class_id = 0; class_id < NUM_CLASSES; class_id++)
         {
-          if (CLASS_LEVEL(ch, class_id) > 0)
+          if (class_id == CLASS_SORCERER)
+            continue;
+
+          if (character_can_use_perk_class(ch, class_id))
           {
             found_class = class_id;
             break;
@@ -23719,7 +23846,7 @@ ACMD(do_perk)
 
         if (found_class == -1)
         {
-          send_to_char(ch, "You don't have any class levels yet.\r\n");
+          send_to_char(ch, "You don't have access to any perk trees yet.\r\n");
           return;
         }
 
@@ -23728,7 +23855,7 @@ ACMD(do_perk)
 
       if (!character_can_use_perk_class(ch, class_id))
       {
-        send_to_char(ch, "You don't have any levels in %s.\r\n", class_names[class_id]);
+        send_to_char(ch, "You don't have access to the %s perk tree.\r\n", class_names[class_id]);
         return;
       }
 
@@ -23737,21 +23864,32 @@ ACMD(do_perk)
     }
 
     send_to_char(ch, "\tcAvailable Perk Classes\tn\r\n\r\n");
-    send_to_char(ch, "Your classes and available perk points:\r\n");
+    send_to_char(ch, "Your perk trees and available perk points:\r\n");
 
     for (class_id = 0; class_id < NUM_CLASSES; class_id++)
     {
-      if (CLASS_LEVEL(ch, class_id) > 0)
+      if (should_show_perk_class(ch, class_id))
       {
         int perk_class = normalize_perk_class_id(class_id);
         int points = get_perk_points(ch, perk_class);
-        send_to_char(ch, "  %-15s (Level %2d): \tY%d\tn perk point%s\r\n",
-                     get_perk_class_display_name(class_id, perk_class), CLASS_LEVEL(ch, class_id),
-                     points, points != 1 ? "s" : "");
+        int source_class = find_perk_class_source_class(ch, class_id);
+        char source_desc[64];
+
+        if (source_class == class_id)
+          snprintf(source_desc, sizeof(source_desc), "(Level %2d)", CLASS_LEVEL(ch, class_id));
+        else if (source_class >= 0 && source_class < NUM_CLASSES)
+          snprintf(source_desc, sizeof(source_desc), "(via %s %d)", class_names[source_class],
+                   CLASS_LEVEL(ch, source_class));
+        else
+          snprintf(source_desc, sizeof(source_desc), "(points only)");
+
+        send_to_char(ch, "  %-22s %-28s \tY%d\tn perk point%s\r\n",
+                     get_accessible_perk_class_display_name(ch, class_id), source_desc, points,
+                     points != 1 ? "s" : "");
       }
     }
 
-    send_to_char(ch, "\r\nUse '\tcperk <class> [known|available|all]\tn' to view filtered perks for a class.\r\n");
+    send_to_char(ch, "\r\nUse '\tcperk <class> [known|available|all]\tn' to view filtered perks for a tree.\r\n");
     return;
   }
 
@@ -23988,7 +24126,7 @@ ACMD(do_perk)
     send_to_char(ch, "Unknown class or command.\r\n");
     send_to_char(ch, "Usage:\r\n");
     send_to_char(ch, "  perk                              - Show known and purchasable perks\r\n");
-    send_to_char(ch, "  perk list                         - Show all your classes\r\n");
+    send_to_char(ch, "  perk list                         - Show all your perk trees\r\n");
     send_to_char(ch, "  perk list [known|available|all] [class]\r\n");
     send_to_char(ch, "  perk <class> [known|available|all]\r\n");
     send_to_char(ch, "  perk <class> list [known|available|all]\r\n");
@@ -24002,7 +24140,7 @@ ACMD(do_perk)
   /* Check if character has this class */
   if (!character_can_use_perk_class(ch, class_id))
   {
-    send_to_char(ch, "You don't have any levels in %s.\r\n", class_names[class_id]);
+    send_to_char(ch, "You don't have access to the %s perk tree.\r\n", class_names[class_id]);
     return;
   }
 

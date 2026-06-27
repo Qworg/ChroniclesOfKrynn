@@ -508,6 +508,9 @@ void add_completed_quest(struct char_data *ch, qst_vnum vnum)
   qst_vnum *temp;
   int i;
 
+  if (vnum == NOTHING || is_complete(ch, vnum))
+    return;
+
   CREATE(temp, qst_vnum, GET_NUM_QUESTS(ch) + 1);
   for (i = 0; i < GET_NUM_QUESTS(ch); i++)
     temp[i] = ch->player_specials->saved.completed_quests[i];
@@ -802,6 +805,8 @@ void complete_quest(struct char_data *ch, int index)
     set_quest(ch, rnum, index);
     send_to_char(ch, "\tW***The next stage of your quest awaits:\tn\r\n\r\n%s\r\n", QST_INFO(rnum));
   }
+
+  save_char(ch, 0);
 }
 
 /* this function is called upon completion of a quest
