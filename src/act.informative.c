@@ -8542,6 +8542,11 @@ ACMD(do_toggle)
       {"carefulpet", PRF_CAREFUL_PET, 0,
        "You will no longer be careful with your pets (and vice versa).\r\n",
        "You will now be careful with your pets (and vice versa).\r\n"},
+      /*51*/
+      {"spontaneous", PRF_SPONTANEOUS_CASTING, 0,
+       "Cleric spontaneous casting disabled.\r\n",
+       "Cleric spontaneous casting enabled. Prepared cleric spells will convert to cure or "
+       "cause/harm spells based on your energy alignment.\r\n"},
 
       /*LAST*/
       {"\n", 0, -1, "\n", "\n"} /* must be last */

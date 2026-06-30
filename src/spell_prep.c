@@ -3191,6 +3191,62 @@ void assign_feat_spell_slots(int ch_class)
 /**** END CONSTRUCTION ZONE *****/
 
 /**
+ * spell_prep_gen_extract_by_class - Extract a prepared spell from one class
+ * @ch: Character casting the spell
+ * @ch_class: Class whose spell collection should be used
+ * @spellnum: Spell being consumed from the prepared collection
+ * @metamagic: Metamagic flags applied to the prepared spell
+ *
+ * This is a focused version of spell_prep_gen_extract() for cases where the
+ * casting layer has already selected the exact class slot to spend. Cleric
+ * spontaneous casting uses this to spend the original prepared cleric spell
+ * while resolving as a cure/cause/harm spell.
+ *
+ * Returns: ch_class on success, CLASS_UNDEFINED if the spell was unavailable.
+ */
+int spell_prep_gen_extract_by_class(struct char_data *ch, int ch_class, int spellnum,
+                                    int metamagic)
+{
+  int check_metamagic = metamagic;
+  int prep_time = INVALID_PREP_TIME;
+  int circle = TOP_CIRCLE + 1;
+  int is_domain = FALSE;
+
+  if (!ch || ch_class < 0 || ch_class >= NUM_CLASSES)
+    return CLASS_UNDEFINED;
+
+  if (CLASS_LEVEL(ch, ch_class) > 0)
+  {
+    int spell_circle =
+        compute_spells_circle(ch, ch_class, spellnum, METAMAGIC_NONE,
+                              (ch_class == CLASS_CLERIC || ch_class == CLASS_INQUISITOR)
+                                  ? GET_1ST_DOMAIN(ch)
+                                  : DOMAIN_UNDEFINED);
+
+    if (spell_circle <= 3)
+    {
+      if (HAS_FEAT(ch, FEAT_AUTOMATIC_SILENT_SPELL))
+        REMOVE_BIT(check_metamagic, METAMAGIC_SILENT);
+      if (HAS_FEAT(ch, FEAT_AUTOMATIC_STILL_SPELL))
+        REMOVE_BIT(check_metamagic, METAMAGIC_STILL);
+    }
+  }
+
+  if (!is_spell_in_collection(ch, ch_class, spellnum, check_metamagic))
+    return CLASS_UNDEFINED;
+
+  if (!collection_remove_by_class(ch, ch_class, spellnum, check_metamagic))
+    return CLASS_UNDEFINED;
+
+  is_domain = is_domain_spell_of_ch(ch, spellnum);
+  circle = compute_spells_circle(ch, ch_class, spellnum, check_metamagic, is_domain);
+  prep_time = compute_spells_prep_time(ch, ch_class, circle, is_domain);
+  prep_queue_add(ch, ch_class, spellnum, check_metamagic, prep_time, is_domain);
+
+  return ch_class;
+}
+
+/**
  * spell_prep_gen_extract - Extract a spell when cast (moves from ready to recovering)
  * @ch: Character casting the spell
  * @spellnum: Spell being cast

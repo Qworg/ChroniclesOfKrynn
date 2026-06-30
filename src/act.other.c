@@ -5742,19 +5742,15 @@ ACMD(do_lore)
 
   // target = generic_find(arg, FIND_CHAR_ROOM | FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &tch, &tobj);
 
-  target = generic_find(arg, FIND_OBJ_INV, ch, &tch, &tobj);
+  target = generic_find(arg, FIND_OBJ_INV | FIND_CHAR_ROOM, ch, &tch, &tobj);
 
   if (*arg)
   {
     if (!target)
     {
-      target = generic_find(arg, FIND_CHAR_ROOM, ch, &tch, &tobj);
-      if (!target)
-      {
-        act("There is nothing to here to use your Lore ability on...", FALSE, ch, NULL, NULL,
-            TO_CHAR);
-        return;
-      }
+      act("There is nothing to here to use your Lore ability on...", FALSE, ch, NULL, NULL,
+          TO_CHAR);
+      return;
     }
   }
   else
@@ -8595,6 +8591,10 @@ ACMD(do_gen_tog)
       // 72
       {"You will now accept incoming trade requests.\r\n",
        "You will now reject incoming trade requests.\r\n"},
+      // 73
+      {"Cleric spontaneous casting disabled.\r\n",
+       "Cleric spontaneous casting enabled. Prepared cleric spells will convert to cure or "
+       "cause/harm spells based on your energy alignment.\r\n"},
   };
 
   if (IS_NPC(ch))
@@ -8936,6 +8936,9 @@ ACMD(do_gen_tog)
     result = PRF_TOG_CHK(ch, PRF_REJECT_TRADES);
     if (result)
       clear_trade_invites(ch, "Trade request canceled.\r\n");
+    break;
+  case SCMD_SPONTANEOUS_CASTING:
+    result = PRF_TOG_CHK(ch, PRF_SPONTANEOUS_CASTING);
     break;
   default:
     log("SYSERR: Unknown subcmd %d in do_gen_toggle.", subcmd);

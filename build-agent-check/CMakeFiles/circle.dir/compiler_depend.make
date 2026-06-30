@@ -16449,6 +16449,7 @@ CMakeFiles/circle.dir/src/players.c.o: /home/krynn/code/src/players.c \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h
 
 CMakeFiles/circle.dir/src/prefedit.c.o: /home/krynn/code/src/prefedit.c \
+  /home/krynn/code/src/act.h \
   /home/krynn/code/src/bool.h \
   /home/krynn/code/src/campaign.h \
   /home/krynn/code/src/comm.h \

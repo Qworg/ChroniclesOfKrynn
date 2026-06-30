@@ -383,6 +383,14 @@ static void prefedit_extra_disp_toggles_menu(struct descriptor_data *d)
 
       /*end*/);
 
+  send_to_char(d->character,
+               "%sP%s) Cleric Spontaneous Casting %s[%s%3s%s]\r\n",
+               CBYEL(d->character, C_NRM), CCNRM(d->character, C_NRM),
+               CCCYN(d->character, C_NRM),
+               PREFEDIT_FLAGGED(PRF_SPONTANEOUS_CASTING) ? CBGRN(d->character, C_NRM)
+                                                         : CBRED(d->character, C_NRM),
+               ONOFF(PREFEDIT_FLAGGED(PRF_SPONTANEOUS_CASTING)), CCCYN(d->character, C_NRM));
+
   /* Finishing Off */
   send_to_char(d->character, "%sQ%s) Quit extra toggle preferences...\r\n",
                CBYEL(d->character, C_NRM), CCNRM(d->character, C_NRM));
@@ -1278,6 +1286,11 @@ void prefedit_parse(struct descriptor_data *d, char *arg)
     case 'o':
     case 'O':
       TOGGLE_BIT_AR(PREFEDIT_GET_FLAGS, PRF_REJECT_TRADES);
+      break;
+
+    case 'p':
+    case 'P':
+      TOGGLE_BIT_AR(PREFEDIT_GET_FLAGS, PRF_SPONTANEOUS_CASTING);
       break;
 
     default:

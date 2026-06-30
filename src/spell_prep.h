@@ -832,6 +832,21 @@ int compute_powers_circle(int class, int spellnum, int metamagic);
 int spell_prep_gen_extract(struct char_data *ch, int spellnum, int metamagic);
 
 /**
+     * spell_prep_gen_extract_by_class - Extract spell from a specific class
+     * @ch: Character attempting to cast
+     * @ch_class: Class whose prepared spell should be consumed
+     * @spellnum: Spell number to cast
+     * @metamagic: Metamagic to apply
+     *
+     * Used when casting logic has already chosen the class-specific slot to
+     * spend, such as cleric spontaneous cure/inflict conversion.
+     *
+     * Returns: Class number if spell found, CLASS_UNDEFINED if not
+     */
+int spell_prep_gen_extract_by_class(struct char_data *ch, int ch_class, int spellnum,
+                                    int metamagic);
+
+/**
      * spell_prep_gen_check - Check if spell is available to cast
      * @ch: Character to check
      * @spellnum: Spell number to find

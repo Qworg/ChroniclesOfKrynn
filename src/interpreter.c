@@ -1041,6 +1041,7 @@ cpp_extern const struct command_info cmd_info[] = {
     {"survey", "survey", POS_RECLINING, do_survey, 0, 0, TRUE, ACTION_NONE, {0, 0}, NULL},
 #endif
     {"sacredflames", "sacredflames", POS_FIGHTING, do_sacredflames, 1, 0, FALSE, ACTION_NONE, {0, 0}, NULL},
+    {"spontaneous", "spontaneous", POS_DEAD, do_gen_tog, 0, SCMD_SPONTANEOUS_CASTING, TRUE, ACTION_NONE, {0, 0}, NULL},
     {"staffevents", "staffevents", POS_SLEEPING, do_staffevents, 1, 0, TRUE, ACTION_NONE, {0, 0}, NULL},
     {"summon", "summon", POS_RECLINING, do_summon, 1, 0, FALSE, ACTION_NONE, {0, 0}, NULL},
     {"summonerpreference", "summonerpreference", POS_STANDING, do_summonerpreference, 1, 0, FALSE, ACTION_NONE, {0, 0}, NULL},

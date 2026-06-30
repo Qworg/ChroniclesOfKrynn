@@ -53,6 +53,11 @@ static void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
                       struct obj_data *tobj, bool start);
 static int cast_spell_with_type(struct char_data *ch, struct char_data *tch, struct obj_data *tobj,
                                 int spellnum, int metamagic, int casttype);
+static int cast_spell_with_type_and_slot(struct char_data *ch, struct char_data *tch,
+                                         struct obj_data *tobj, int spellnum, int metamagic,
+                                         int casttype, int slot_class, int slot_spellnum,
+                                         int slot_metamagic);
+static int get_cleric_spontaneous_replacement(struct char_data *ch, int spellnum, int metamagic);
 void spello(int spl, const char *name, int max_psp, int min_psp, int psp_change, int minpos,
             int targets, int violent, int routines, const char *wearoff, int time, int memtime,
             int school, bool quest);
@@ -211,6 +216,120 @@ bool spell_is_cantrip(int spellnum)
     return FALSE;
 
   return spell_info[spellnum].is_cantrip;
+}
+
+#define CLERIC_SPONTANEOUS_NEEDS_ENERGY (-1)
+
+static int get_cleric_spontaneous_energy_type(struct char_data *ch)
+{
+  if (!ch)
+    return CHANNEL_ENERGY_TYPE_NONE;
+  if (IS_GOOD(ch))
+    return CHANNEL_ENERGY_TYPE_POSITIVE;
+  if (IS_EVIL(ch))
+    return CHANNEL_ENERGY_TYPE_NEGATIVE;
+  if (!ch->player_specials)
+    return CHANNEL_ENERGY_TYPE_NONE;
+
+  if (ch->player_specials->saved.channel_energy_type == CHANNEL_ENERGY_TYPE_POSITIVE ||
+      ch->player_specials->saved.channel_energy_type == CHANNEL_ENERGY_TYPE_NEGATIVE)
+    return ch->player_specials->saved.channel_energy_type;
+
+  return CHANNEL_ENERGY_TYPE_NONE;
+}
+
+static int cleric_spontaneous_spell_for_circle(int circle, int energy_type)
+{
+  if (energy_type == CHANNEL_ENERGY_TYPE_POSITIVE)
+  {
+    switch (circle)
+    {
+    case 1:
+      return SPELL_CURE_LIGHT;
+    case 2:
+      return SPELL_CURE_MODERATE;
+    case 3:
+      return SPELL_CURE_SERIOUS;
+    case 4:
+      return SPELL_CURE_CRITIC;
+    case 5:
+      return SPELL_MASS_CURE_MODERATE;
+    case 6:
+      return SPELL_HEAL;
+    case 7:
+    case 8:
+    case 9:
+      return SPELL_GROUP_HEAL;
+    default:
+      return 0;
+    }
+  }
+
+  if (energy_type == CHANNEL_ENERGY_TYPE_NEGATIVE)
+  {
+    switch (circle)
+    {
+    case 1:
+      return SPELL_CAUSE_LIGHT_WOUNDS;
+    case 2:
+      return SPELL_CAUSE_MODERATE_WOUNDS;
+    case 3:
+      return SPELL_CAUSE_SERIOUS_WOUNDS;
+    case 4:
+    case 5:
+      return SPELL_CAUSE_CRITICAL_WOUNDS;
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+      return SPELL_HARM;
+    default:
+      return 0;
+    }
+  }
+
+  return 0;
+}
+
+static int get_cleric_collection_metamagic(struct char_data *ch, int spellnum, int metamagic)
+{
+  int check_metamagic = metamagic;
+  int spell_circle =
+      compute_spells_circle(ch, CLASS_CLERIC, spellnum, METAMAGIC_NONE, GET_1ST_DOMAIN(ch));
+
+  if (spell_circle <= 3)
+  {
+    if (HAS_FEAT(ch, FEAT_AUTOMATIC_SILENT_SPELL))
+      REMOVE_BIT(check_metamagic, METAMAGIC_SILENT);
+    if (HAS_FEAT(ch, FEAT_AUTOMATIC_STILL_SPELL))
+      REMOVE_BIT(check_metamagic, METAMAGIC_STILL);
+  }
+
+  return check_metamagic;
+}
+
+static int get_cleric_spontaneous_replacement(struct char_data *ch, int spellnum, int metamagic)
+{
+  int check_metamagic = METAMAGIC_NONE;
+  int circle = 0;
+  int energy_type = CHANNEL_ENERGY_TYPE_NONE;
+
+  if (!ch || IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_SPONTANEOUS_CASTING) ||
+      CLASS_LEVEL(ch, CLASS_CLERIC) <= 0 || spell_is_cantrip(spellnum))
+    return 0;
+
+  check_metamagic = get_cleric_collection_metamagic(ch, spellnum, metamagic);
+  if (!is_spell_in_collection(ch, CLASS_CLERIC, spellnum, check_metamagic))
+    return 0;
+
+  energy_type = get_cleric_spontaneous_energy_type(ch);
+  if (energy_type == CHANNEL_ENERGY_TYPE_NONE)
+    return CLERIC_SPONTANEOUS_NEEDS_ENERGY;
+
+  circle = compute_spells_circle(ch, CLASS_CLERIC, spellnum, check_metamagic,
+                                 is_domain_spell_of_ch(ch, spellnum));
+
+  return cleric_spontaneous_spell_for_circle(circle, energy_type);
 }
 
 /* displays substitute text for spells to represent 'magical phrases' */
@@ -2452,6 +2571,15 @@ int cast_innate_spell(struct char_data *ch, struct char_data *tch, struct obj_da
 static int cast_spell_with_type(struct char_data *ch, struct char_data *tch, struct obj_data *tobj,
                                 int spellnum, int metamagic, int casttype)
 {
+  return cast_spell_with_type_and_slot(ch, tch, tobj, spellnum, metamagic, casttype,
+                                       CLASS_UNDEFINED, spellnum, metamagic);
+}
+
+static int cast_spell_with_type_and_slot(struct char_data *ch, struct char_data *tch,
+                                         struct obj_data *tobj, int spellnum, int metamagic,
+                                         int casttype, int slot_class, int slot_spellnum,
+                                         int slot_metamagic)
+{
   if (GET_LEVEL(ch) >= LVL_IMMORT && !IS_NPC(ch))
   {
     // imms can cast any spell
@@ -3115,7 +3243,11 @@ will be using for casting this spell */
            * - This requires modification to spell_prep_gen_extract to accept a "free metamagic" flag
            * - Notify player: "You channel your Spell Metamastery to enhance this spell without cost!"
            */
-          ch_class = spell_prep_gen_extract(ch, spellnum, metamagic);
+          if (slot_class != CLASS_UNDEFINED)
+            ch_class =
+                spell_prep_gen_extract_by_class(ch, slot_class, slot_spellnum, slot_metamagic);
+          else
+            ch_class = spell_prep_gen_extract(ch, spellnum, metamagic);
           if (treat_as_at_will)
           {
             ch_class = CLASS_WIZARD;
@@ -3311,9 +3443,12 @@ ACMDU(do_gen_cast)
   struct obj_data *tobj = NULL;
   char *spell_arg = NULL, *target_arg = NULL, *metamagic_arg = NULL;
   int number = 0, spellnum = 0, i = 0, target = 0, metamagic = 0;
+  int slot_class = CLASS_UNDEFINED, slot_spellnum = 0, slot_metamagic = 0;
+  int spontaneous_replacement = 0;
   struct affected_type af;
   int class_num = CLASS_UNDEFINED;
   int circle = 99, school = 0;
+  bool cleric_spontaneous_casting = FALSE;
   bool perfect_fabricator_active = FALSE; /* Track Perfect Fabricator usage for psionic powers */
 
   if (IS_NPC(ch))
@@ -3401,6 +3536,7 @@ ACMDU(do_gen_cast)
   }
 
   /* we have our spellnum now */
+  slot_spellnum = spellnum;
 
   /* Check for metamagic. */
   if (subcmd != SCMD_CAST_PSIONIC && subcmd != SCMD_CAST_SHADOW)
@@ -3550,6 +3686,29 @@ ACMDU(do_gen_cast)
       compute_spells_circle(ch, GET_CASTING_CLASS(ch), spellnum, metamagic, 0) <= 3)
     SET_BIT(metamagic, METAMAGIC_STILL);
 
+  slot_metamagic = metamagic;
+  if (subcmd == SCMD_CAST_SPELL)
+  {
+    spontaneous_replacement = get_cleric_spontaneous_replacement(ch, slot_spellnum, slot_metamagic);
+    if (spontaneous_replacement == CLERIC_SPONTANEOUS_NEEDS_ENERGY)
+    {
+      send_to_char(ch, "As a neutral cleric, choose positive or negative energy first with "
+                       "'channel positive' or 'channel negative'.\r\n");
+      return;
+    }
+    if (spontaneous_replacement > 0)
+    {
+      cleric_spontaneous_casting = TRUE;
+      slot_class = CLASS_CLERIC;
+      if (spontaneous_replacement != spellnum)
+      {
+        send_to_char(ch, "Your spontaneous casting converts '%s' into '%s'.\r\n",
+                     spell_info[slot_spellnum].name, spell_info[spontaneous_replacement].name);
+      }
+      spellnum = spontaneous_replacement;
+    }
+  }
+
   /* looking for 'easy outs' */
 
   if (IS_AFFECTED(ch, AFF_TFORM) || IS_AFFECTED(ch, AFF_BATTLETIDE) ||
@@ -3685,8 +3844,8 @@ ACMDU(do_gen_cast)
     }
   }
 
-  if (GET_SKILL(ch, spellnum) == 0 && GET_LEVEL(ch) < LVL_IMMORT && subcmd != SCMD_CAST_PSIONIC &&
-      subcmd != SCMD_CAST_SHADOW && !canCastAtWill(ch, spellnum) &&
+  if (!cleric_spontaneous_casting && GET_SKILL(ch, spellnum) == 0 && GET_LEVEL(ch) < LVL_IMMORT &&
+      subcmd != SCMD_CAST_PSIONIC && subcmd != SCMD_CAST_SHADOW && !canCastAtWill(ch, spellnum) &&
       !is_domain_spell_of_ch(ch, spellnum))
   {
     send_to_char(ch, "You are unfamiliar with that %s.\r\n", do_cast_types[subcmd][2]);
@@ -3796,7 +3955,8 @@ return;
     }
   }
   else if (
-      !canCastAtWill(ch, spellnum) && GET_LEVEL(ch) < LVL_IMMORT && subcmd != SCMD_CAST_SHADOW &&
+      !cleric_spontaneous_casting && !canCastAtWill(ch, spellnum) && GET_LEVEL(ch) < LVL_IMMORT &&
+      subcmd != SCMD_CAST_SHADOW &&
       (BONUS_CASTER_LEVEL(ch, CLASS_WIZARD) + CLASS_LEVEL(ch, CLASS_WIZARD) <
            SINFO.min_level[CLASS_WIZARD] &&
        //          BONUS_CASTER_LEVEL(ch, CLASS_PSY_WARR) + CLASS_LEVEL(ch, CLASS_PSY_WARR) < SINFO.min_level[CLASS_PSY_WARR] &&
@@ -3936,15 +4096,21 @@ return;
   else
   {
     /* SPELL PREPARATION HOOK */
-    if (GET_LEVEL(ch) < LVL_IMMORT && !canCastAtWill(ch, spellnum) &&
-        (class_num = spell_prep_gen_check(ch, spellnum, metamagic)) == CLASS_UNDEFINED &&
-        !isEpicSpell(spellnum) && subcmd != SCMD_CAST_SHADOW)
+    if (GET_LEVEL(ch) < LVL_IMMORT && !canCastAtWill(ch, spellnum) && !isEpicSpell(spellnum) &&
+        subcmd != SCMD_CAST_SHADOW)
     {
-      send_to_char(ch,
-                   "You are not ready to %s that %s... (help preparation, or the meta-magic "
-                   "modification might be too high)\r\n",
-                   do_cast_types[subcmd][1], do_cast_types[subcmd][2]);
-      return;
+      if (cleric_spontaneous_casting)
+      {
+        class_num = CLASS_CLERIC;
+      }
+      else if ((class_num = spell_prep_gen_check(ch, spellnum, metamagic)) == CLASS_UNDEFINED)
+      {
+        send_to_char(ch,
+                     "You are not ready to %s that %s... (help preparation, or the meta-magic "
+                     "modification might be too high)\r\n",
+                     do_cast_types[subcmd][1], do_cast_types[subcmd][2]);
+        return;
+      }
     }
   }
 
@@ -3975,7 +4141,17 @@ return;
     }
   }
 
-  circle = compute_spells_circle(ch, GET_CASTING_CLASS(ch), spellnum, 0, 0);
+  if (cleric_spontaneous_casting)
+  {
+    circle =
+        compute_spells_circle(ch, CLASS_CLERIC, slot_spellnum,
+                              get_cleric_collection_metamagic(ch, slot_spellnum, slot_metamagic),
+                              is_domain_spell_of_ch(ch, slot_spellnum));
+  }
+  else
+  {
+    circle = compute_spells_circle(ch, GET_CASTING_CLASS(ch), spellnum, 0, 0);
+  }
 
   if (!canCastAtWill(ch, spellnum) && !is_domain_spell_of_ch(ch, spellnum))
   {
@@ -4278,15 +4454,32 @@ return;
       is_spellnum_psionic(spellnum) == FALSE)
   {
     /* For prepared casters, verify they have the exact spell+metamagic combination */
-    int available_class = spell_prep_gen_check(ch, spellnum, metamagic);
+    int checked_spellnum = cleric_spontaneous_casting ? slot_spellnum : spellnum;
+    int checked_metamagic = cleric_spontaneous_casting
+                                ? get_cleric_collection_metamagic(ch, slot_spellnum, slot_metamagic)
+                                : metamagic;
+    int available_class = CLASS_UNDEFINED;
+
+    if (cleric_spontaneous_casting)
+    {
+      available_class =
+          is_spell_in_collection(ch, CLASS_CLERIC, checked_spellnum, checked_metamagic)
+              ? CLASS_CLERIC
+              : CLASS_UNDEFINED;
+    }
+    else
+    {
+      available_class = spell_prep_gen_check(ch, checked_spellnum, checked_metamagic);
+    }
+
     if (available_class == CLASS_UNDEFINED)
     {
       /* Log attempted exploit */
-      if (metamagic > 0)
+      if (checked_metamagic > 0)
       {
         log("METAMAGIC_EXPLOIT: %s attempted to cast %s (spell %d) with metamagic %d but doesn't "
             "have it prepared",
-            GET_NAME(ch), spell_name(spellnum), spellnum, metamagic);
+            GET_NAME(ch), spell_name(checked_spellnum), checked_spellnum, checked_metamagic);
       }
 
       send_to_char(ch, "You don't have that %s prepared with those metamagic options.\r\n",
@@ -4295,7 +4488,8 @@ return;
     }
   }
 
-  cast_spell(ch, tch, tobj, spellnum, metamagic);
+  cast_spell_with_type_and_slot(ch, tch, tobj, spellnum, metamagic, CAST_SPELL, slot_class,
+                                slot_spellnum, slot_metamagic);
 }
 
 /* assignment */

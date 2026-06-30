@@ -1483,9 +1483,10 @@
 #define PRF_AUTOLIGHT 87           /**< Automatically replace burned-out light from inventory */
 #define PRF_NO_WALKTO_CONFIRM 88   /**< Skip walkto confirmation for quest targets/masters */
 #define PRF_REJECT_TRADES 89       /**< Reject incoming trade requests */
+#define PRF_SPONTANEOUS_CASTING 90 /**< Cleric prepared spells convert to cure/inflict spells */
 
 /** Total number of available PRF flags */
-#define NUM_PRF_FLAGS 90
+#define NUM_PRF_FLAGS 91
 
 /* Score Color Theme constants */
 #define SCORE_THEME_ENHANCED 0     /**< Enhanced theme with rich colors */
